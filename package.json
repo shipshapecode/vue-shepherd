@@ -1,35 +1,39 @@
 {
   "name": "vue-shepherd",
-  "version": "0.0.0",
+  "version": "0.1.0",
+  "scripts": {
+    "serve": "yarn demo",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "demo": "vue-cli-service demo",
+    "docs": "yarn docs:serve",
+    "docs:build": "vue-cli-service docs --mode build",
+    "docs:serve": "vue-cli-service docs --mode serve",
+    "prepublish": "vue-cli-service lint && vue-cli-service docs --mode build && vue-cli-service build",
+    "start": "vue-cli-service serve"
+  },
   "main": "dist/vue-shepherd.common.js",
   "module": "dist/vue-shepherd.esm.js",
-  "browser": "dist/vue-shepherd.js",
+  "unpkg": "dist/vue-shepherd.umd.min.js",
   "files": [
-    "dist/*",
-    "src/*",
-    "public/*",
-    "*.json",
-    "*.js"
+    "dist/vue-shepherd.common.js",
+    "dist/vue-shepherd.umd.min.js",
+    "dist/vue-shepherd.umd.js",
+    "dist/vue-shepherd.esm.js",
+    "src"
   ],
-  "private": true,
-  "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "build-bundle": "vue-cli-service build --target lib --name shepherd ./src/index.js",
-    "lint": "vue-cli-service lint"
-  },
   "dependencies": {
-    "shepherd.js": "^2.3.3",
-    "vue": "^2.5.22"
+    "shepherd.js": "^5.0.0-beta.2"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^3.4.0",
-    "@vue/cli-plugin-eslint": "^3.4.0",
-    "@vue/cli-service": "^3.4.0",
+    "@vue/cli-plugin-babel": "^3.11.0",
+    "@vue/cli-plugin-eslint": "^3.11.0",
+    "@vue/cli-service": "^3.11.0",
     "babel-eslint": "^10.0.1",
-    "eslint": "^5.8.0",
+    "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
-    "vue-template-compiler": "^2.5.21"
+    "vue-cli-plugin-p11n": "^0.4.0",
+    "vue-template-compiler": "^2.6.10"
   },
   "eslintConfig": {
     "root": true,
@@ -52,7 +56,8 @@
   },
   "browserslist": [
     "> 1%",
-    "last 2 versions",
-    "not ie <= 8"
-  ]
+    "last 2 versions"
+  ],
+  "jsdelivr": "dist/vue-shepherd.umd.min.js",
+  "sideeffects": false
 }
