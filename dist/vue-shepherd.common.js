@@ -1,5 +1,5 @@
 /*!
- * vue-shepherd v0.0.0 
+ * vue-shepherd v0.0.1 
  * (c) 2019 Robert Wagner
  * Released under the MIT License.
  */
@@ -48,7 +48,7 @@ function _construct(Parent, args, Class) {
   return _construct.apply(null, arguments);
 }
 
-var version = '0.0.0';
+var version = '0.0.1';
 
 var install = function install(Vue) {
   Vue.prototype.$shepherd = function () {
