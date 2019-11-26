@@ -1,6 +1,20 @@
 {
   "name": "vue-shepherd",
   "version": "0.0.0",
+  "description": "A Vue wrapper for the site tour library Shepherd.",
+  "keywords": [
+    "vue",
+    "site tour",
+    "tour",
+    "shepherd"
+  ],
+  "repository": "https://github.com/shipshapecode/vue-shepherd",
+  "license": "MIT",
+  "author": {
+    "name": "Robert Wagner",
+    "email": "rwwagner90@gmail.com",
+    "url": "https://github.com/rwwagner90"
+  },
   "scripts": {
     "serve": "yarn demo",
     "build": "vue-cli-service build",
@@ -23,7 +37,7 @@
     "src"
   ],
   "dependencies": {
-    "shepherd.js": "^5.0.0-beta.2"
+    "shepherd.js": "^6.0.2"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.11.0",

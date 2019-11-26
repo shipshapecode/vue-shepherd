@@ -1,7 +1,7 @@
 /*!
  * vue-shepherd v0.0.0 
- * (c) 2019 
- * Released under the undefined License.
+ * (c) 2019 Robert Wagner
+ * Released under the MIT License.
  */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('shepherd.js')) :

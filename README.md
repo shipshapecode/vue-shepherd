@@ -10,12 +10,8 @@
 [![Build Status](https://travis-ci.org/shipshapecode/vue-shepherd.svg)](https://travis-ci.org/shipshapecode/vue-shepherd)
 [![Code Climate](https://codeclimate.com/github/shipshapecode/vue-shepherd/badges/gpa.svg)](https://codeclimate.com/github/shipshapecode/vue-shepherd)
 [![Test Coverage](https://codeclimate.com/github/shipshapecode/vue-shepherd/badges/coverage.svg)](https://codeclimate.com/github/shipshapecode/vue-shepherd/coverage)
-[![Greenkeeper badge](https://badges.greenkeeper.io/shipshapecode/vue-shepherd.svg)](https://greenkeeper.io/)
 
 This is a Vue wrapper for the [Shepherd](https://github.com/shipshapecode/shepherd), site tour, library.
-
-It also aims to provide additional functionality on top of Shepherd.
-
 
 ## Installation
 
@@ -24,6 +20,12 @@ npm install vue-shepherd --save
 ```
 
 ## Usage
+
+You will need to import the styles first:
+
+```css
+@import '~shepherd.js/dist/css/shepherd.css';
+```
 
 The plugin extends Vue with a set of directives and $shepherd() constructor function.
 
