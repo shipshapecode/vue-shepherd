@@ -15,8 +15,19 @@ This is a Vue wrapper for the [Shepherd](https://github.com/shipshapecode/shephe
 
 ## Installation
 
+### NPM
+
 ```bash
 npm install vue-shepherd --save
+```
+
+When using with a module system, you must explicitly install the vue-shepherd via Vue.use():
+
+```js
+import Vue from 'vue'
+import VueShepherd from 'vue-shepherd'
+
+Vue.use(VueShepherd)
 ```
 
 ## Usage
