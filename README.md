@@ -21,13 +21,13 @@ This is a Vue wrapper for the [Shepherd](https://github.com/shipshapecode/shephe
 npm install vue-shepherd --save
 ```
 
-When using with a module system, you must explicitly install the vue-shepherd via Vue.use():
+When using with a module system, you must explicitly install vue-shepherd via Vue.use():
 
 ```js
-import Vue from 'vue'
-import VueShepherd from 'vue-shepherd'
+import Vue from 'vue';
+import VueShepherd from 'vue-shepherd';
 
-Vue.use(VueShepherd)
+Vue.use(VueShepherd);
 ```
 
 ## Usage
