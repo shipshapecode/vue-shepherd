@@ -1,6 +1,6 @@
 /*!
  * vue-shepherd v0.0.1 
- * (c) 2019 Robert Wagner
+ * (c) 2020 Robert Wagner
  * Released under the MIT License.
  */
 import Shepherd from 'shepherd.js';
@@ -14,7 +14,7 @@ function _setPrototypeOf(o, p) {
   return _setPrototypeOf(o, p);
 }
 
-function isNativeReflectConstruct() {
+function _isNativeReflectConstruct() {
   if (typeof Reflect === "undefined" || !Reflect.construct) return false;
   if (Reflect.construct.sham) return false;
   if (typeof Proxy === "function") return true;
@@ -28,7 +28,7 @@ function isNativeReflectConstruct() {
 }
 
 function _construct(Parent, args, Class) {
-  if (isNativeReflectConstruct()) {
+  if (_isNativeReflectConstruct()) {
     _construct = Reflect.construct;
   } else {
     _construct = function _construct(Parent, args, Class) {

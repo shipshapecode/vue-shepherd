@@ -1,15 +1,15 @@
 /*!
  * vue-shepherd v0.0.1 
- * (c) 2019 Robert Wagner
+ * (c) 2020 Robert Wagner
  * Released under the MIT License.
  */
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('shepherd.js')) :
   typeof define === 'function' && define.amd ? define(['shepherd.js'], factory) :
   (global = global || self, global.VueShepherd = factory(global.Shepherd));
-}(this, function (Shepherd) { 'use strict';
+}(this, (function (Shepherd) { 'use strict';
 
-  Shepherd = Shepherd && Shepherd.hasOwnProperty('default') ? Shepherd['default'] : Shepherd;
+  Shepherd = Shepherd && Object.prototype.hasOwnProperty.call(Shepherd, 'default') ? Shepherd['default'] : Shepherd;
 
   function _setPrototypeOf(o, p) {
     _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) {
@@ -20,7 +20,7 @@
     return _setPrototypeOf(o, p);
   }
 
-  function isNativeReflectConstruct() {
+  function _isNativeReflectConstruct() {
     if (typeof Reflect === "undefined" || !Reflect.construct) return false;
     if (Reflect.construct.sham) return false;
     if (typeof Proxy === "function") return true;
@@ -34,7 +34,7 @@
   }
 
   function _construct(Parent, args, Class) {
-    if (isNativeReflectConstruct()) {
+    if (_isNativeReflectConstruct()) {
       _construct = Reflect.construct;
     } else {
       _construct = function _construct(Parent, args, Class) {
@@ -73,4 +73,4 @@
 
   return plugin;
 
-}));
+})));
