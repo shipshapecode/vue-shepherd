@@ -79,6 +79,9 @@
     }
   },
   "release-it": {
+    "hooks": {
+      "after:bump": "yarn prepublish"
+    },
     "plugins": {
       "release-it-lerna-changelog": {
         "infile": "CHANGELOG.md",
