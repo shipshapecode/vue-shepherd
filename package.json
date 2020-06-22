@@ -1,6 +1,6 @@
 {
   "name": "vue-shepherd",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A Vue wrapper for the site tour library Shepherd.",
   "keywords": [
     "vue",
