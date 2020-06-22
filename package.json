@@ -15,20 +15,10 @@
     "email": "rwwagner90@gmail.com",
     "url": "https://github.com/rwwagner90"
   },
-  "scripts": {
-    "serve": "yarn demo",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint",
-    "demo": "vue-cli-service demo",
-    "docs": "yarn docs:serve",
-    "docs:build": "vue-cli-service docs --mode build",
-    "docs:serve": "vue-cli-service docs --mode serve",
-    "prepublish": "yarn lint && yarn build",
-    "start": "yarn serve"
-  },
   "main": "dist/vue-shepherd.common.js",
-  "module": "dist/vue-shepherd.esm.js",
+  "jsdelivr": "dist/vue-shepherd.umd.min.js",
   "unpkg": "dist/vue-shepherd.umd.min.js",
+  "module": "dist/vue-shepherd.esm.js",
   "files": [
     "dist/vue-shepherd.common.js",
     "dist/vue-shepherd.umd.min.js",
@@ -36,6 +26,35 @@
     "dist/vue-shepherd.esm.js",
     "src"
   ],
+  "scripts": {
+    "build": "vue-cli-service build",
+    "demo": "vue-cli-service demo",
+    "docs": "yarn docs:serve",
+    "docs:build": "vue-cli-service docs --mode build",
+    "docs:serve": "vue-cli-service docs --mode serve",
+    "lint": "vue-cli-service lint",
+    "prepublish": "yarn lint && yarn build",
+    "serve": "yarn demo",
+    "start": "yarn serve"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions"
+  ],
+  "eslintConfig": {
+    "env": {
+      "node": true
+    },
+    "parserOptions": {
+      "parser": "babel-eslint"
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended"
+    ],
+    "rules": {},
+    "root": true
+  },
   "dependencies": {
     "shepherd.js": "^8.0.1"
   },
@@ -46,32 +65,33 @@
     "babel-eslint": "^10.1.0",
     "eslint": "^7.3.0",
     "eslint-plugin-vue": "^6.2.2",
+    "release-it": "^13.6.0",
+    "release-it-lerna-changelog": "^2.3.0",
     "vue-cli-plugin-p11n": "^0.4.0",
     "vue-template-compiler": "^2.6.11"
   },
-  "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended"
-    ],
-    "rules": {},
-    "parserOptions": {
-      "parser": "babel-eslint"
-    }
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org"
   },
   "postcss": {
     "plugins": {
       "autoprefixer": {}
     }
   },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions"
-  ],
-  "jsdelivr": "dist/vue-shepherd.umd.min.js",
+  "release-it": {
+    "plugins": {
+      "release-it-lerna-changelog": {
+        "infile": "CHANGELOG.md",
+        "launchEditor": false
+      }
+    },
+    "git": {
+      "tagName": "v${version}"
+    },
+    "github": {
+      "release": true,
+      "tokenRef": "GITHUB_AUTH"
+    }
+  },
   "sideeffects": false
 }
