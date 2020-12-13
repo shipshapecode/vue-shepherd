@@ -1,4 +1,4 @@
-/*! shepherd.js 8.1.0 */
+'use strict';Object.defineProperty(exports,'__esModule',{value:true});/*! shepherd.js 8.1.0 */
 
 var isMergeableObject = function isMergeableObject(value) {
   return isNonNullObject(value) && !isSpecial(value);
@@ -5856,9 +5856,7 @@ class Tour extends Evented {
 Object.assign(Shepherd, {
   Tour,
   Step
-});
-
-const install = function installVueShepherd(Vue) {
+});const install = function installVueShepherd(Vue) {
   if (install.installed) return;
   install.installed = true;
 
@@ -5870,5 +5868,21 @@ const install = function installVueShepherd(Vue) {
 const plugin = {
   install
 }; // To auto-install on non-es builds, when vue is found
+// eslint-disable-next-line no-redeclare
 
-export default plugin;
+/* global window, global */
+
+{
+  let GlobalVue = null;
+
+  if (typeof window !== 'undefined') {
+    GlobalVue = window.Vue;
+  } else if (typeof global !== 'undefined') {
+    GlobalVue = global.Vue;
+  }
+
+  if (GlobalVue) {
+    GlobalVue.use(plugin);
+  }
+} // Default export is library as a whole, registered via Vue.use()
+exports.default=plugin;
