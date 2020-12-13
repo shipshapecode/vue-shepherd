@@ -111,6 +111,11 @@
   },
   "repository": "https://github.com/shipshapecode/vue-shepherd",
   "sideeffects": false,
+  {
+    "resolutions": {
+      "cypress": "^5.6.0"
+    }
+  }
   "volta": {
     "node": "12.16.2",
     "yarn": "1.22.10"
