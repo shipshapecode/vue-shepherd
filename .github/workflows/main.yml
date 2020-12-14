@@ -24,10 +24,10 @@ jobs:
         with:
           browser: chrome
           config-file: ./cypress.json
-          start: yarn start
+          start: yarn test:e2e --headless
       - name: Cypress - Firefox
         uses: cypress-io/github-action@v2
         with:
           browser: firefox
           config-file: ./cypress.json    
-          start: yarn start
+          start: yarn test:e2e --headless
