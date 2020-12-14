@@ -20,14 +20,6 @@ jobs:
           node-version: 12.x
       - run: yarn install
       - name: Cypress - Chrome
-        uses: cypress-io/github-action@v2
-        with:
-          browser: chrome
-          config-file: ./cypress.json
-          start: yarn test:e2e --headless
-      - name: Cypress - Firefox
-        uses: cypress-io/github-action@v2
-        with:
-          browser: firefox
-          config-file: ./cypress.json    
-          start: yarn test:e2e --headless
+        run: yarn test:e2e --browser chrome --headless
+      - name: Cypress - Firefox  
+        run: yarn test:e2e --browser firefox --headless
