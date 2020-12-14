@@ -2,45 +2,71 @@
   "name": "vue-shepherd",
   "version": "0.2.1",
   "description": "A Vue wrapper for the site tour library Shepherd.",
-  "keywords": [
-    "vue",
-    "site tour",
-    "tour",
-    "shepherd"
-  ],
-  "repository": "https://github.com/shipshapecode/vue-shepherd",
-  "license": "MIT",
   "author": {
     "name": "Robert Wagner",
     "email": "rwwagner90@gmail.com",
     "url": "https://github.com/rwwagner90"
   },
-  "main": "dist/vue-shepherd.common.js",
-  "jsdelivr": "dist/vue-shepherd.umd.min.js",
-  "unpkg": "dist/vue-shepherd.umd.min.js",
-  "module": "dist/vue-shepherd.esm.js",
-  "files": [
-    "dist/vue-shepherd.common.js",
-    "dist/vue-shepherd.umd.min.js",
-    "dist/vue-shepherd.umd.js",
-    "dist/vue-shepherd.esm.js",
-    "src"
-  ],
   "scripts": {
-    "build": "vue-cli-service build",
-    "demo": "vue-cli-service demo",
-    "docs": "yarn docs:serve",
-    "docs:build": "vue-cli-service docs --mode build",
-    "docs:serve": "vue-cli-service docs --mode serve",
+    "build": "cross-env NODE_ENV=production rollup --config rollup.config.js",
+    "build:ssr": "cross-env NODE_ENV=production rollup --config rollup.config.js --format cjs",
+    "build:es": "cross-env NODE_ENV=production rollup --config rollup.config.js --format es",
+    "build:unpkg": "cross-env NODE_ENV=production rollup --config rollup.config.js --format iife",
+    "dev": "yarn serve",
     "lint": "vue-cli-service lint",
     "prepublish": "yarn lint && yarn build",
-    "serve": "yarn demo",
-    "start": "yarn serve"
+    "serve": "vue-cli-service serve dev/serve.js",
+    "start": "yarn serve",
+    "test:e2e": "vue-cli-service test:e2e"
   },
-  "browserslist": [
-    "> 1%",
-    "last 2 versions"
+  "main": "dist/vue-shepherd.ssr.js",
+  "browser": "dist/vue-shepherd.esm.js",
+  "module": "dist/vue-shepherd.esm.js",
+  "unpkg": "dist/vue-shepherd.min.js",
+  "files": [
+    "dist/vue-shepherd.common.js",
+    "dist/vue-shepherd.common.js.map",
+    "dist/vue-shepherd.esm.js",
+    "dist/vue-shepherd.esm.js.map",
+    "dist/vue-shepherd.min.js",
+    "dist/vue-shepherd.ssr.js",
+    "package.json",
+    "README.md",
+    "src"
   ],
+  "dependencies": {
+    "shepherd.js": "^8.1.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-alias": "^2.2.0",
+    "@rollup/plugin-commonjs": "^17.0.0",
+    "@rollup/plugin-node-resolve": "^11.0.0",
+    "@rollup/plugin-replace": "^2.3.2",
+    "@vue/cli-plugin-babel": "^4.5.9",
+    "@vue/cli-plugin-e2e-cypress": "^4.5.9",
+    "@vue/cli-plugin-eslint": "^4.5.9",
+    "@vue/cli-service": "^4.5.9",
+    "@vue/compiler-sfc": "^3.0.4",
+    "babel-eslint": "^10.1.0",
+    "cross-env": "^7.0.2",
+    "cypress": "^5.6.0",
+    "eslint": "^7.15.0",
+    "eslint-plugin-vue": "^7.2.0",
+    "minimist": "^1.2.5",
+    "release-it": "^14.2.2",
+    "release-it-lerna-changelog": "^3.1.0",
+    "rollup": "^2.34.2",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-filesize": "^9.1.0",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "rollup-plugin-terser": "^5.3.0",
+    "rollup-plugin-vue": "^6.0.0",
+    "vue": "^2.6.12",
+    "vue-template-compiler": "^2.6.12"
+  },
+  "peerDependencies": {
+    "vue": "^2.6.12"
+  },
   "eslintConfig": {
     "env": {
       "node": true
@@ -55,28 +81,15 @@
     "rules": {},
     "root": true
   },
-  "dependencies": {
-    "shepherd.js": "^8.0.1"
-  },
-  "devDependencies": {
-    "@vue/cli-plugin-babel": "^4.4.5",
-    "@vue/cli-plugin-eslint": "^4.4.5",
-    "@vue/cli-service": "^4.4.5",
-    "babel-eslint": "^10.1.0",
-    "eslint": "^7.3.0",
-    "eslint-plugin-vue": "^6.2.2",
-    "release-it": "^13.6.0",
-    "release-it-lerna-changelog": "^2.3.0",
-    "vue-cli-plugin-p11n": "^0.4.0",
-    "vue-template-compiler": "^2.6.11"
-  },
+  "keywords": [
+    "vue",
+    "site tour",
+    "tour",
+    "shepherd"
+  ],
+  "license": "MIT",
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
-  },
-  "postcss": {
-    "plugins": {
-      "autoprefixer": {}
-    }
   },
   "release-it": {
     "hooks": {
@@ -96,5 +109,13 @@
       "tokenRef": "GITHUB_AUTH"
     }
   },
-  "sideeffects": false
+  "repository": "https://github.com/shipshapecode/vue-shepherd",
+  "sideeffects": false,
+  "resolutions": {
+    "cypress": "^5.6.0"
+  },
+  "volta": {
+    "node": "12.16.2",
+    "yarn": "1.22.10"
+  }
 }
