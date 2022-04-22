@@ -20,8 +20,14 @@ This is a Vue wrapper for the [Shepherd](https://github.com/shipshapecode/shephe
 ```bash
 npm install vue-shepherd --save
 ```
+### Yarn
 
-When using with a module system, you must explicitly install vue-shepherd via Vue.use():
+```bash
+yarn add vue-shepherd
+```
+
+### Setup
+- create new file vue-shepherd.js in plugins folder
 
 ```js
 import Vue from 'vue';
@@ -30,43 +36,138 @@ import VueShepherd from 'vue-shepherd';
 Vue.use(VueShepherd);
 ```
 
-## Usage
-
-You will need to import the styles first:
+- create file css and import style
 
 ```css
 @import '~shepherd.js/dist/css/shepherd.css';
 ```
 
-The plugin extends Vue with a set of directives and $shepherd() constructor function.
+- add plugins to nuxt.config.js
 
-### Constructor Function
+```js
+\\ vue-stepherd
+...
+plugins:[
+  ...,
+  '~/plugins/vue-stepherd'
+]
+...
+\\ css style
+css:[
+  ...,
+  '~/assests/style.css'
+]
+```
+### Example 
 
 ```vue
 <template>
   <div>
-    Testing
+    <div id="step-1">Step one ...</div>
+    <div id="step-2">Step two ...</div>
+    <div id="step-3">Step three ...</div>
   </div>
 </template>
 
 <script>
-  export default {
-    name: 'ShepherdExample',
-    mounted() {
-      this.$nextTick(() => {
-        const tour = this.$shepherd({
-          useModalOverlay: true
-        });
-
-        tour.addStep({
-          attachTo: { element: this.$el, on: 'top' },
-          text: 'Test'
-        });
-
-        tour.start();
-      });
+export default {
+  name: 'IndexPage',
+  data() {
+    const step = [
+      {
+        attachTo:{
+          element: '#step-1',
+          on: 'bottom'
+        },
+        text: 'one ...',
+        buttons: [
+          {
+            action() {
+              return this.cancel()
+            },
+            classes: 'shepherd-button-secondary',
+            text: 'Skip',
+          },
+          {
+            action() {
+              return this.next()
+            },
+            text: 'Next',
+          },
+        ],
+      },
+      {
+        attachTo:{
+          element: '#step-2',
+          on: 'bottom'
+        },
+        text: 'two ...',
+        buttons: [
+          {
+            action() {
+              return this.back()
+            },
+            classes: 'shepherd-button-secondary',
+            text: 'Back',
+          },
+          {
+            action() {
+              return this.next()
+            },
+            text: 'Next',
+          },
+        ],
+      },
+      {
+        attachTo:{
+          element: '#step-3',
+          on: 'bottom'
+        },
+        text: 'three ...',
+        buttons: [
+          {
+            action() {
+              return this.back()
+            },
+            classes: 'shepherd-button-secondary',
+            text: 'Back',
+          },
+          {
+            action() {
+              return this.complete()
+            },
+            text: 'Finish',
+          },
+        ],
+      },
+    ]
+    return {
+      step
     }
-  };
+  },
+  methods: {
+    start() {
+      this.loading = true
+    },
+    finish() {
+      this.loading = false
+    },
+  },
+  head() {
+    return {
+      title: 'Index Page',
+    }
+  },
+  mounted() {
+    this.$nextTick(() => {
+      const tour = this.$shepherd({
+        useModalOverlay: true,
+      })
+      tour.addSteps(step)
+      tour.start()
+    })
+  },
+}
 </script>
 ```
 
