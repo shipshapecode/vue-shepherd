@@ -39,7 +39,7 @@
   },
   "devDependencies": {
     "@rollup/plugin-alias": "^2.2.0",
-    "@rollup/plugin-commonjs": "^17.0.0",
+    "@rollup/plugin-commonjs": "^18.1.0",
     "@rollup/plugin-node-resolve": "^11.0.0",
     "@rollup/plugin-replace": "^4.0.0",
     "@vue/cli-plugin-babel": "^4.5.9",
