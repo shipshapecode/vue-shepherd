@@ -1,6 +1,6 @@
 {
   "name": "vue-shepherd",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "A Vue wrapper for the site tour library Shepherd.",
   "author": {
     "name": "Robert Wagner",
