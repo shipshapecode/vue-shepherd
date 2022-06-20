@@ -55,7 +55,7 @@
     "minimist": "^1.2.5",
     "release-it": "^14.14.3",
     "release-it-lerna-changelog": "^4.0.1",
-    "rollup": "^2.75.6",
+    "rollup": "^2.75.7",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-filesize": "^9.1.2",
     "rollup-plugin-peer-deps-external": "^2.2.4",
