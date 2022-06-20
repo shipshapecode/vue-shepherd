@@ -1,4 +1,4 @@
-/*! shepherd.js 8.1.0 */
+/*! shepherd.js 10.0.0 */
 
 var isMergeableObject = function isMergeableObject(value) {
   return isNonNullObject(value) && !isSpecial(value);
@@ -129,7 +129,7 @@ var cjs = deepmerge_1;
  * Checks if `value` is classified as an `Element`.
  * @param {*} value The param to check if it is an Element
  */
-function isElement(value) {
+function isElement$1(value) {
   return value instanceof Element;
 }
 /**
@@ -137,7 +137,7 @@ function isElement(value) {
  * @param {*} value The param to check if it is an HTMLElement
  */
 
-function isHTMLElement(value) {
+function isHTMLElement$1(value) {
   return value instanceof HTMLElement;
 }
 /**
@@ -166,7 +166,11 @@ function isUndefined(value) {
 }
 
 class Evented {
-  on(event, handler, ctx, once = false) {
+  on(event, handler, ctx, once) {
+    if (once === void 0) {
+      once = false;
+    }
+
     if (isUndefined(this.bindings)) {
       this.bindings = {};
     }
@@ -205,7 +209,11 @@ class Evented {
     return this;
   }
 
-  trigger(event, ...args) {
+  trigger(event) {
+    for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+      args[_key - 1] = arguments[_key];
+    }
+
     if (!isUndefined(this.bindings) && this.bindings[event]) {
       this.bindings[event].forEach((binding, index) => {
         const {
@@ -346,10 +354,11 @@ function getNodeName(element) {
   return element ? (element.nodeName || '').toLowerCase() : null;
 }
 
-/*:: import type { Window } from '../types'; */
-
-/*:: declare function getWindow(node: Node | Window): Window; */
 function getWindow(node) {
+  if (node == null) {
+    return window;
+  }
+
   if (node.toString() !== '[object Window]') {
     var ownerDocument = node.ownerDocument;
     return ownerDocument ? ownerDocument.defaultView || window : window;
@@ -358,20 +367,24 @@ function getWindow(node) {
   return node;
 }
 
-/*:: declare function isElement(node: mixed): boolean %checks(node instanceof
-  Element); */
-
-function isElement$1(node) {
+function isElement(node) {
   var OwnElement = getWindow(node).Element;
   return node instanceof OwnElement || node instanceof Element;
 }
-/*:: declare function isHTMLElement(node: mixed): boolean %checks(node instanceof
-  HTMLElement); */
 
-
-function isHTMLElement$1(node) {
+function isHTMLElement(node) {
   var OwnElement = getWindow(node).HTMLElement;
   return node instanceof OwnElement || node instanceof HTMLElement;
+}
+
+function isShadowRoot(node) {
+  // IE 11 has no ShadowRoot
+  if (typeof ShadowRoot === 'undefined') {
+    return false;
+  }
+
+  var OwnElement = getWindow(node).ShadowRoot;
+  return node instanceof OwnElement || node instanceof ShadowRoot;
 }
 
 // and applies them to the HTMLElements such as popper and arrow
@@ -383,11 +396,11 @@ function applyStyles(_ref) {
     var attributes = state.attributes[name] || {};
     var element = state.elements[name]; // arrow is optional + virtual elements
 
-    if (!isHTMLElement$1(element) || !getNodeName(element)) {
+    if (!isHTMLElement(element) || !getNodeName(element)) {
       return;
     } // Flow doesn't support to extend this property, but it's the most
     // effective way to apply styles to an HTMLElement
-    // $FlowFixMe
+    // $FlowFixMe[cannot-write]
 
 
     Object.assign(element.style, style);
@@ -403,7 +416,7 @@ function applyStyles(_ref) {
   });
 }
 
-function effect(_ref2) {
+function effect$2(_ref2) {
   var state = _ref2.state;
   var initialStyles = {
     popper: {
@@ -418,6 +431,7 @@ function effect(_ref2) {
     reference: {}
   };
   Object.assign(state.elements.popper.style, initialStyles.popper);
+  state.styles = initialStyles;
 
   if (state.elements.arrow) {
     Object.assign(state.elements.arrow.style, initialStyles.arrow);
@@ -434,12 +448,9 @@ function effect(_ref2) {
         return style;
       }, {}); // arrow is optional + virtual elements
 
-      if (!isHTMLElement$1(element) || !getNodeName(element)) {
+      if (!isHTMLElement(element) || !getNodeName(element)) {
         return;
-      } // Flow doesn't support to extend this property, but it's the most
-      // effective way to apply styles to an HTMLElement
-      // $FlowFixMe
-
+      }
 
       Object.assign(element.style, style);
       Object.keys(attributes).forEach(function (attribute) {
@@ -455,7 +466,7 @@ var applyStyles$1 = {
   enabled: true,
   phase: 'write',
   fn: applyStyles,
-  effect: effect,
+  effect: effect$2,
   requires: ['computeStyles']
 };
 
@@ -463,37 +474,88 @@ function getBasePlacement(placement) {
   return placement.split('-')[0];
 }
 
-// Returns the layout rect of an element relative to its offsetParent. Layout
+var max = Math.max;
+var min = Math.min;
+var round = Math.round;
+
+function getBoundingClientRect(element, includeScale) {
+  if (includeScale === void 0) {
+    includeScale = false;
+  }
+
+  var rect = element.getBoundingClientRect();
+  var scaleX = 1;
+  var scaleY = 1;
+
+  if (isHTMLElement(element) && includeScale) {
+    var offsetHeight = element.offsetHeight;
+    var offsetWidth = element.offsetWidth; // Do not attempt to divide by 0, otherwise we get `Infinity` as scale
+    // Fallback to 1 in case both values are `0`
+
+    if (offsetWidth > 0) {
+      scaleX = round(rect.width) / offsetWidth || 1;
+    }
+
+    if (offsetHeight > 0) {
+      scaleY = round(rect.height) / offsetHeight || 1;
+    }
+  }
+
+  return {
+    width: rect.width / scaleX,
+    height: rect.height / scaleY,
+    top: rect.top / scaleY,
+    right: rect.right / scaleX,
+    bottom: rect.bottom / scaleY,
+    left: rect.left / scaleX,
+    x: rect.left / scaleX,
+    y: rect.top / scaleY
+  };
+}
+
 // means it doesn't take into account transforms.
+
 function getLayoutRect(element) {
+  var clientRect = getBoundingClientRect(element); // Use the clientRect sizes if it's not been transformed.
+  // Fixes https://github.com/popperjs/popper-core/issues/1223
+
+  var width = element.offsetWidth;
+  var height = element.offsetHeight;
+
+  if (Math.abs(clientRect.width - width) <= 1) {
+    width = clientRect.width;
+  }
+
+  if (Math.abs(clientRect.height - height) <= 1) {
+    height = clientRect.height;
+  }
+
   return {
     x: element.offsetLeft,
     y: element.offsetTop,
-    width: element.offsetWidth,
-    height: element.offsetHeight
+    width: width,
+    height: height
   };
 }
 
 function contains(parent, child) {
-  var rootNode = child.getRootNode && child.getRootNode(); // $FlowFixMe: Node is not aware of host
-
-  var isShadow = Boolean(rootNode && rootNode.host); // First, attempt with faster native method
+  var rootNode = child.getRootNode && child.getRootNode(); // First, attempt with faster native method
 
   if (parent.contains(child)) {
     return true;
   } // then fallback to custom implementation with Shadow DOM support
-  else if (isShadow) {
-      var next = child;
+  else if (rootNode && isShadowRoot(rootNode)) {
+    var next = child;
 
-      do {
-        if (next && parent.isSameNode(next)) {
-          return true;
-        } // $FlowFixMe: need a better way to handle this...
+    do {
+      if (next && parent.isSameNode(next)) {
+        return true;
+      } // $FlowFixMe[prop-missing]: need a better way to handle this...
 
 
-        next = next.parentNode || next.host;
-      } while (next);
-    } // Give up, the result is false
+      next = next.parentNode || next.host;
+    } while (next);
+  } // Give up, the result is false
 
 
   return false;
@@ -508,8 +570,9 @@ function isTableElement(element) {
 }
 
 function getDocumentElement(element) {
-  // $FlowFixMe: assume body is always available
-  return ((isElement$1(element) ? element.ownerDocument : element.document) || window.document).documentElement;
+  // $FlowFixMe[incompatible-return]: assume body is always available
+  return ((isElement(element) ? element.ownerDocument : // $FlowFixMe[prop-missing]
+  element.document) || window.document).documentElement;
 }
 
 function getParentNode(element) {
@@ -517,46 +580,54 @@ function getParentNode(element) {
     return element;
   }
 
-  return (// $FlowFixMe: this is a quicker (but less type safe) way to save quite some bytes from the bundle
+  return (// this is a quicker (but less type safe) way to save quite some bytes from the bundle
+    // $FlowFixMe[incompatible-return]
+    // $FlowFixMe[prop-missing]
     element.assignedSlot || // step into the shadow DOM of the parent of a slotted node
-    element.parentNode || // DOM Element detected
-    // $FlowFixMe: need a better way to handle this...
-    element.host || // ShadowRoot detected
-    // $FlowFixMe: HTMLElement is a Node
+    element.parentNode || ( // DOM Element detected
+    isShadowRoot(element) ? element.host : null) || // ShadowRoot detected
+    // $FlowFixMe[incompatible-call]: HTMLElement is a Node
     getDocumentElement(element) // fallback
 
   );
 }
 
 function getTrueOffsetParent(element) {
-  if (!isHTMLElement$1(element) || // https://github.com/popperjs/popper-core/issues/837
+  if (!isHTMLElement(element) || // https://github.com/popperjs/popper-core/issues/837
   getComputedStyle(element).position === 'fixed') {
     return null;
   }
 
-  var offsetParent = element.offsetParent;
-
-  if (offsetParent) {
-    var html = getDocumentElement(offsetParent);
-
-    if (getNodeName(offsetParent) === 'body' && getComputedStyle(offsetParent).position === 'static' && getComputedStyle(html).position !== 'static') {
-      return html;
-    }
-  }
-
-  return offsetParent;
+  return element.offsetParent;
 } // `.offsetParent` reports `null` for fixed elements, while absolute elements
 // return the containing block
 
 
 function getContainingBlock(element) {
+  var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') !== -1;
+  var isIE = navigator.userAgent.indexOf('Trident') !== -1;
+
+  if (isIE && isHTMLElement(element)) {
+    // In IE 9, 10 and 11 fixed elements containing block is always established by the viewport
+    var elementCss = getComputedStyle(element);
+
+    if (elementCss.position === 'fixed') {
+      return null;
+    }
+  }
+
   var currentNode = getParentNode(element);
 
-  while (isHTMLElement$1(currentNode) && ['html', 'body'].indexOf(getNodeName(currentNode)) < 0) {
+  if (isShadowRoot(currentNode)) {
+    currentNode = currentNode.host;
+  }
+
+  while (isHTMLElement(currentNode) && ['html', 'body'].indexOf(getNodeName(currentNode)) < 0) {
     var css = getComputedStyle(currentNode); // This is non-exhaustive but covers the most common CSS properties that
     // create a containing block.
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block#identifying_the_containing_block
 
-    if (css.transform !== 'none' || css.perspective !== 'none' || css.willChange && css.willChange !== 'auto') {
+    if (css.transform !== 'none' || css.perspective !== 'none' || css.contain === 'paint' || ['transform', 'perspective'].indexOf(css.willChange) !== -1 || isFirefox && css.willChange === 'filter' || isFirefox && css.filter && css.filter !== 'none') {
       return currentNode;
     } else {
       currentNode = currentNode.parentNode;
@@ -576,7 +647,7 @@ function getOffsetParent(element) {
     offsetParent = getTrueOffsetParent(offsetParent);
   }
 
-  if (offsetParent && getNodeName(offsetParent) === 'body' && getComputedStyle(offsetParent).position === 'static') {
+  if (offsetParent && (getNodeName(offsetParent) === 'html' || getNodeName(offsetParent) === 'body' && getComputedStyle(offsetParent).position === 'static')) {
     return window;
   }
 
@@ -587,8 +658,12 @@ function getMainAxisFromPlacement(placement) {
   return ['top', 'bottom'].indexOf(placement) >= 0 ? 'x' : 'y';
 }
 
-function within(min, value, max) {
-  return Math.max(min, Math.min(value, max));
+function within(min$1, value, max$1) {
+  return max(min$1, min(value, max$1));
+}
+function withinMaxClamp(min, value, max) {
+  var v = within(min, value, max);
+  return v > max ? max : v;
 }
 
 function getFreshSideObject() {
@@ -601,7 +676,7 @@ function getFreshSideObject() {
 }
 
 function mergePaddingObject(paddingObject) {
-  return Object.assign(Object.assign({}, getFreshSideObject()), paddingObject);
+  return Object.assign({}, getFreshSideObject(), paddingObject);
 }
 
 function expandToHashMap(value, keys) {
@@ -611,11 +686,19 @@ function expandToHashMap(value, keys) {
   }, {});
 }
 
+var toPaddingObject = function toPaddingObject(padding, state) {
+  padding = typeof padding === 'function' ? padding(Object.assign({}, state.rects, {
+    placement: state.placement
+  })) : padding;
+  return mergePaddingObject(typeof padding !== 'number' ? padding : expandToHashMap(padding, basePlacements));
+};
+
 function arrow(_ref) {
   var _state$modifiersData$;
 
   var state = _ref.state,
-      name = _ref.name;
+      name = _ref.name,
+      options = _ref.options;
   var arrowElement = state.elements.arrow;
   var popperOffsets = state.modifiersData.popperOffsets;
   var basePlacement = getBasePlacement(state.placement);
@@ -627,7 +710,7 @@ function arrow(_ref) {
     return;
   }
 
-  var paddingObject = state.modifiersData[name + "#persistent"].padding;
+  var paddingObject = toPaddingObject(options.padding, state);
   var arrowRect = getLayoutRect(arrowElement);
   var minProp = axis === 'y' ? top : left;
   var maxProp = axis === 'y' ? bottom : right;
@@ -649,12 +732,9 @@ function arrow(_ref) {
 
 function effect$1(_ref2) {
   var state = _ref2.state,
-      options = _ref2.options,
-      name = _ref2.name;
+      options = _ref2.options;
   var _options$element = options.element,
-      arrowElement = _options$element === void 0 ? '[data-popper-arrow]' : _options$element,
-      _options$padding = options.padding,
-      padding = _options$padding === void 0 ? 0 : _options$padding;
+      arrowElement = _options$element === void 0 ? '[data-popper-arrow]' : _options$element;
 
   if (arrowElement == null) {
     return;
@@ -675,9 +755,6 @@ function effect$1(_ref2) {
   }
 
   state.elements.arrow = arrowElement;
-  state.modifiersData[name + "#persistent"] = {
-    padding: mergePaddingObject(typeof padding !== 'number' ? padding : expandToHashMap(padding, basePlacements))
-  };
 } // eslint-disable-next-line import/no-unused-modules
 
 
@@ -691,6 +768,10 @@ var arrow$1 = {
   requiresIfExists: ['preventOverflow']
 };
 
+function getVariation(placement) {
+  return placement.split('-')[1];
+}
+
 var unsetSides = {
   top: 'auto',
   right: 'auto',
@@ -700,14 +781,14 @@ var unsetSides = {
 // Zooming can change the DPR, but it seems to report a value that will
 // cleanly divide the values into the appropriate subpixels.
 
-function roundOffsets(_ref) {
+function roundOffsetsByDPR(_ref) {
   var x = _ref.x,
       y = _ref.y;
   var win = window;
   var dpr = win.devicePixelRatio || 1;
   return {
-    x: Math.round(x * dpr) / dpr || 0,
-    y: Math.round(y * dpr) / dpr || 0
+    x: round(x * dpr) / dpr || 0,
+    y: round(y * dpr) / dpr || 0
   };
 }
 
@@ -717,15 +798,28 @@ function mapToStyles(_ref2) {
   var popper = _ref2.popper,
       popperRect = _ref2.popperRect,
       placement = _ref2.placement,
+      variation = _ref2.variation,
       offsets = _ref2.offsets,
       position = _ref2.position,
       gpuAcceleration = _ref2.gpuAcceleration,
-      adaptive = _ref2.adaptive;
+      adaptive = _ref2.adaptive,
+      roundOffsets = _ref2.roundOffsets,
+      isFixed = _ref2.isFixed;
+  var _offsets$x = offsets.x,
+      x = _offsets$x === void 0 ? 0 : _offsets$x,
+      _offsets$y = offsets.y,
+      y = _offsets$y === void 0 ? 0 : _offsets$y;
 
-  var _roundOffsets = roundOffsets(offsets),
-      x = _roundOffsets.x,
-      y = _roundOffsets.y;
+  var _ref3 = typeof roundOffsets === 'function' ? roundOffsets({
+    x: x,
+    y: y
+  }) : {
+    x: x,
+    y: y
+  };
 
+  x = _ref3.x;
+  y = _ref3.y;
   var hasX = offsets.hasOwnProperty('x');
   var hasY = offsets.hasOwnProperty('y');
   var sideX = left;
@@ -734,23 +828,34 @@ function mapToStyles(_ref2) {
 
   if (adaptive) {
     var offsetParent = getOffsetParent(popper);
+    var heightProp = 'clientHeight';
+    var widthProp = 'clientWidth';
 
     if (offsetParent === getWindow(popper)) {
       offsetParent = getDocumentElement(popper);
-    } // $FlowFixMe: force type refinement, we compare offsetParent with window above, but Flow doesn't detect it
 
-    /*:: offsetParent = (offsetParent: Element); */
+      if (getComputedStyle(offsetParent).position !== 'static' && position === 'absolute') {
+        heightProp = 'scrollHeight';
+        widthProp = 'scrollWidth';
+      }
+    } // $FlowFixMe[incompatible-cast]: force type refinement, we compare offsetParent with window above, but Flow doesn't detect it
 
 
-    if (placement === top) {
+    offsetParent = offsetParent;
+
+    if (placement === top || (placement === left || placement === right) && variation === end) {
       sideY = bottom;
-      y -= offsetParent.clientHeight - popperRect.height;
+      var offsetY = isFixed && offsetParent === win && win.visualViewport ? win.visualViewport.height : // $FlowFixMe[prop-missing]
+      offsetParent[heightProp];
+      y -= offsetY - popperRect.height;
       y *= gpuAcceleration ? 1 : -1;
     }
 
-    if (placement === left) {
+    if (placement === left || (placement === top || placement === bottom) && variation === end) {
       sideX = right;
-      x -= offsetParent.clientWidth - popperRect.width;
+      var offsetX = isFixed && offsetParent === win && win.visualViewport ? win.visualViewport.width : // $FlowFixMe[prop-missing]
+      offsetParent[widthProp];
+      x -= offsetX - popperRect.width;
       x *= gpuAcceleration ? 1 : -1;
     }
   }
@@ -759,47 +864,64 @@ function mapToStyles(_ref2) {
     position: position
   }, adaptive && unsetSides);
 
+  var _ref4 = roundOffsets === true ? roundOffsetsByDPR({
+    x: x,
+    y: y
+  }) : {
+    x: x,
+    y: y
+  };
+
+  x = _ref4.x;
+  y = _ref4.y;
+
   if (gpuAcceleration) {
     var _Object$assign;
 
-    return Object.assign(Object.assign({}, commonStyles), {}, (_Object$assign = {}, _Object$assign[sideY] = hasY ? '0' : '', _Object$assign[sideX] = hasX ? '0' : '', _Object$assign.transform = (win.devicePixelRatio || 1) < 2 ? "translate(" + x + "px, " + y + "px)" : "translate3d(" + x + "px, " + y + "px, 0)", _Object$assign));
+    return Object.assign({}, commonStyles, (_Object$assign = {}, _Object$assign[sideY] = hasY ? '0' : '', _Object$assign[sideX] = hasX ? '0' : '', _Object$assign.transform = (win.devicePixelRatio || 1) <= 1 ? "translate(" + x + "px, " + y + "px)" : "translate3d(" + x + "px, " + y + "px, 0)", _Object$assign));
   }
 
-  return Object.assign(Object.assign({}, commonStyles), {}, (_Object$assign2 = {}, _Object$assign2[sideY] = hasY ? y + "px" : '', _Object$assign2[sideX] = hasX ? x + "px" : '', _Object$assign2.transform = '', _Object$assign2));
+  return Object.assign({}, commonStyles, (_Object$assign2 = {}, _Object$assign2[sideY] = hasY ? y + "px" : '', _Object$assign2[sideX] = hasX ? x + "px" : '', _Object$assign2.transform = '', _Object$assign2));
 }
 
-function computeStyles(_ref3) {
-  var state = _ref3.state,
-      options = _ref3.options;
+function computeStyles(_ref5) {
+  var state = _ref5.state,
+      options = _ref5.options;
   var _options$gpuAccelerat = options.gpuAcceleration,
       gpuAcceleration = _options$gpuAccelerat === void 0 ? true : _options$gpuAccelerat,
       _options$adaptive = options.adaptive,
-      adaptive = _options$adaptive === void 0 ? true : _options$adaptive;
+      adaptive = _options$adaptive === void 0 ? true : _options$adaptive,
+      _options$roundOffsets = options.roundOffsets,
+      roundOffsets = _options$roundOffsets === void 0 ? true : _options$roundOffsets;
 
   var commonStyles = {
     placement: getBasePlacement(state.placement),
+    variation: getVariation(state.placement),
     popper: state.elements.popper,
     popperRect: state.rects.popper,
-    gpuAcceleration: gpuAcceleration
+    gpuAcceleration: gpuAcceleration,
+    isFixed: state.options.strategy === 'fixed'
   };
 
   if (state.modifiersData.popperOffsets != null) {
-    state.styles.popper = Object.assign(Object.assign({}, state.styles.popper), mapToStyles(Object.assign(Object.assign({}, commonStyles), {}, {
+    state.styles.popper = Object.assign({}, state.styles.popper, mapToStyles(Object.assign({}, commonStyles, {
       offsets: state.modifiersData.popperOffsets,
       position: state.options.strategy,
-      adaptive: adaptive
+      adaptive: adaptive,
+      roundOffsets: roundOffsets
     })));
   }
 
   if (state.modifiersData.arrow != null) {
-    state.styles.arrow = Object.assign(Object.assign({}, state.styles.arrow), mapToStyles(Object.assign(Object.assign({}, commonStyles), {}, {
+    state.styles.arrow = Object.assign({}, state.styles.arrow, mapToStyles(Object.assign({}, commonStyles, {
       offsets: state.modifiersData.arrow,
       position: 'absolute',
-      adaptive: false
+      adaptive: false,
+      roundOffsets: roundOffsets
     })));
   }
 
-  state.attributes.popper = Object.assign(Object.assign({}, state.attributes.popper), {}, {
+  state.attributes.popper = Object.assign({}, state.attributes.popper, {
     'data-popper-placement': state.placement
   });
 } // eslint-disable-next-line import/no-unused-modules
@@ -817,7 +939,7 @@ var passive = {
   passive: true
 };
 
-function effect$2(_ref) {
+function effect(_ref) {
   var state = _ref.state,
       instance = _ref.instance,
       options = _ref.options;
@@ -857,11 +979,11 @@ var eventListeners = {
   enabled: true,
   phase: 'write',
   fn: function fn() {},
-  effect: effect$2,
+  effect: effect,
   data: {}
 };
 
-var hash = {
+var hash$1 = {
   left: 'right',
   right: 'left',
   bottom: 'top',
@@ -869,32 +991,18 @@ var hash = {
 };
 function getOppositePlacement(placement) {
   return placement.replace(/left|right|bottom|top/g, function (matched) {
-    return hash[matched];
+    return hash$1[matched];
   });
 }
 
-var hash$1 = {
+var hash = {
   start: 'end',
   end: 'start'
 };
 function getOppositeVariationPlacement(placement) {
   return placement.replace(/start|end/g, function (matched) {
-    return hash$1[matched];
+    return hash[matched];
   });
-}
-
-function getBoundingClientRect(element) {
-  var rect = element.getBoundingClientRect();
-  return {
-    width: rect.width,
-    height: rect.height,
-    top: rect.top,
-    right: rect.right,
-    bottom: rect.bottom,
-    left: rect.left,
-    x: rect.left,
-    y: rect.top
-  };
 }
 
 function getWindowScroll(node) {
@@ -959,16 +1067,18 @@ function getViewportRect(element) {
 // of the `<html>` and `<body>` rect bounds if horizontally scrollable
 
 function getDocumentRect(element) {
+  var _element$ownerDocumen;
+
   var html = getDocumentElement(element);
   var winScroll = getWindowScroll(element);
-  var body = element.ownerDocument.body;
-  var width = Math.max(html.scrollWidth, html.clientWidth, body ? body.scrollWidth : 0, body ? body.clientWidth : 0);
-  var height = Math.max(html.scrollHeight, html.clientHeight, body ? body.scrollHeight : 0, body ? body.clientHeight : 0);
+  var body = (_element$ownerDocumen = element.ownerDocument) == null ? void 0 : _element$ownerDocumen.body;
+  var width = max(html.scrollWidth, html.clientWidth, body ? body.scrollWidth : 0, body ? body.clientWidth : 0);
+  var height = max(html.scrollHeight, html.clientHeight, body ? body.scrollHeight : 0, body ? body.clientHeight : 0);
   var x = -winScroll.scrollLeft + getWindowScrollBarX(element);
   var y = -winScroll.scrollTop;
 
   if (getComputedStyle(body || html).direction === 'rtl') {
-    x += Math.max(html.clientWidth, body ? body.clientWidth : 0) - width;
+    x += max(html.clientWidth, body ? body.clientWidth : 0) - width;
   }
 
   return {
@@ -991,11 +1101,11 @@ function isScrollParent(element) {
 
 function getScrollParent(node) {
   if (['html', 'body', '#document'].indexOf(getNodeName(node)) >= 0) {
-    // $FlowFixMe: assume body is always available
+    // $FlowFixMe[incompatible-return]: assume body is always available
     return node.ownerDocument.body;
   }
 
-  if (isHTMLElement$1(node) && isScrollParent(node)) {
+  if (isHTMLElement(node) && isScrollParent(node)) {
     return node;
   }
 
@@ -1005,26 +1115,28 @@ function getScrollParent(node) {
 /*
 given a DOM element, return the list of all scroll parents, up the list of ancesors
 until we get to the top window object. This list is what we attach scroll listeners
-to, because if any of these parent elements scroll, we'll need to re-calculate the 
+to, because if any of these parent elements scroll, we'll need to re-calculate the
 reference element's position.
 */
 
 function listScrollParents(element, list) {
+  var _element$ownerDocumen;
+
   if (list === void 0) {
     list = [];
   }
 
   var scrollParent = getScrollParent(element);
-  var isBody = getNodeName(scrollParent) === 'body';
+  var isBody = scrollParent === ((_element$ownerDocumen = element.ownerDocument) == null ? void 0 : _element$ownerDocumen.body);
   var win = getWindow(scrollParent);
   var target = isBody ? [win].concat(win.visualViewport || [], isScrollParent(scrollParent) ? scrollParent : []) : scrollParent;
   var updatedList = list.concat(target);
-  return isBody ? updatedList : // $FlowFixMe: isBody tells us target will be an HTMLElement here
+  return isBody ? updatedList : // $FlowFixMe[incompatible-call]: isBody tells us target will be an HTMLElement here
   updatedList.concat(listScrollParents(getParentNode(target)));
 }
 
 function rectToClientRect(rect) {
-  return Object.assign(Object.assign({}, rect), {}, {
+  return Object.assign({}, rect, {
     left: rect.x,
     top: rect.y,
     right: rect.x + rect.width,
@@ -1046,7 +1158,7 @@ function getInnerBoundingClientRect(element) {
 }
 
 function getClientRectFromMixedType(element, clippingParent) {
-  return clippingParent === viewport ? rectToClientRect(getViewportRect(element)) : isHTMLElement$1(clippingParent) ? getInnerBoundingClientRect(clippingParent) : rectToClientRect(getDocumentRect(getDocumentElement(element)));
+  return clippingParent === viewport ? rectToClientRect(getViewportRect(element)) : isElement(clippingParent) ? getInnerBoundingClientRect(clippingParent) : rectToClientRect(getDocumentRect(getDocumentElement(element)));
 } // A "clipping parent" is an overflowable container with the characteristic of
 // clipping (or hiding) overflowing elements with a position different from
 // `initial`
@@ -1055,15 +1167,15 @@ function getClientRectFromMixedType(element, clippingParent) {
 function getClippingParents(element) {
   var clippingParents = listScrollParents(getParentNode(element));
   var canEscapeClipping = ['absolute', 'fixed'].indexOf(getComputedStyle(element).position) >= 0;
-  var clipperElement = canEscapeClipping && isHTMLElement$1(element) ? getOffsetParent(element) : element;
+  var clipperElement = canEscapeClipping && isHTMLElement(element) ? getOffsetParent(element) : element;
 
-  if (!isElement$1(clipperElement)) {
+  if (!isElement(clipperElement)) {
     return [];
-  } // $FlowFixMe: https://github.com/facebook/flow/issues/1414
+  } // $FlowFixMe[incompatible-return]: https://github.com/facebook/flow/issues/1414
 
 
   return clippingParents.filter(function (clippingParent) {
-    return isElement$1(clippingParent) && contains(clippingParent, clipperElement) && getNodeName(clippingParent) !== 'body';
+    return isElement(clippingParent) && contains(clippingParent, clipperElement) && getNodeName(clippingParent) !== 'body';
   });
 } // Gets the maximum area that the element is visible in due to any number of
 // clipping parents
@@ -1075,10 +1187,10 @@ function getClippingRect(element, boundary, rootBoundary) {
   var firstClippingParent = clippingParents[0];
   var clippingRect = clippingParents.reduce(function (accRect, clippingParent) {
     var rect = getClientRectFromMixedType(element, clippingParent);
-    accRect.top = Math.max(rect.top, accRect.top);
-    accRect.right = Math.min(rect.right, accRect.right);
-    accRect.bottom = Math.min(rect.bottom, accRect.bottom);
-    accRect.left = Math.max(rect.left, accRect.left);
+    accRect.top = max(rect.top, accRect.top);
+    accRect.right = min(rect.right, accRect.right);
+    accRect.bottom = min(rect.bottom, accRect.bottom);
+    accRect.left = max(rect.left, accRect.left);
     return accRect;
   }, getClientRectFromMixedType(element, firstClippingParent));
   clippingRect.width = clippingRect.right - clippingRect.left;
@@ -1086,10 +1198,6 @@ function getClippingRect(element, boundary, rootBoundary) {
   clippingRect.x = clippingRect.left;
   clippingRect.y = clippingRect.top;
   return clippingRect;
-}
-
-function getVariation(placement) {
-  return placement.split('-')[1];
 }
 
 function computeOffsets(_ref) {
@@ -1145,11 +1253,11 @@ function computeOffsets(_ref) {
 
     switch (variation) {
       case start:
-        offsets[mainAxis] = Math.floor(offsets[mainAxis]) - Math.floor(reference[len] / 2 - element[len] / 2);
+        offsets[mainAxis] = offsets[mainAxis] - (reference[len] / 2 - element[len] / 2);
         break;
 
       case end:
-        offsets[mainAxis] = Math.floor(offsets[mainAxis]) + Math.ceil(reference[len] / 2 - element[len] / 2);
+        offsets[mainAxis] = offsets[mainAxis] + (reference[len] / 2 - element[len] / 2);
         break;
     }
   }
@@ -1177,18 +1285,17 @@ function detectOverflow(state, options) {
       padding = _options$padding === void 0 ? 0 : _options$padding;
   var paddingObject = mergePaddingObject(typeof padding !== 'number' ? padding : expandToHashMap(padding, basePlacements));
   var altContext = elementContext === popper ? reference : popper;
-  var referenceElement = state.elements.reference;
   var popperRect = state.rects.popper;
   var element = state.elements[altBoundary ? altContext : elementContext];
-  var clippingClientRect = getClippingRect(isElement$1(element) ? element : element.contextElement || getDocumentElement(state.elements.popper), boundary, rootBoundary);
-  var referenceClientRect = getBoundingClientRect(referenceElement);
+  var clippingClientRect = getClippingRect(isElement(element) ? element : element.contextElement || getDocumentElement(state.elements.popper), boundary, rootBoundary);
+  var referenceClientRect = getBoundingClientRect(state.elements.reference);
   var popperOffsets = computeOffsets({
     reference: referenceClientRect,
     element: popperRect,
     strategy: 'absolute',
     placement: placement
   });
-  var popperClientRect = rectToClientRect(Object.assign(Object.assign({}, popperRect), popperOffsets));
+  var popperClientRect = rectToClientRect(Object.assign({}, popperRect, popperOffsets));
   var elementClientRect = elementContext === popper ? popperClientRect : referenceClientRect; // positive = overflowing the clipping rect
   // 0 or negative = within the clipping rect
 
@@ -1212,10 +1319,6 @@ function detectOverflow(state, options) {
   return overflowOffsets;
 }
 
-/*:: type OverflowsMap = { [ComputedPlacement]: number }; */
-
-/*;; type OverflowsMap = { [key in ComputedPlacement]: number }; */
-
 function computeAutoPlacement(state, options) {
   if (options === void 0) {
     options = {};
@@ -1232,15 +1335,14 @@ function computeAutoPlacement(state, options) {
   var variation = getVariation(placement);
   var placements$1 = variation ? flipVariations ? variationPlacements : variationPlacements.filter(function (placement) {
     return getVariation(placement) === variation;
-  }) : basePlacements; // $FlowFixMe
-
+  }) : basePlacements;
   var allowedPlacements = placements$1.filter(function (placement) {
     return allowedAutoPlacements.indexOf(placement) >= 0;
   });
 
   if (allowedPlacements.length === 0) {
     allowedPlacements = placements$1;
-  } // $FlowFixMe: Flow seems to have problems with two array unions...
+  } // $FlowFixMe[incompatible-type]: Flow seems to have problems with two array unions...
 
 
   var overflows = allowedPlacements.reduce(function (acc, placement) {
@@ -1441,7 +1543,7 @@ function hide(_ref) {
     isReferenceHidden: isReferenceHidden,
     hasPopperEscaped: hasPopperEscaped
   };
-  state.attributes.popper = Object.assign(Object.assign({}, state.attributes.popper), {}, {
+  state.attributes.popper = Object.assign({}, state.attributes.popper, {
     'data-popper-reference-hidden': isReferenceHidden,
     'data-popper-escaped': hasPopperEscaped
   });
@@ -1460,7 +1562,7 @@ function distanceAndSkiddingToXY(placement, rects, offset) {
   var basePlacement = getBasePlacement(placement);
   var invertDistance = [left, top].indexOf(basePlacement) >= 0 ? -1 : 1;
 
-  var _ref = typeof offset === 'function' ? offset(Object.assign(Object.assign({}, rects), {}, {
+  var _ref = typeof offset === 'function' ? offset(Object.assign({}, rects, {
     placement: placement
   })) : offset,
       skidding = _ref[0],
@@ -1566,9 +1668,17 @@ function preventOverflow(_ref) {
   var popperOffsets = state.modifiersData.popperOffsets;
   var referenceRect = state.rects.reference;
   var popperRect = state.rects.popper;
-  var tetherOffsetValue = typeof tetherOffset === 'function' ? tetherOffset(Object.assign(Object.assign({}, state.rects), {}, {
+  var tetherOffsetValue = typeof tetherOffset === 'function' ? tetherOffset(Object.assign({}, state.rects, {
     placement: state.placement
   })) : tetherOffset;
+  var normalizedTetherOffsetValue = typeof tetherOffsetValue === 'number' ? {
+    mainAxis: tetherOffsetValue,
+    altAxis: tetherOffsetValue
+  } : Object.assign({
+    mainAxis: 0,
+    altAxis: 0
+  }, tetherOffsetValue);
+  var offsetModifierState = state.modifiersData.offset ? state.modifiersData.offset[state.placement] : null;
   var data = {
     x: 0,
     y: 0
@@ -1579,12 +1689,14 @@ function preventOverflow(_ref) {
   }
 
   if (checkMainAxis) {
+    var _offsetModifierState$;
+
     var mainSide = mainAxis === 'y' ? top : left;
     var altSide = mainAxis === 'y' ? bottom : right;
     var len = mainAxis === 'y' ? 'height' : 'width';
     var offset = popperOffsets[mainAxis];
-    var min = popperOffsets[mainAxis] + overflow[mainSide];
-    var max = popperOffsets[mainAxis] - overflow[altSide];
+    var min$1 = offset + overflow[mainSide];
+    var max$1 = offset - overflow[altSide];
     var additive = tether ? -popperRect[len] / 2 : 0;
     var minLen = variation === start ? referenceRect[len] : popperRect[len];
     var maxLen = variation === start ? -popperRect[len] : -referenceRect[len]; // We need to include the arrow in the calculation so the arrow doesn't go
@@ -1604,30 +1716,42 @@ function preventOverflow(_ref) {
     // width or height)
 
     var arrowLen = within(0, referenceRect[len], arrowRect[len]);
-    var minOffset = isBasePlacement ? referenceRect[len] / 2 - additive - arrowLen - arrowPaddingMin - tetherOffsetValue : minLen - arrowLen - arrowPaddingMin - tetherOffsetValue;
-    var maxOffset = isBasePlacement ? -referenceRect[len] / 2 + additive + arrowLen + arrowPaddingMax + tetherOffsetValue : maxLen + arrowLen + arrowPaddingMax + tetherOffsetValue;
+    var minOffset = isBasePlacement ? referenceRect[len] / 2 - additive - arrowLen - arrowPaddingMin - normalizedTetherOffsetValue.mainAxis : minLen - arrowLen - arrowPaddingMin - normalizedTetherOffsetValue.mainAxis;
+    var maxOffset = isBasePlacement ? -referenceRect[len] / 2 + additive + arrowLen + arrowPaddingMax + normalizedTetherOffsetValue.mainAxis : maxLen + arrowLen + arrowPaddingMax + normalizedTetherOffsetValue.mainAxis;
     var arrowOffsetParent = state.elements.arrow && getOffsetParent(state.elements.arrow);
     var clientOffset = arrowOffsetParent ? mainAxis === 'y' ? arrowOffsetParent.clientTop || 0 : arrowOffsetParent.clientLeft || 0 : 0;
-    var offsetModifierValue = state.modifiersData.offset ? state.modifiersData.offset[state.placement][mainAxis] : 0;
-    var tetherMin = popperOffsets[mainAxis] + minOffset - offsetModifierValue - clientOffset;
-    var tetherMax = popperOffsets[mainAxis] + maxOffset - offsetModifierValue;
-    var preventedOffset = within(tether ? Math.min(min, tetherMin) : min, offset, tether ? Math.max(max, tetherMax) : max);
+    var offsetModifierValue = (_offsetModifierState$ = offsetModifierState == null ? void 0 : offsetModifierState[mainAxis]) != null ? _offsetModifierState$ : 0;
+    var tetherMin = offset + minOffset - offsetModifierValue - clientOffset;
+    var tetherMax = offset + maxOffset - offsetModifierValue;
+    var preventedOffset = within(tether ? min(min$1, tetherMin) : min$1, offset, tether ? max(max$1, tetherMax) : max$1);
     popperOffsets[mainAxis] = preventedOffset;
     data[mainAxis] = preventedOffset - offset;
   }
 
   if (checkAltAxis) {
+    var _offsetModifierState$2;
+
     var _mainSide = mainAxis === 'x' ? top : left;
 
     var _altSide = mainAxis === 'x' ? bottom : right;
 
     var _offset = popperOffsets[altAxis];
 
+    var _len = altAxis === 'y' ? 'height' : 'width';
+
     var _min = _offset + overflow[_mainSide];
 
     var _max = _offset - overflow[_altSide];
 
-    var _preventedOffset = within(_min, _offset, _max);
+    var isOriginSide = [top, left].indexOf(basePlacement) !== -1;
+
+    var _offsetModifierValue = (_offsetModifierState$2 = offsetModifierState == null ? void 0 : offsetModifierState[altAxis]) != null ? _offsetModifierState$2 : 0;
+
+    var _tetherMin = isOriginSide ? _min : _offset - referenceRect[_len] - popperRect[_len] - _offsetModifierValue + normalizedTetherOffsetValue.altAxis;
+
+    var _tetherMax = isOriginSide ? _offset + referenceRect[_len] + popperRect[_len] - _offsetModifierValue - normalizedTetherOffsetValue.altAxis : _max;
+
+    var _preventedOffset = tether && isOriginSide ? withinMaxClamp(_tetherMin, _offset, _tetherMax) : within(tether ? _tetherMin : _min, _offset, tether ? _tetherMax : _max);
 
     popperOffsets[altAxis] = _preventedOffset;
     data[altAxis] = _preventedOffset - _offset;
@@ -1653,23 +1777,31 @@ function getHTMLElementScroll(element) {
 }
 
 function getNodeScroll(node) {
-  if (node === getWindow(node) || !isHTMLElement$1(node)) {
+  if (node === getWindow(node) || !isHTMLElement(node)) {
     return getWindowScroll(node);
   } else {
     return getHTMLElementScroll(node);
   }
 }
 
+function isElementScaled(element) {
+  var rect = element.getBoundingClientRect();
+  var scaleX = round(rect.width) / element.offsetWidth || 1;
+  var scaleY = round(rect.height) / element.offsetHeight || 1;
+  return scaleX !== 1 || scaleY !== 1;
+} // Returns the composite rect of an element relative to its offsetParent.
 // Composite means it takes into account transforms as well as layout.
+
 
 function getCompositeRect(elementOrVirtualElement, offsetParent, isFixed) {
   if (isFixed === void 0) {
     isFixed = false;
   }
 
+  var isOffsetParentAnElement = isHTMLElement(offsetParent);
+  var offsetParentIsScaled = isHTMLElement(offsetParent) && isElementScaled(offsetParent);
   var documentElement = getDocumentElement(offsetParent);
-  var rect = getBoundingClientRect(elementOrVirtualElement);
-  var isOffsetParentAnElement = isHTMLElement$1(offsetParent);
+  var rect = getBoundingClientRect(elementOrVirtualElement, offsetParentIsScaled);
   var scroll = {
     scrollLeft: 0,
     scrollTop: 0
@@ -1685,8 +1817,8 @@ function getCompositeRect(elementOrVirtualElement, offsetParent, isFixed) {
       scroll = getNodeScroll(offsetParent);
     }
 
-    if (isHTMLElement$1(offsetParent)) {
-      offsets = getBoundingClientRect(offsetParent);
+    if (isHTMLElement(offsetParent)) {
+      offsets = getBoundingClientRect(offsetParent, true);
       offsets.x += offsetParent.clientLeft;
       offsets.y += offsetParent.clientTop;
     } else if (documentElement) {
@@ -1764,9 +1896,9 @@ function debounce(fn) {
 function mergeByName(modifiers) {
   var merged = modifiers.reduce(function (merged, current) {
     var existing = merged[current.name];
-    merged[current.name] = existing ? Object.assign(Object.assign(Object.assign({}, existing), current), {}, {
-      options: Object.assign(Object.assign({}, existing.options), current.options),
-      data: Object.assign(Object.assign({}, existing.data), current.data)
+    merged[current.name] = existing ? Object.assign({}, existing, current, {
+      options: Object.assign({}, existing.options, current.options),
+      data: Object.assign({}, existing.data, current.data)
     }) : current;
     return merged;
   }, {}); // IE11 does not support Object.values
@@ -1810,7 +1942,7 @@ function popperGenerator(generatorOptions) {
     var state = {
       placement: 'bottom',
       orderedModifiers: [],
-      options: Object.assign(Object.assign({}, DEFAULT_OPTIONS), defaultOptions),
+      options: Object.assign({}, DEFAULT_OPTIONS, defaultOptions),
       modifiersData: {},
       elements: {
         reference: reference,
@@ -1823,11 +1955,12 @@ function popperGenerator(generatorOptions) {
     var isDestroyed = false;
     var instance = {
       state: state,
-      setOptions: function setOptions(options) {
+      setOptions: function setOptions(setOptionsAction) {
+        var options = typeof setOptionsAction === 'function' ? setOptionsAction(state.options) : setOptionsAction;
         cleanupModifierEffects();
-        state.options = Object.assign(Object.assign(Object.assign({}, defaultOptions), state.options), options);
+        state.options = Object.assign({}, defaultOptions, state.options, options);
         state.scrollParents = {
-          reference: isElement$1(reference) ? listScrollParents(reference) : reference.contextElement ? listScrollParents(reference.contextElement) : [],
+          reference: isElement(reference) ? listScrollParents(reference) : reference.contextElement ? listScrollParents(reference.contextElement) : [],
           popper: listScrollParents(popper)
         }; // Orders the modifiers based on their dependencies and `phase`
         // properties
@@ -1973,7 +2106,7 @@ var createPopper = /*#__PURE__*/popperGenerator({
 }); // eslint-disable-next-line import/no-unused-modules
 
 function _extends() {
-  _extends = Object.assign || function (target) {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
     for (var i = 1; i < arguments.length; i++) {
       var source = arguments[i];
 
@@ -1986,7 +2119,6 @@ function _extends() {
 
     return target;
   };
-
   return _extends.apply(this, arguments);
 }
 
@@ -1994,9 +2126,10 @@ function _getCenteredStylePopperModifier() {
   return [{
     name: 'applyStyles',
 
-    fn({
-      state
-    }) {
+    fn(_ref) {
+      let {
+        state
+      } = _ref;
       Object.keys(state.elements).forEach(name => {
         if (name !== 'popper') {
           return;
@@ -2081,9 +2214,9 @@ function normalizePrefix(prefix) {
   return prefix.charAt(prefix.length - 1) !== '-' ? `${prefix}-` : prefix;
 }
 /**
- * Checks if options.attachTo.element is a string, and if so, tries to find the element
+ * Resolves attachTo options, converting element option value to a qualified HTMLElement.
  * @param {Step} step The step instance
- * @returns {{element, on}}
+ * @returns {{}|{element, on}}
  * `element` is a qualified HTML Element
  * `on` is a string position value
  */
@@ -2092,11 +2225,16 @@ function parseAttachTo(step) {
   const options = step.options.attachTo || {};
   const returnOpts = Object.assign({}, options);
 
-  if (isString(options.element)) {
+  if (isFunction(returnOpts.element)) {
+    // Bind the callback to step so that it has access to the object, to enable running additional logic
+    returnOpts.element = returnOpts.element.call(step);
+  }
+
+  if (isString(returnOpts.element)) {
     // Can't override the element in user opts reference because we can't
     // guarantee that the element will exist in the future.
     try {
-      returnOpts.element = document.querySelector(options.element);
+      returnOpts.element = document.querySelector(returnOpts.element);
     } catch (e) {// TODO
     }
 
@@ -2106,6 +2244,20 @@ function parseAttachTo(step) {
   }
 
   return returnOpts;
+}
+/**
+ * Checks if the step should be centered or not. Does not trigger attachTo.element evaluation, making it a pure
+ * alternative for the deprecated step.isCentered() method.
+ * @param resolvedAttachToOptions
+ * @returns {boolean}
+ */
+
+function shouldCenterStep(resolvedAttachToOptions) {
+  if (resolvedAttachToOptions === undefined || resolvedAttachToOptions === null) {
+    return true;
+  }
+
+  return !resolvedAttachToOptions.element || !resolvedAttachToOptions.on;
 }
 /**
  * Determines options for the tooltip and initializes
@@ -2118,11 +2270,12 @@ function setupTooltip(step) {
     step.tooltip.destroy();
   }
 
-  const attachToOptions = parseAttachTo(step);
+  const attachToOptions = step._getResolvedAttachToOptions();
+
   let target = attachToOptions.element;
   const popperOptions = getPopperOptions(attachToOptions, step);
 
-  if (step.isCentered()) {
+  if (shouldCenterStep(attachToOptions)) {
     target = document.body;
     const content = step.shepherdElementComponent.getElement();
     content.classList.add('shepherd-centered');
@@ -2158,7 +2311,8 @@ function getPopperOptions(attachToOptions, step) {
     modifiers: [{
       name: 'preventOverflow',
       options: {
-        altAxis: true
+        altAxis: true,
+        tether: false
       }
     }, {
       name: 'focusAfterRender',
@@ -2177,7 +2331,7 @@ function getPopperOptions(attachToOptions, step) {
     strategy: 'absolute'
   };
 
-  if (step.isCentered()) {
+  if (shouldCenterStep(attachToOptions)) {
     popperOptions = makeCenteredPopper(step);
   } else {
     popperOptions.placement = attachToOptions.on;
@@ -2323,7 +2477,7 @@ function set_current_component(component) {
 }
 
 function get_current_component() {
-  if (!current_component) throw new Error(`Function called outside component initialization`);
+  if (!current_component) throw new Error('Function called outside component initialization');
   return current_component;
 }
 
@@ -2352,25 +2506,44 @@ function schedule_update() {
 function add_render_callback(fn) {
   render_callbacks.push(fn);
 }
+// 1. All beforeUpdate callbacks, in order: parents before children
+// 2. All bind:this callbacks, in reverse order: children before parents.
+// 3. All afterUpdate callbacks, in order: parents before children. EXCEPT
+//    for afterUpdates called during the initial onMount, which are called in
+//    reverse order: children before parents.
+// Since callbacks might update component values, which could trigger another
+// call to flush(), the following steps guard against this:
+// 1. During beforeUpdate, any updated components will be added to the
+//    dirty_components array and will cause a reentrant call to flush(). Because
+//    the flush index is kept outside the function, the reentrant call will pick
+//    up where the earlier call left off and go through all dirty components. The
+//    current_component value is saved and restored so that the reentrant call will
+//    not interfere with the "parent" flush() call.
+// 2. bind:this callbacks cannot trigger new flush() calls.
+// 3. During afterUpdate, any updated components will NOT have their afterUpdate
+//    callback called a second time; the seen_callbacks set, outside the flush()
+//    function, guarantees this behavior.
 
-let flushing = false;
+
 const seen_callbacks = new Set();
+let flushidx = 0; // Do *not* move this inside the flush() function
 
 function flush() {
-  if (flushing) return;
-  flushing = true;
+  const saved_component = current_component;
 
   do {
     // first, call beforeUpdate functions
     // and update components
-    for (let i = 0; i < dirty_components.length; i += 1) {
-      const component = dirty_components[i];
+    while (flushidx < dirty_components.length) {
+      const component = dirty_components[flushidx];
+      flushidx++;
       set_current_component(component);
       update(component.$$);
     }
 
     set_current_component(null);
     dirty_components.length = 0;
+    flushidx = 0;
 
     while (binding_callbacks.length) binding_callbacks.pop()(); // then, once components are updated, call
     // afterUpdate functions. This may cause
@@ -2395,8 +2568,8 @@ function flush() {
   }
 
   update_scheduled = false;
-  flushing = false;
   seen_callbacks.clear();
+  set_current_component(saved_component);
 }
 
 function update($$) {
@@ -2496,28 +2669,32 @@ function create_component(block) {
   block && block.c();
 }
 
-function mount_component(component, target, anchor) {
+function mount_component(component, target, anchor, customElement) {
   const {
     fragment,
     on_mount,
     on_destroy,
     after_update
   } = component.$$;
-  fragment && fragment.m(target, anchor); // onMount happens before the initial afterUpdate
+  fragment && fragment.m(target, anchor);
 
-  add_render_callback(() => {
-    const new_on_destroy = on_mount.map(run).filter(is_function);
+  if (!customElement) {
+    // onMount happens before the initial afterUpdate
+    add_render_callback(() => {
+      const new_on_destroy = on_mount.map(run).filter(is_function);
 
-    if (on_destroy) {
-      on_destroy.push(...new_on_destroy);
-    } else {
-      // Edge case - component was destroyed immediately,
-      // most likely as a result of a binding initialising
-      run_all(new_on_destroy);
-    }
+      if (on_destroy) {
+        on_destroy.push(...new_on_destroy);
+      } else {
+        // Edge case - component was destroyed immediately,
+        // most likely as a result of a binding initialising
+        run_all(new_on_destroy);
+      }
 
-    component.$$.on_mount = [];
-  });
+      component.$$.on_mount = [];
+    });
+  }
+
   after_update.forEach(add_render_callback);
 }
 
@@ -2544,10 +2721,13 @@ function make_dirty(component, i) {
   component.$$.dirty[i / 31 | 0] |= 1 << i % 31;
 }
 
-function init(component, options, instance, create_fragment, not_equal, props, dirty = [-1]) {
+function init(component, options, instance, create_fragment, not_equal, props, append_styles, dirty) {
+  if (dirty === void 0) {
+    dirty = [-1];
+  }
+
   const parent_component = current_component;
   set_current_component(component);
-  const prop_values = options.props || {};
   const $$ = component.$$ = {
     fragment: null,
     ctx: null,
@@ -2559,17 +2739,20 @@ function init(component, options, instance, create_fragment, not_equal, props, d
     // lifecycle
     on_mount: [],
     on_destroy: [],
+    on_disconnect: [],
     before_update: [],
     after_update: [],
-    context: new Map(parent_component ? parent_component.$$.context : []),
+    context: new Map(options.context || (parent_component ? parent_component.$$.context : [])),
     // everything else
     callbacks: blank_object(),
     dirty,
-    skip_bound: false
+    skip_bound: false,
+    root: options.target || parent_component.$$.root
   };
+  append_styles && append_styles($$.root);
   let ready = false;
-  $$.ctx = instance ? instance(component, prop_values, (i, ret, ...rest) => {
-    const value = rest.length ? rest[0] : ret;
+  $$.ctx = instance ? instance(component, options.props || {}, function (i, ret) {
+    const value = (arguments.length <= 2 ? 0 : arguments.length - 2) ? arguments.length <= 2 ? undefined : arguments[2] : ret;
 
     if ($$.ctx && not_equal($$.ctx[i], $$.ctx[i] = value)) {
       if (!$$.skip_bound && $$.bound[i]) $$.bound[i](value);
@@ -2596,12 +2779,16 @@ function init(component, options, instance, create_fragment, not_equal, props, d
     }
 
     if (options.intro) transition_in(component.$$.fragment);
-    mount_component(component, options.target, options.anchor);
+    mount_component(component, options.target, options.anchor, options.customElement);
     flush();
   }
 
   set_current_component(parent_component);
 }
+/**
+ * Base class for Svelte components. Used when dev=false.
+ */
+
 
 class SvelteComponent {
   $destroy() {
@@ -2628,9 +2815,9 @@ class SvelteComponent {
 
 }
 
-/* src/js/components/shepherd-button.svelte generated by Svelte v3.28.0 */
+/* src/js/components/shepherd-button.svelte generated by Svelte v3.48.0 */
 
-function create_fragment(ctx) {
+function create_fragment$8(ctx) {
   let button;
   let button_aria_label_value;
   let button_class_value;
@@ -2646,9 +2833,9 @@ function create_fragment(ctx) {
       ctx[3] : null);
       attr(button, "class", button_class_value = `${
       /*classes*/
-      ctx[1] || ""} shepherd-button ${
+      ctx[1] || ''} shepherd-button ${
       /*secondary*/
-      ctx[4] ? "shepherd-button-secondary" : ""}`);
+      ctx[4] ? 'shepherd-button-secondary' : ''}`);
       button.disabled =
       /*disabled*/
       ctx[2];
@@ -2673,7 +2860,8 @@ function create_fragment(ctx) {
       }
     },
 
-    p(new_ctx, [dirty]) {
+    p(new_ctx, _ref) {
+      let [dirty] = _ref;
       ctx = new_ctx;
       if (dirty &
       /*text*/
@@ -2695,9 +2883,9 @@ function create_fragment(ctx) {
       /*classes, secondary*/
       18 && button_class_value !== (button_class_value = `${
       /*classes*/
-      ctx[1] || ""} shepherd-button ${
+      ctx[1] || ''} shepherd-button ${
       /*secondary*/
-      ctx[4] ? "shepherd-button-secondary" : ""}`)) {
+      ctx[4] ? 'shepherd-button-secondary' : ''}`)) {
         attr(button, "class", button_class_value);
       }
 
@@ -2722,39 +2910,37 @@ function create_fragment(ctx) {
   };
 }
 
-function instance($$self, $$props, $$invalidate) {
+function instance$8($$self, $$props, $$invalidate) {
   let {
-    config
-  } = $$props,
-      {
+    config,
     step
   } = $$props;
   let action, classes, disabled, label, secondary, text;
 
-  function getDisabled(disabled) {
-    if (isFunction(disabled)) {
-      return disabled = disabled.call(step);
+  function getConfigOption(option) {
+    if (isFunction(option)) {
+      return option = option.call(step);
     }
 
-    return disabled;
+    return option;
   }
 
   $$self.$$set = $$props => {
-    if ("config" in $$props) $$invalidate(6, config = $$props.config);
-    if ("step" in $$props) $$invalidate(7, step = $$props.step);
+    if ('config' in $$props) $$invalidate(6, config = $$props.config);
+    if ('step' in $$props) $$invalidate(7, step = $$props.step);
   };
 
   $$self.$$.update = () => {
     if ($$self.$$.dirty &
     /*config, step*/
     192) {
-       {
+      {
         $$invalidate(0, action = config.action ? config.action.bind(step.tour) : null);
         $$invalidate(1, classes = config.classes);
-        $$invalidate(2, disabled = config.disabled ? getDisabled(config.disabled) : false);
-        $$invalidate(3, label = config.label);
+        $$invalidate(2, disabled = config.disabled ? getConfigOption(config.disabled) : false);
+        $$invalidate(3, label = config.label ? getConfigOption(config.label) : null);
         $$invalidate(4, secondary = config.secondary);
-        $$invalidate(5, text = config.text);
+        $$invalidate(5, text = config.text ? getConfigOption(config.text) : null);
       }
     }
   };
@@ -2765,7 +2951,7 @@ function instance($$self, $$props, $$invalidate) {
 class Shepherd_button extends SvelteComponent {
   constructor(options) {
     super();
-    init(this, options, instance, create_fragment, safe_not_equal, {
+    init(this, options, instance$8, create_fragment$8, safe_not_equal, {
       config: 6,
       step: 7
     });
@@ -2773,7 +2959,7 @@ class Shepherd_button extends SvelteComponent {
 
 }
 
-/* src/js/components/shepherd-footer.svelte generated by Svelte v3.28.0 */
+/* src/js/components/shepherd-footer.svelte generated by Svelte v3.48.0 */
 
 function get_each_context(ctx, list, i) {
   const child_ctx = ctx.slice();
@@ -2782,7 +2968,7 @@ function get_each_context(ctx, list, i) {
 } // (24:4) {#if buttons}
 
 
-function create_if_block(ctx) {
+function create_if_block$3(ctx) {
   let each_1_anchor;
   let current;
   let each_value =
@@ -2934,12 +3120,12 @@ function create_each_block(ctx) {
   };
 }
 
-function create_fragment$1(ctx) {
+function create_fragment$7(ctx) {
   let footer;
   let current;
   let if_block =
   /*buttons*/
-  ctx[1] && create_if_block(ctx);
+  ctx[1] && create_if_block$3(ctx);
   return {
     c() {
       footer = element("footer");
@@ -2953,7 +3139,9 @@ function create_fragment$1(ctx) {
       current = true;
     },
 
-    p(ctx, [dirty]) {
+    p(ctx, _ref) {
+      let [dirty] = _ref;
+
       if (
       /*buttons*/
       ctx[1]) {
@@ -2966,7 +3154,7 @@ function create_fragment$1(ctx) {
             transition_in(if_block, 1);
           }
         } else {
-          if_block = create_if_block(ctx);
+          if_block = create_if_block$3(ctx);
           if_block.c();
           transition_in(if_block, 1);
           if_block.m(footer, null);
@@ -2999,22 +3187,21 @@ function create_fragment$1(ctx) {
   };
 }
 
-function instance$1($$self, $$props, $$invalidate) {
+function instance$7($$self, $$props, $$invalidate) {
+  let buttons;
   let {
     step
   } = $$props;
 
   $$self.$$set = $$props => {
-    if ("step" in $$props) $$invalidate(0, step = $$props.step);
+    if ('step' in $$props) $$invalidate(0, step = $$props.step);
   };
-
-  let buttons;
 
   $$self.$$.update = () => {
     if ($$self.$$.dirty &
     /*step*/
     1) {
-       $$invalidate(1, buttons = step.options.buttons);
+      $$invalidate(1, buttons = step.options.buttons);
     }
   };
 
@@ -3024,16 +3211,16 @@ function instance$1($$self, $$props, $$invalidate) {
 class Shepherd_footer extends SvelteComponent {
   constructor(options) {
     super();
-    init(this, options, instance$1, create_fragment$1, safe_not_equal, {
+    init(this, options, instance$7, create_fragment$7, safe_not_equal, {
       step: 0
     });
   }
 
 }
 
-/* src/js/components/shepherd-cancel-icon.svelte generated by Svelte v3.28.0 */
+/* src/js/components/shepherd-cancel-icon.svelte generated by Svelte v3.48.0 */
 
-function create_fragment$2(ctx) {
+function create_fragment$6(ctx) {
   let button;
   let span;
   let button_aria_label_value;
@@ -3049,7 +3236,7 @@ function create_fragment$2(ctx) {
       /*cancelIcon*/
       ctx[0].label ?
       /*cancelIcon*/
-      ctx[0].label : "Close Tour");
+      ctx[0].label : 'Close Tour');
       attr(button, "class", "shepherd-cancel-icon");
       attr(button, "type", "button");
     },
@@ -3066,14 +3253,16 @@ function create_fragment$2(ctx) {
       }
     },
 
-    p(ctx, [dirty]) {
+    p(ctx, _ref) {
+      let [dirty] = _ref;
+
       if (dirty &
       /*cancelIcon*/
       1 && button_aria_label_value !== (button_aria_label_value =
       /*cancelIcon*/
       ctx[0].label ?
       /*cancelIcon*/
-      ctx[0].label : "Close Tour")) {
+      ctx[0].label : 'Close Tour')) {
         attr(button, "aria-label", button_aria_label_value);
       }
     },
@@ -3090,11 +3279,9 @@ function create_fragment$2(ctx) {
   };
 }
 
-function instance$2($$self, $$props, $$invalidate) {
+function instance$6($$self, $$props, $$invalidate) {
   let {
-    cancelIcon
-  } = $$props,
-      {
+    cancelIcon,
     step
   } = $$props;
   /**
@@ -3107,8 +3294,8 @@ function instance$2($$self, $$props, $$invalidate) {
   };
 
   $$self.$$set = $$props => {
-    if ("cancelIcon" in $$props) $$invalidate(0, cancelIcon = $$props.cancelIcon);
-    if ("step" in $$props) $$invalidate(2, step = $$props.step);
+    if ('cancelIcon' in $$props) $$invalidate(0, cancelIcon = $$props.cancelIcon);
+    if ('step' in $$props) $$invalidate(2, step = $$props.step);
   };
 
   return [cancelIcon, handleCancelClick, step];
@@ -3117,7 +3304,7 @@ function instance$2($$self, $$props, $$invalidate) {
 class Shepherd_cancel_icon extends SvelteComponent {
   constructor(options) {
     super();
-    init(this, options, instance$2, create_fragment$2, safe_not_equal, {
+    init(this, options, instance$6, create_fragment$6, safe_not_equal, {
       cancelIcon: 0,
       step: 2
     });
@@ -3125,9 +3312,9 @@ class Shepherd_cancel_icon extends SvelteComponent {
 
 }
 
-/* src/js/components/shepherd-title.svelte generated by Svelte v3.28.0 */
+/* src/js/components/shepherd-title.svelte generated by Svelte v3.48.0 */
 
-function create_fragment$3(ctx) {
+function create_fragment$5(ctx) {
   let h3;
   return {
     c() {
@@ -3145,7 +3332,9 @@ function create_fragment$3(ctx) {
       ctx[3](h3);
     },
 
-    p(ctx, [dirty]) {
+    p(ctx, _ref) {
+      let [dirty] = _ref;
+
       if (dirty &
       /*labelId*/
       2) {
@@ -3168,14 +3357,10 @@ function create_fragment$3(ctx) {
   };
 }
 
-function instance$3($$self, $$props, $$invalidate) {
+function instance$5($$self, $$props, $$invalidate) {
   let {
-    labelId
-  } = $$props,
-      {
-    element
-  } = $$props,
-      {
+    labelId,
+    element,
     title
   } = $$props;
   afterUpdate(() => {
@@ -3187,16 +3372,16 @@ function instance$3($$self, $$props, $$invalidate) {
   });
 
   function h3_binding($$value) {
-    binding_callbacks[$$value ? "unshift" : "push"](() => {
+    binding_callbacks[$$value ? 'unshift' : 'push'](() => {
       element = $$value;
       $$invalidate(0, element);
     });
   }
 
   $$self.$$set = $$props => {
-    if ("labelId" in $$props) $$invalidate(1, labelId = $$props.labelId);
-    if ("element" in $$props) $$invalidate(0, element = $$props.element);
-    if ("title" in $$props) $$invalidate(2, title = $$props.title);
+    if ('labelId' in $$props) $$invalidate(1, labelId = $$props.labelId);
+    if ('element' in $$props) $$invalidate(0, element = $$props.element);
+    if ('title' in $$props) $$invalidate(2, title = $$props.title);
   };
 
   return [element, labelId, title, h3_binding];
@@ -3205,7 +3390,7 @@ function instance$3($$self, $$props, $$invalidate) {
 class Shepherd_title extends SvelteComponent {
   constructor(options) {
     super();
-    init(this, options, instance$3, create_fragment$3, safe_not_equal, {
+    init(this, options, instance$5, create_fragment$5, safe_not_equal, {
       labelId: 1,
       element: 0,
       title: 2
@@ -3214,9 +3399,9 @@ class Shepherd_title extends SvelteComponent {
 
 }
 
-/* src/js/components/shepherd-header.svelte generated by Svelte v3.28.0 */
+/* src/js/components/shepherd-header.svelte generated by Svelte v3.48.0 */
 
-function create_if_block_1(ctx) {
+function create_if_block_1$1(ctx) {
   let shepherdtitle;
   let current;
   shepherdtitle = new Shepherd_title({
@@ -3273,7 +3458,7 @@ function create_if_block_1(ctx) {
 } // (39:4) {#if cancelIcon && cancelIcon.enabled}
 
 
-function create_if_block$1(ctx) {
+function create_if_block$2(ctx) {
   let shepherdcancelicon;
   let current;
   shepherdcancelicon = new Shepherd_cancel_icon({
@@ -3335,12 +3520,12 @@ function create_fragment$4(ctx) {
   let current;
   let if_block0 =
   /*title*/
-  ctx[2] && create_if_block_1(ctx);
+  ctx[2] && create_if_block_1$1(ctx);
   let if_block1 =
   /*cancelIcon*/
   ctx[3] &&
   /*cancelIcon*/
-  ctx[3].enabled && create_if_block$1(ctx);
+  ctx[3].enabled && create_if_block$2(ctx);
   return {
     c() {
       header = element("header");
@@ -3358,7 +3543,9 @@ function create_fragment$4(ctx) {
       current = true;
     },
 
-    p(ctx, [dirty]) {
+    p(ctx, _ref) {
+      let [dirty] = _ref;
+
       if (
       /*title*/
       ctx[2]) {
@@ -3371,7 +3558,7 @@ function create_fragment$4(ctx) {
             transition_in(if_block0, 1);
           }
         } else {
-          if_block0 = create_if_block_1(ctx);
+          if_block0 = create_if_block_1$1(ctx);
           if_block0.c();
           transition_in(if_block0, 1);
           if_block0.m(header, t);
@@ -3398,7 +3585,7 @@ function create_fragment$4(ctx) {
             transition_in(if_block1, 1);
           }
         } else {
-          if_block1 = create_if_block$1(ctx);
+          if_block1 = create_if_block$2(ctx);
           if_block1.c();
           transition_in(if_block1, 1);
           if_block1.m(header, null);
@@ -3436,23 +3623,21 @@ function create_fragment$4(ctx) {
 
 function instance$4($$self, $$props, $$invalidate) {
   let {
-    labelId
-  } = $$props,
-      {
+    labelId,
     step
   } = $$props;
   let title, cancelIcon;
 
   $$self.$$set = $$props => {
-    if ("labelId" in $$props) $$invalidate(0, labelId = $$props.labelId);
-    if ("step" in $$props) $$invalidate(1, step = $$props.step);
+    if ('labelId' in $$props) $$invalidate(0, labelId = $$props.labelId);
+    if ('step' in $$props) $$invalidate(1, step = $$props.step);
   };
 
   $$self.$$.update = () => {
     if ($$self.$$.dirty &
     /*step*/
     2) {
-       {
+      {
         $$invalidate(2, title = step.options.title);
         $$invalidate(3, cancelIcon = step.options.cancelIcon);
       }
@@ -3473,9 +3658,9 @@ class Shepherd_header extends SvelteComponent {
 
 }
 
-/* src/js/components/shepherd-text.svelte generated by Svelte v3.28.0 */
+/* src/js/components/shepherd-text.svelte generated by Svelte v3.48.0 */
 
-function create_fragment$5(ctx) {
+function create_fragment$3(ctx) {
   let div;
   return {
     c() {
@@ -3493,7 +3678,9 @@ function create_fragment$5(ctx) {
       ctx[3](div);
     },
 
-    p(ctx, [dirty]) {
+    p(ctx, _ref) {
+      let [dirty] = _ref;
+
       if (dirty &
       /*descriptionId*/
       2) {
@@ -3516,14 +3703,10 @@ function create_fragment$5(ctx) {
   };
 }
 
-function instance$5($$self, $$props, $$invalidate) {
+function instance$3($$self, $$props, $$invalidate) {
   let {
-    descriptionId
-  } = $$props,
-      {
-    element
-  } = $$props,
-      {
+    descriptionId,
+    element,
     step
   } = $$props;
   afterUpdate(() => {
@@ -3535,7 +3718,7 @@ function instance$5($$self, $$props, $$invalidate) {
       text = text.call(step);
     }
 
-    if (isHTMLElement(text)) {
+    if (isHTMLElement$1(text)) {
       element.appendChild(text);
     } else {
       $$invalidate(0, element.innerHTML = text, element);
@@ -3543,16 +3726,16 @@ function instance$5($$self, $$props, $$invalidate) {
   });
 
   function div_binding($$value) {
-    binding_callbacks[$$value ? "unshift" : "push"](() => {
+    binding_callbacks[$$value ? 'unshift' : 'push'](() => {
       element = $$value;
       $$invalidate(0, element);
     });
   }
 
   $$self.$$set = $$props => {
-    if ("descriptionId" in $$props) $$invalidate(1, descriptionId = $$props.descriptionId);
-    if ("element" in $$props) $$invalidate(0, element = $$props.element);
-    if ("step" in $$props) $$invalidate(2, step = $$props.step);
+    if ('descriptionId' in $$props) $$invalidate(1, descriptionId = $$props.descriptionId);
+    if ('element' in $$props) $$invalidate(0, element = $$props.element);
+    if ('step' in $$props) $$invalidate(2, step = $$props.step);
   };
 
   return [element, descriptionId, step, div_binding];
@@ -3561,7 +3744,7 @@ function instance$5($$self, $$props, $$invalidate) {
 class Shepherd_text extends SvelteComponent {
   constructor(options) {
     super();
-    init(this, options, instance$5, create_fragment$5, safe_not_equal, {
+    init(this, options, instance$3, create_fragment$3, safe_not_equal, {
       descriptionId: 1,
       element: 0,
       step: 2
@@ -3570,7 +3753,7 @@ class Shepherd_text extends SvelteComponent {
 
 }
 
-/* src/js/components/shepherd-content.svelte generated by Svelte v3.28.0 */
+/* src/js/components/shepherd-content.svelte generated by Svelte v3.48.0 */
 
 function create_if_block_2(ctx) {
   let shepherdheader;
@@ -3629,7 +3812,7 @@ function create_if_block_2(ctx) {
 } // (28:2) {#if !isUndefined(step.options.text)}
 
 
-function create_if_block_1$1(ctx) {
+function create_if_block_1(ctx) {
   let shepherdtext;
   let current;
   shepherdtext = new Shepherd_text({
@@ -3686,7 +3869,7 @@ function create_if_block_1$1(ctx) {
 } // (35:2) {#if Array.isArray(step.options.buttons) && step.options.buttons.length}
 
 
-function create_if_block$2(ctx) {
+function create_if_block$1(ctx) {
   let shepherdfooter;
   let current;
   shepherdfooter = new Shepherd_footer({
@@ -3734,7 +3917,7 @@ function create_if_block$2(ctx) {
   };
 }
 
-function create_fragment$6(ctx) {
+function create_fragment$2(ctx) {
   let div;
   let show_if_2 = !isUndefined(
   /*step*/
@@ -3755,8 +3938,8 @@ function create_fragment$6(ctx) {
   ctx[2].options.buttons.length;
   let current;
   let if_block0 = show_if_2 && create_if_block_2(ctx);
-  let if_block1 = show_if_1 && create_if_block_1$1(ctx);
-  let if_block2 = show_if && create_if_block$2(ctx);
+  let if_block1 = show_if_1 && create_if_block_1(ctx);
+  let if_block2 = show_if && create_if_block$1(ctx);
   return {
     c() {
       div = element("div");
@@ -3778,7 +3961,8 @@ function create_fragment$6(ctx) {
       current = true;
     },
 
-    p(ctx, [dirty]) {
+    p(ctx, _ref) {
+      let [dirty] = _ref;
       if (dirty &
       /*step*/
       4) show_if_2 = !isUndefined(
@@ -3828,7 +4012,7 @@ function create_fragment$6(ctx) {
             transition_in(if_block1, 1);
           }
         } else {
-          if_block1 = create_if_block_1$1(ctx);
+          if_block1 = create_if_block_1(ctx);
           if_block1.c();
           transition_in(if_block1, 1);
           if_block1.m(div, t1);
@@ -3859,7 +4043,7 @@ function create_fragment$6(ctx) {
             transition_in(if_block2, 1);
           }
         } else {
-          if_block2 = create_if_block$2(ctx);
+          if_block2 = create_if_block$1(ctx);
           if_block2.c();
           transition_in(if_block2, 1);
           if_block2.m(div, null);
@@ -3898,21 +4082,17 @@ function create_fragment$6(ctx) {
   };
 }
 
-function instance$6($$self, $$props, $$invalidate) {
+function instance$2($$self, $$props, $$invalidate) {
   let {
-    descriptionId
-  } = $$props,
-      {
-    labelId
-  } = $$props,
-      {
+    descriptionId,
+    labelId,
     step
   } = $$props;
 
   $$self.$$set = $$props => {
-    if ("descriptionId" in $$props) $$invalidate(0, descriptionId = $$props.descriptionId);
-    if ("labelId" in $$props) $$invalidate(1, labelId = $$props.labelId);
-    if ("step" in $$props) $$invalidate(2, step = $$props.step);
+    if ('descriptionId' in $$props) $$invalidate(0, descriptionId = $$props.descriptionId);
+    if ('labelId' in $$props) $$invalidate(1, labelId = $$props.labelId);
+    if ('step' in $$props) $$invalidate(2, step = $$props.step);
   };
 
   return [descriptionId, labelId, step];
@@ -3921,7 +4101,7 @@ function instance$6($$self, $$props, $$invalidate) {
 class Shepherd_content extends SvelteComponent {
   constructor(options) {
     super();
-    init(this, options, instance$6, create_fragment$6, safe_not_equal, {
+    init(this, options, instance$2, create_fragment$2, safe_not_equal, {
       descriptionId: 0,
       labelId: 1,
       step: 2
@@ -3930,9 +4110,9 @@ class Shepherd_content extends SvelteComponent {
 
 }
 
-/* src/js/components/shepherd-element.svelte generated by Svelte v3.28.0 */
+/* src/js/components/shepherd-element.svelte generated by Svelte v3.48.0 */
 
-function create_if_block$3(ctx) {
+function create_if_block(ctx) {
   let div;
   return {
     c() {
@@ -3952,7 +4132,7 @@ function create_if_block$3(ctx) {
   };
 }
 
-function create_fragment$7(ctx) {
+function create_fragment$1(ctx) {
   let div;
   let t;
   let shepherdcontent;
@@ -3969,7 +4149,7 @@ function create_fragment$7(ctx) {
   /*step*/
   ctx[4].options.attachTo.element &&
   /*step*/
-  ctx[4].options.attachTo.on && create_if_block$3();
+  ctx[4].options.attachTo.on && create_if_block();
   shepherdcontent = new Shepherd_content({
     props: {
       descriptionId:
@@ -4042,7 +4222,9 @@ function create_fragment$7(ctx) {
       }
     },
 
-    p(ctx, [dirty]) {
+    p(ctx, _ref) {
+      let [dirty] = _ref;
+
       if (
       /*step*/
       ctx[4].options.arrow &&
@@ -4053,7 +4235,7 @@ function create_fragment$7(ctx) {
       /*step*/
       ctx[4].options.attachTo.on) {
         if (if_block) ; else {
-          if_block = create_if_block$3();
+          if_block = create_if_block();
           if_block.c();
           if_block.m(div, t);
         }
@@ -4144,35 +4326,19 @@ const LEFT_ARROW = 37;
 const RIGHT_ARROW = 39;
 
 function getClassesArray(classes) {
-  return classes.split(" ").filter(className => !!className.length);
+  return classes.split(' ').filter(className => !!className.length);
 }
 
-function instance$7($$self, $$props, $$invalidate) {
+function instance$1($$self, $$props, $$invalidate) {
   let {
-    classPrefix
-  } = $$props,
-      {
-    element
-  } = $$props,
-      {
-    descriptionId
-  } = $$props,
-      {
-    firstFocusableElement
-  } = $$props,
-      {
-    focusableElements
-  } = $$props,
-      {
-    labelId
-  } = $$props,
-      {
-    lastFocusableElement
-  } = $$props,
-      {
-    step
-  } = $$props,
-      {
+    classPrefix,
+    element,
+    descriptionId,
+    firstFocusableElement,
+    focusableElements,
+    labelId,
+    lastFocusableElement,
+    step,
     dataStepId
   } = $$props;
   let hasCancelIcon, hasTitle, classes;
@@ -4184,7 +4350,7 @@ function instance$7($$self, $$props, $$invalidate) {
     $$invalidate(1, dataStepId = {
       [`data-${classPrefix}shepherd-step-id`]: step.id
     });
-    $$invalidate(9, focusableElements = element.querySelectorAll("a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex=\"0\"]"));
+    $$invalidate(9, focusableElements = element.querySelectorAll('a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex="0"]'));
     $$invalidate(8, firstFocusableElement = focusableElements[0]);
     $$invalidate(10, lastFocusableElement = focusableElements[focusableElements.length - 1]);
   });
@@ -4242,7 +4408,7 @@ function instance$7($$self, $$props, $$invalidate) {
 
 
         if (e.shiftKey) {
-          if (document.activeElement === firstFocusableElement || document.activeElement.classList.contains("shepherd-element")) {
+          if (document.activeElement === firstFocusableElement || document.activeElement.classList.contains('shepherd-element')) {
             e.preventDefault();
             lastFocusableElement.focus();
           }
@@ -4279,29 +4445,29 @@ function instance$7($$self, $$props, $$invalidate) {
   };
 
   function div_binding($$value) {
-    binding_callbacks[$$value ? "unshift" : "push"](() => {
+    binding_callbacks[$$value ? 'unshift' : 'push'](() => {
       element = $$value;
       $$invalidate(0, element);
     });
   }
 
   $$self.$$set = $$props => {
-    if ("classPrefix" in $$props) $$invalidate(11, classPrefix = $$props.classPrefix);
-    if ("element" in $$props) $$invalidate(0, element = $$props.element);
-    if ("descriptionId" in $$props) $$invalidate(2, descriptionId = $$props.descriptionId);
-    if ("firstFocusableElement" in $$props) $$invalidate(8, firstFocusableElement = $$props.firstFocusableElement);
-    if ("focusableElements" in $$props) $$invalidate(9, focusableElements = $$props.focusableElements);
-    if ("labelId" in $$props) $$invalidate(3, labelId = $$props.labelId);
-    if ("lastFocusableElement" in $$props) $$invalidate(10, lastFocusableElement = $$props.lastFocusableElement);
-    if ("step" in $$props) $$invalidate(4, step = $$props.step);
-    if ("dataStepId" in $$props) $$invalidate(1, dataStepId = $$props.dataStepId);
+    if ('classPrefix' in $$props) $$invalidate(11, classPrefix = $$props.classPrefix);
+    if ('element' in $$props) $$invalidate(0, element = $$props.element);
+    if ('descriptionId' in $$props) $$invalidate(2, descriptionId = $$props.descriptionId);
+    if ('firstFocusableElement' in $$props) $$invalidate(8, firstFocusableElement = $$props.firstFocusableElement);
+    if ('focusableElements' in $$props) $$invalidate(9, focusableElements = $$props.focusableElements);
+    if ('labelId' in $$props) $$invalidate(3, labelId = $$props.labelId);
+    if ('lastFocusableElement' in $$props) $$invalidate(10, lastFocusableElement = $$props.lastFocusableElement);
+    if ('step' in $$props) $$invalidate(4, step = $$props.step);
+    if ('dataStepId' in $$props) $$invalidate(1, dataStepId = $$props.dataStepId);
   };
 
   $$self.$$.update = () => {
     if ($$self.$$.dirty &
     /*step*/
     16) {
-       {
+      {
         $$invalidate(5, hasCancelIcon = step.options && step.options.cancelIcon && step.options.cancelIcon.enabled);
         $$invalidate(6, hasTitle = step.options && step.options.title);
       }
@@ -4314,7 +4480,7 @@ function instance$7($$self, $$props, $$invalidate) {
 class Shepherd_element extends SvelteComponent {
   constructor(options) {
     super();
-    init(this, options, instance$7, create_fragment$7, safe_not_equal, {
+    init(this, options, instance$1, create_fragment$1, safe_not_equal, {
       classPrefix: 11,
       element: 0,
       descriptionId: 2,
@@ -4680,7 +4846,7 @@ var smoothscroll = createCommonjsModule(function (module, exports) {
     }
   })();
 });
-var smoothscroll_1 = smoothscroll.polyfill;
+smoothscroll.polyfill;
 
 smoothscroll.polyfill();
 /**
@@ -4704,10 +4870,11 @@ class Step extends Evented {
    * });
    * ```
    *
-   * If you don’t specify an attachTo the element will appear in the middle of the screen.
+   * If you don’t specify an `attachTo` the element will appear in the middle of the screen. The same will happen if your `attachTo.element` callback returns `null`, `undefined`, or a selector that does not exist in the DOM.
    * If you omit the `on` portion of `attachTo`, the element will still be highlighted, but the tooltip will appear
    * in the middle of the screen, without an arrow pointing to the target.
-   * @param {HTMLElement|string} options.attachTo.element An element selector string or a DOM element.
+   * If the element to highlight does not yet exist while instantiating tour steps, you may use lazy evaluation by supplying a function to `attachTo.element`. The function will be called in the `before-show` phase.
+   * @param {string|HTMLElement|function} options.attachTo.element An element selector string, DOM element, or a function (returning a selector, a DOM element, `null` or `undefined`).
    * @param {string} options.attachTo.on The optional direction to place the Popper tooltip relative to the element.
    *   - Possible string values: 'auto', 'auto-start', 'auto-end', 'top', 'top-start', 'top-end', 'bottom', 'bottom-start', 'bottom-end', 'right', 'right-start', 'right-end', 'left', 'left-start', 'left-end'
    * @param {Object} options.advanceOn An action on the page which should advance shepherd to the next step.
@@ -4776,11 +4943,23 @@ class Step extends Evented {
    * ```
    * @return {Step} The newly created Step instance
    */
-  constructor(tour, options = {}) {
+  constructor(tour, options) {
+    if (options === void 0) {
+      options = {};
+    }
+
     super(tour, options);
     this.tour = tour;
     this.classPrefix = this.tour.options ? normalizePrefix(this.tour.options.classPrefix) : '';
     this.styles = tour.styles;
+    /**
+     * Resolved attachTo options. Due to lazy evaluation, we only resolve the options during `before-show` phase.
+     * Do not use this directly, use the _getResolvedAttachToOptions method instead.
+     * @type {null|{}|{element, to}}
+     * @private
+     */
+
+    this._resolvedAttachTo = null;
     autoBind(this);
 
     this._setOptions(options);
@@ -4819,7 +4998,7 @@ class Step extends Evented {
       this.tooltip = null;
     }
 
-    if (isHTMLElement(this.el) && this.el.parentNode) {
+    if (isHTMLElement$1(this.el) && this.el.parentNode) {
       this.el.parentNode.removeChild(this.el);
       this.el = null;
     }
@@ -4855,14 +5034,29 @@ class Step extends Evented {
     this.trigger('hide');
   }
   /**
-   * Checks if the step should be centered or not
-   * @return {boolean} True if the step is centered
+   * Resolves attachTo options.
+   * @returns {{}|{element, on}}
+   * @private
    */
 
 
-  isCentered() {
-    const attachToOptions = parseAttachTo(this);
-    return !attachToOptions.element || !attachToOptions.on;
+  _resolveAttachToOptions() {
+    this._resolvedAttachTo = parseAttachTo(this);
+    return this._resolvedAttachTo;
+  }
+  /**
+   * A selector for resolved attachTo options.
+   * @returns {{}|{element, on}}
+   * @private
+   */
+
+
+  _getResolvedAttachToOptions() {
+    if (this._resolvedAttachTo === null) {
+      return this._resolveAttachToOptions();
+    }
+
+    return this._resolvedAttachTo;
   }
   /**
    * Check if the step is open and visible
@@ -4960,11 +5154,11 @@ class Step extends Evented {
   _scrollTo(scrollToOptions) {
     const {
       element
-    } = parseAttachTo(this);
+    } = this._getResolvedAttachToOptions();
 
     if (isFunction(this.options.scrollToHandler)) {
       this.options.scrollToHandler(element);
-    } else if (isElement(element) && typeof element.scrollIntoView === 'function') {
+    } else if (isElement$1(element) && typeof element.scrollIntoView === 'function') {
       element.scrollIntoView(scrollToOptions);
     }
   }
@@ -4991,7 +5185,11 @@ class Step extends Evented {
    */
 
 
-  _setOptions(options = {}) {
+  _setOptions(options) {
+    if (options === void 0) {
+      options = {};
+    }
+
     let tourOptions = this.tour && this.tour.options && this.tour.options.defaultStepOptions;
     tourOptions = cjs({}, tourOptions || {});
     this.options = Object.assign({
@@ -5037,7 +5235,9 @@ class Step extends Evented {
 
 
   _show() {
-    this.trigger('before-show');
+    this.trigger('before-show'); // Force resolve to make sure the options are updated on subsequent shows.
+
+    this._resolveAttachToOptions();
 
     this._setupElements();
 
@@ -5085,6 +5285,8 @@ class Step extends Evented {
       targetElement.classList.add(step.options.highlightClass);
     }
 
+    targetElement.classList.remove('shepherd-target-click-disabled');
+
     if (step.options.canClickTarget === false) {
       targetElement.classList.add('shepherd-target-click-disabled');
     }
@@ -5103,7 +5305,7 @@ class Step extends Evented {
       target.classList.remove(this.options.highlightClass);
     }
 
-    target.classList.remove(`${this.classPrefix}shepherd-enabled`, `${this.classPrefix}shepherd-target`);
+    target.classList.remove('shepherd-target-click-disabled', `${this.classPrefix}shepherd-enabled`, `${this.classPrefix}shepherd-target`);
   }
 
 }
@@ -5137,13 +5339,14 @@ function cleanupSteps(tour) {
  * @param {number} [r=0] - Corner Radius. Keep this smaller than  half of width or height.
  * @returns {string} - Rounded rectangle overlay path data.
  */
-function makeOverlayPath({
-  width,
-  height,
-  x = 0,
-  y = 0,
-  r = 0
-}) {
+function makeOverlayPath(_ref) {
+  let {
+    width,
+    height,
+    x = 0,
+    y = 0,
+    r = 0
+  } = _ref;
   const {
     innerWidth: w,
     innerHeight: h
@@ -5165,9 +5368,9 @@ a${r},${r},0,0,0-${r}-${r}\
 Z`;
 }
 
-/* src/js/components/shepherd-modal.svelte generated by Svelte v3.28.0 */
+/* src/js/components/shepherd-modal.svelte generated by Svelte v3.48.0 */
 
-function create_fragment$8(ctx) {
+function create_fragment(ctx) {
   let svg;
   let path;
   let svg_class_value;
@@ -5182,7 +5385,7 @@ function create_fragment$8(ctx) {
       ctx[2]);
       attr(svg, "class", svg_class_value = `${
       /*modalIsVisible*/
-      ctx[1] ? "shepherd-modal-is-visible" : ""} shepherd-modal-overlay-container`);
+      ctx[1] ? 'shepherd-modal-is-visible' : ''} shepherd-modal-overlay-container`);
     },
 
     m(target, anchor) {
@@ -5200,7 +5403,9 @@ function create_fragment$8(ctx) {
       }
     },
 
-    p(ctx, [dirty]) {
+    p(ctx, _ref) {
+      let [dirty] = _ref;
+
       if (dirty &
       /*pathDefinition*/
       4) {
@@ -5213,7 +5418,7 @@ function create_fragment$8(ctx) {
       /*modalIsVisible*/
       2 && svg_class_value !== (svg_class_value = `${
       /*modalIsVisible*/
-      ctx[1] ? "shepherd-modal-is-visible" : ""} shepherd-modal-overlay-container`)) {
+      ctx[1] ? 'shepherd-modal-is-visible' : ''} shepherd-modal-overlay-container`)) {
         attr(svg, "class", svg_class_value);
       }
     },
@@ -5240,7 +5445,7 @@ function _getScrollParent(element) {
 
   const isHtmlElement = element instanceof HTMLElement;
   const overflowY = isHtmlElement && window.getComputedStyle(element).overflowY;
-  const isScrollable = overflowY !== "hidden" && overflowY !== "visible";
+  const isScrollable = overflowY !== 'hidden' && overflowY !== 'visible';
 
   if (isScrollable && element.scrollHeight >= element.clientHeight) {
     return element;
@@ -5249,14 +5454,14 @@ function _getScrollParent(element) {
   return _getScrollParent(element.parentElement);
 }
 /**
-* Get the visible height of the target element relative to its scrollParent.
-* If there is no scroll parent, the height of the element is returned.
-*
-* @param {HTMLElement} element The target element
-* @param {HTMLElement} [scrollParent] The scrollable parent element
-* @returns {{y: number, height: number}}
-* @private
-*/
+ * Get the visible height of the target element relative to its scrollParent.
+ * If there is no scroll parent, the height of the element is returned.
+ *
+ * @param {HTMLElement} element The target element
+ * @param {HTMLElement} [scrollParent] The scrollable parent element
+ * @returns {{y: number, height: number}}
+ * @private
+ */
 
 
 function _getVisibleHeight(element, scrollParent) {
@@ -5280,14 +5485,12 @@ function _getVisibleHeight(element, scrollParent) {
   };
 }
 
-function instance$8($$self, $$props, $$invalidate) {
+function instance($$self, $$props, $$invalidate) {
   let {
-    element
-  } = $$props,
-      {
+    element,
     openingProperties
   } = $$props;
-  const guid = uuid();
+  uuid();
   let modalIsVisible = false;
   let rafId = undefined;
   let pathDefinition;
@@ -5311,8 +5514,16 @@ function instance$8($$self, $$props, $$invalidate) {
     _cleanupStepEventListeners();
   }
 
-  function positionModalOpening(targetElement, scrollParent, modalOverlayOpeningPadding = 0, modalOverlayOpeningRadius = 0) {
-    if (targetElement.getBoundingClientRect) {
+  function positionModal(modalOverlayOpeningPadding, modalOverlayOpeningRadius, scrollParent, targetElement) {
+    if (modalOverlayOpeningPadding === void 0) {
+      modalOverlayOpeningPadding = 0;
+    }
+
+    if (modalOverlayOpeningRadius === void 0) {
+      modalOverlayOpeningRadius = 0;
+    }
+
+    if (targetElement) {
       const {
         y,
         height
@@ -5331,6 +5542,8 @@ function instance$8($$self, $$props, $$invalidate) {
         y: y - modalOverlayOpeningPadding,
         r: modalOverlayOpeningRadius
       });
+    } else {
+      closeModalOpening();
     }
   }
 
@@ -5366,7 +5579,7 @@ function instance$8($$self, $$props, $$invalidate) {
 
   function _addStepEventListeners() {
     // Prevents window from moving on touch.
-    window.addEventListener("touchmove", _preventModalBodyTouch, {
+    window.addEventListener('touchmove', _preventModalBodyTouch, {
       passive: false
     });
   }
@@ -5382,7 +5595,7 @@ function instance$8($$self, $$props, $$invalidate) {
       rafId = undefined;
     }
 
-    window.removeEventListener("touchmove", _preventModalBodyTouch, {
+    window.removeEventListener('touchmove', _preventModalBodyTouch, {
       passive: false
     });
   }
@@ -5399,57 +5612,53 @@ function instance$8($$self, $$props, $$invalidate) {
       modalOverlayOpeningRadius
     } = step.options;
 
-    if (step.target) {
-      const scrollParent = _getScrollParent(step.target); // Setup recursive function to call requestAnimationFrame to update the modal opening position
+    const scrollParent = _getScrollParent(step.target); // Setup recursive function to call requestAnimationFrame to update the modal opening position
 
 
-      const rafLoop = () => {
-        rafId = undefined;
-        positionModalOpening(step.target, scrollParent, modalOverlayOpeningPadding, modalOverlayOpeningRadius);
-        rafId = requestAnimationFrame(rafLoop);
-      };
+    const rafLoop = () => {
+      rafId = undefined;
+      positionModal(modalOverlayOpeningPadding, modalOverlayOpeningRadius, scrollParent, step.target);
+      rafId = requestAnimationFrame(rafLoop);
+    };
 
-      rafLoop();
+    rafLoop();
 
-      _addStepEventListeners();
-    } else {
-      closeModalOpening();
-    }
+    _addStepEventListeners();
   }
 
   function svg_binding($$value) {
-    binding_callbacks[$$value ? "unshift" : "push"](() => {
+    binding_callbacks[$$value ? 'unshift' : 'push'](() => {
       element = $$value;
       $$invalidate(0, element);
     });
   }
 
   $$self.$$set = $$props => {
-    if ("element" in $$props) $$invalidate(0, element = $$props.element);
-    if ("openingProperties" in $$props) $$invalidate(4, openingProperties = $$props.openingProperties);
+    if ('element' in $$props) $$invalidate(0, element = $$props.element);
+    if ('openingProperties' in $$props) $$invalidate(4, openingProperties = $$props.openingProperties);
   };
 
   $$self.$$.update = () => {
     if ($$self.$$.dirty &
     /*openingProperties*/
     16) {
-       $$invalidate(2, pathDefinition = makeOverlayPath(openingProperties));
+      $$invalidate(2, pathDefinition = makeOverlayPath(openingProperties));
     }
   };
 
-  return [element, modalIsVisible, pathDefinition, _preventModalOverlayTouch, openingProperties, getElement, closeModalOpening, hide, positionModalOpening, setupForStep, show, svg_binding];
+  return [element, modalIsVisible, pathDefinition, _preventModalOverlayTouch, openingProperties, getElement, closeModalOpening, hide, positionModal, setupForStep, show, svg_binding];
 }
 
 class Shepherd_modal extends SvelteComponent {
   constructor(options) {
     super();
-    init(this, options, instance$8, create_fragment$8, safe_not_equal, {
+    init(this, options, instance, create_fragment, safe_not_equal, {
       element: 0,
       openingProperties: 4,
       getElement: 5,
       closeModalOpening: 6,
       hide: 7,
-      positionModalOpening: 8,
+      positionModal: 8,
       setupForStep: 9,
       show: 10
     });
@@ -5467,7 +5676,7 @@ class Shepherd_modal extends SvelteComponent {
     return this.$$.ctx[7];
   }
 
-  get positionModalOpening() {
+  get positionModal() {
     return this.$$.ctx[8];
   }
 
@@ -5511,7 +5720,11 @@ class Tour extends Evented {
    * can remain interactive
    * @returns {Tour}
    */
-  constructor(options = {}) {
+  constructor(options) {
+    if (options === void 0) {
+      options = {};
+    }
+
     super(options);
     autoBind(this);
     const defaultTourOptions = {
@@ -5705,7 +5918,15 @@ class Tour extends Evented {
    */
 
 
-  show(key = 0, forward = true) {
+  show(key, forward) {
+    if (key === void 0) {
+      key = 0;
+    }
+
+    if (forward === void 0) {
+      forward = true;
+    }
+
     const step = isString(key) ? this.getById(key) : this.steps[key];
 
     if (step) {
@@ -5780,7 +6001,7 @@ class Tour extends Evented {
     } // Focus the element that was focused before the tour started
 
 
-    if (isHTMLElement(this.focusedElBeforeOpen)) {
+    if (isHTMLElement$1(this.focusedElBeforeOpen)) {
       this.focusedElBeforeOpen.focus();
     }
   }
@@ -5812,7 +6033,7 @@ class Tour extends Evented {
     });
   }
   /**
-   * Called when `showOn` evaluates to false, to skip the step
+   * Called when `showOn` evaluates to false, to skip the step or complete the tour if it's the last step
    * @param {Step} step The step to skip
    * @param {Boolean} forward True if we are going forward, false if backward
    * @private
@@ -5821,8 +6042,13 @@ class Tour extends Evented {
 
   _skipStep(step, forward) {
     const index = this.steps.indexOf(step);
-    const nextIndex = forward ? index + 1 : index - 1;
-    this.show(nextIndex, forward);
+
+    if (index === this.steps.length - 1) {
+      this.complete();
+    } else {
+      const nextIndex = forward ? index + 1 : index - 1;
+      this.show(nextIndex, forward);
+    }
   }
   /**
    * Before showing, hide the current step and if the tour is not
@@ -5862,7 +6088,11 @@ const install = function installVueShepherd(Vue) {
   if (install.installed) return;
   install.installed = true;
 
-  Vue.prototype.$shepherd = (...args) => {
+  Vue.prototype.$shepherd = function () {
+    for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+      args[_key] = arguments[_key];
+    }
+
     return new Shepherd.Tour(...args);
   };
 };
@@ -5871,4 +6101,4 @@ const plugin = {
   install
 }; // To auto-install on non-es builds, when vue is found
 
-export default plugin;
+export { plugin as default };
