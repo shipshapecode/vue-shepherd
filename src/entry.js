@@ -1,6 +1,6 @@
-import Shepherd from "shepherd.js";
+import Shepherd from 'shepherd.js';
 
-const shepherdKey = "$shepherd";
+const shepherdKey = '$shepherd';
 // create and export composition API's composable function.
 export const useShepherd = (...args) => new Shepherd.Tour(...args);
 
@@ -16,11 +16,11 @@ const plugin = { install };
 // To auto-install on non-es builds, when vue is found
 // eslint-disable-next-line no-redeclare
 /* global window, global */
-if ("false" === process.env.ES_BUILD) {
+if ('false' === process.env.ES_BUILD) {
   let GlobalVue = null;
-  if (typeof window !== "undefined") {
+  if (typeof window !== 'undefined') {
     GlobalVue = window.Vue;
-  } else if (typeof global !== "undefined") {
+  } else if (typeof global !== 'undefined') {
     GlobalVue = global.Vue;
   }
   if (GlobalVue) {
