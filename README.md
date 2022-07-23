@@ -13,34 +13,37 @@
 
 This is a Vue wrapper for the [Shepherd](https://github.com/shipshapecode/shepherd), site tour, library.
 
-## Installation
-
-### NPM
-
 ```bash
 npm install vue-shepherd --save
 ```
 
-When using with a module system, you must explicitly install vue-shepherd via Vue.use():
+## Install
+
+The plugin will add the global function `$shepherd()`.
+
+### Vue 2
 
 ```js
 import Vue from 'vue';
-import VueShepherd from 'vue-shepherd';
+import VueShepherdPlugin from 'vue-shepherd';
+import '~shepherd.js/dist/css/shepherd.css';
 
-Vue.use(VueShepherd);
+Vue.use(VueShepherdPlugin);
+```
+
+### Vue 3
+
+```js
+import { createApp } from 'vue';
+import VueShepherdPlugin from 'vue-shepherd';
+import '~shepherd.js/dist/css/shepherd.css';
+
+createApp().use(VueShepherdPlugin).mount('#app');
 ```
 
 ## Usage
 
-You will need to import the styles first:
-
-```css
-@import '~shepherd.js/dist/css/shepherd.css';
-```
-
-The plugin extends Vue with a set of directives and $shepherd() constructor function.
-
-### Constructor Function
+### Options API
 
 ```vue
 <template>
@@ -49,7 +52,7 @@ The plugin extends Vue with a set of directives and $shepherd() constructor func
   </div>
 </template>
 
-<script>
+<script></script>
   export default {
     name: 'ShepherdExample',
     mounted() {
@@ -70,6 +73,38 @@ The plugin extends Vue with a set of directives and $shepherd() constructor func
 </script>
 ```
 
-### Directives
+### Composition API
+
+```vue
+  <template>
+    <div ref="el">Testing</div>
+  </template>
+
+  <script>
+    import { defineComponent, onMounted, ref } from '@vue/composition-api'; // if vue <= 2.6
+    import { defineComponent, onMounted, ref } from 'vue'; // if vue >=2.7 | >3.0
+    import { useShepherd } from 'vue-shepherd';
+    
+    export default defineComponent({
+      setup(){
+        const el = ref(null);
+        onMounted(() => {
+            const tour = useShepherd({
+              useModalOverlay: true
+            });
+
+            tour.addStep({
+              attachTo: { element: el.value, on: 'top' },
+              text: 'Test'
+            });
+
+            tour.start();
+        });
+      }
+    })
+  </script>
+```
+
+## Directives
 
 WIP
