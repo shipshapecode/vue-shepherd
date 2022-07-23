@@ -10,7 +10,6 @@
   "scripts": {
     "build": "cross-env NODE_ENV=production rollup --config rollup.config.js",
     "build:ssr": "cross-env NODE_ENV=production rollup --config rollup.config.js --format cjs",
-    "build:es": "cross-env NODE_ENV=production rollup --config rollup.config.js --format es",
     "build:unpkg": "cross-env NODE_ENV=production rollup --config rollup.config.js --format iife",
     "dev": "yarn serve",
     "lint": "vue-cli-service lint",
@@ -20,8 +19,8 @@
     "test:e2e": "vue-cli-service test:e2e"
   },
   "main": "dist/vue-shepherd.ssr.js",
-  "browser": "dist/vue-shepherd.esm.js",
-  "module": "dist/vue-shepherd.esm.js",
+  "browser": "dist/vue-shepherd.min.js",
+  "module": "src/entry.js",
   "unpkg": "dist/vue-shepherd.min.js",
   "files": [
     "dist/vue-shepherd.common.js",
