@@ -10,7 +10,6 @@
   "scripts": {
     "build": "cross-env NODE_ENV=production rollup --config rollup.config.js",
     "build:ssr": "cross-env NODE_ENV=production rollup --config rollup.config.js --format cjs",
-    "build:es": "cross-env NODE_ENV=production rollup --config rollup.config.js --format es",
     "build:unpkg": "cross-env NODE_ENV=production rollup --config rollup.config.js --format iife",
     "dev": "yarn serve",
     "lint": "vue-cli-service lint",
