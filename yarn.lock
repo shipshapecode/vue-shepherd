@@ -8752,10 +8752,10 @@ shelljs@0.8.5:
     interpret "^1.0.0"
     rechoir "^0.6.2"
 
-shepherd.js@^10.0.0:
-  version "10.0.0"
-  resolved "https://registry.yarnpkg.com/shepherd.js/-/shepherd.js-10.0.0.tgz#6842ca669432d4a065d4309fd4c9a35b5919bfe7"
-  integrity sha512-ogyabw8JOVQlMcwOA7RGp6splm6w3gbvYPnoIm1XjjIwcjZr82ila8vTlPObtAad7jsuU8vxEyvR1bi0IkqT2w==
+shepherd.js@^10.0.1:
+  version "10.0.1"
+  resolved "https://registry.yarnpkg.com/shepherd.js/-/shepherd.js-10.0.1.tgz#f01772e1ad972771ab53822ae7496371ab5098e1"
+  integrity sha512-R32v4b4b0N1gK/vxvRtdhty+SBZlBPcPTSYCwcaAQvFd0n6Xki7cRH6Sx0oD9WB/HCkqCNM1msyIyylXmq635w==
   dependencies:
     "@popperjs/core" "^2.11.5"
     deepmerge "^4.2.2"
