@@ -46,7 +46,7 @@
     "@vue/cli-plugin-e2e-cypress": "^5.0.4",
     "@vue/cli-plugin-eslint": "^5.0.8",
     "@vue/cli-service": "^5.0.8",
-    "@vue/compiler-sfc": "^3.2.37",
+    "@vue/compiler-sfc": "^3.2.38",
     "babel-eslint": "^10.1.0",
     "cross-env": "^7.0.2",
     "cypress": "^10.6.0",
