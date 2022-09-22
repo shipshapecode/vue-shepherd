@@ -17,21 +17,41 @@ This is a Vue wrapper for the [Shepherd](https://github.com/shipshapecode/shephe
 npm install vue-shepherd --save
 ```
 
-## Install
+## Usage
 
-The plugin will add the global function `$shepherd()`.
+### Composition API (suggested)
 
-### Vue 2
+```vue
+<template>
+  <div ref="el">
+    Testing
+  </div>
+</template>
 
-```js
-import Vue from 'vue';
-import VueShepherdPlugin from 'vue-shepherd';
-import '~shepherd.js/dist/css/shepherd.css';
+<script setup>
+  import { ref, onMounted } from 'vue'
+  import { useShepherd } from 'vue-shepherd'
 
-Vue.use(VueShepherdPlugin);
+  const el = ref(null);
+
+  const tour = useShepherd({
+    useModalOverlay: true
+  });
+  
+  onMounted(() =>  {
+    tour.addStep({
+      attachTo: { element: el.value, on: 'top' },
+      text: 'Test'
+    });
+
+    tour.start();
+  });
+</script>
 ```
 
-### Vue 3
+### Option API
+
+To use vue-shepherd with Option API you have to install the plugin which will add the '$shepherd' function to your vue app.
 
 ```js
 import { createApp } from 'vue';
@@ -41,68 +61,45 @@ import '~shepherd.js/dist/css/shepherd.css';
 createApp().use(VueShepherdPlugin).mount('#app');
 ```
 
-## Usage
-
-### Options API
-
 ```vue
 <template>
-  <div>
+  <div ref="el">
     Testing
   </div>
 </template>
 
-<script></script>
-  export default {
-    name: 'ShepherdExample',
-    mounted() {
-      this.$nextTick(() => {
-        const tour = this.$shepherd({
+<script>
+  import { defineComponent } from 'vue'
+
+  export default defineComponent({
+    data(){
+      return {
+        tour: null
+      }
+    },
+
+    methods: {
+      createTour(){
+        this.tour = this.$shepherd({
           useModalOverlay: true
         });
 
-        tour.addStep({
-          attachTo: { element: this.$el, on: 'top' },
+        this.tour.addStep({
+          attachTo: { element: this.$refs.el, on: 'top' },
           text: 'Test'
         });
-
-        tour.start();
-      });
-    }
-  };
-</script>
-```
-
-### Composition API
-
-```vue
-  <template>
-    <div ref="el">Testing</div>
-  </template>
-
-  <script>
-    import { defineComponent, onMounted, ref } from '@vue/composition-api'; // if vue <= 2.6
-    import { defineComponent, onMounted, ref } from 'vue'; // if vue >=2.7 | >3.0
-    import { useShepherd } from 'vue-shepherd';
-    
-    export default defineComponent({
-      setup(){
-        const el = ref(null);
-        onMounted(() => {
-            const tour = useShepherd({
-              useModalOverlay: true
-            });
-
-            tour.addStep({
-              attachTo: { element: el.value, on: 'top' },
-              text: 'Test'
-            });
-
-            tour.start();
-        });
       }
-    })
-  </script>
+    },
+
+    created(){
+      this.createTour();
+    },
+
+    mounted(){
+      this.tour.start();
+    }
+  });
+</script>
 ```
 
 ## Directives

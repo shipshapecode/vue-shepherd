@@ -1,3 +1,4 @@
+import fs from "fs";
 import path from "path";
 import vue from "rollup-plugin-vue";
 import alias from "@rollup/plugin-alias";
@@ -9,6 +10,13 @@ import peerDepsExternal from "rollup-plugin-peer-deps-external";
 import resolve from "@rollup/plugin-node-resolve";
 import { terser } from "rollup-plugin-terser";
 import minimist from "minimist";
+
+// Get browserslist config and remove ie from es build targets
+const esbrowserslist = fs
+  .readFileSync("./.browserslistrc")
+  .toString()
+  .split("\n")
+  .filter((entry) => entry && entry.substring(0, 2) !== "ie");
 
 const argv = minimist(process.argv.slice(2));
 
@@ -62,6 +70,39 @@ const globals = {
 
 // Customize configs for individual targets
 const buildFormats = [];
+if (!argv.format || argv.format === "es") {
+  const esConfig = {
+    ...baseConfig,
+    external,
+    output: {
+      file: "dist/vue-shepherd.esm.js",
+      format: "esm",
+      exports: "named",
+    },
+    plugins: [
+      replace({
+        ...baseConfig.plugins.replace,
+        "process.env.ES_BUILD": JSON.stringify("true"),
+      }),
+      ...baseConfig.plugins.preVue,
+      vue(baseConfig.plugins.vue),
+      babel({
+        ...baseConfig.plugins.babel,
+        presets: [
+          [
+            "@babel/preset-env",
+            {
+              targets: esbrowserslist,
+            },
+          ],
+        ],
+      }),
+      commonjs(),
+      filesize(),
+    ],
+  };
+  buildFormats.push(esConfig);
+}
 
 if (!argv.format || argv.format === "cjs") {
   const umdConfig = {

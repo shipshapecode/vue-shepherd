@@ -1,4 +1,4 @@
-'use strict';Object.defineProperty(exports,'__esModule',{value:true});/*! shepherd.js 10.0.1 */
+/*! shepherd.js 10.0.1 */
 
 var isMergeableObject = function isMergeableObject(value) {
   return isNonNullObject(value) && !isSpecial(value);
@@ -6085,7 +6085,9 @@ class Tour extends Evented {
 Object.assign(Shepherd, {
   Tour,
   Step
-});const shepherdKey = "$shepherd"; // create and export composition API's composable function.
+});
+
+const shepherdKey = "$shepherd"; // create and export composition API's composable function.
 
 const useShepherd = function () {
   for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
@@ -6104,21 +6106,5 @@ const install = function installVueShepherd(app) {
 const plugin = {
   install
 }; // To auto-install on non-es builds, when vue is found
-// eslint-disable-next-line no-redeclare
 
-/* global window, global */
-
-{
-  let GlobalVue = null;
-
-  if (typeof window !== "undefined") {
-    GlobalVue = window.Vue;
-  } else if (typeof global !== "undefined") {
-    GlobalVue = global.Vue;
-  }
-
-  if (GlobalVue) {
-    GlobalVue.use(plugin);
-  }
-} // Default export is library as a whole, registered via Vue.use()
-exports["default"]=plugin;exports.useShepherd=useShepherd;
+export { plugin as default, useShepherd };
