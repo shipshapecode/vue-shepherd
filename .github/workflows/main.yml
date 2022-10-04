@@ -16,8 +16,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: volta-cli/action@v1
-        with:
-          node-version: 12.x
       # Cache dependencies
       - name: Cache Dependencies
         uses: actions/cache@v2
