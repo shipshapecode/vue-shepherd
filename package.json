@@ -54,7 +54,7 @@
     "eslint-plugin-vue": "^7.2.0",
     "minimist": "^1.2.7",
     "release-it": "^14.14.3",
-    "release-it-lerna-changelog": "^4.0.1",
+    "release-it-lerna-changelog": "^5.0.0",
     "rollup": "^2.79.1",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-filesize": "^9.1.2",
