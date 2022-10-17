@@ -43,7 +43,7 @@
     "@rollup/plugin-node-resolve": "^15.0.0",
     "@rollup/plugin-replace": "^5.0.0",
     "@vue/cli-plugin-babel": "^5.0.8",
-    "@vue/cli-plugin-e2e-cypress": "^5.0.4",
+    "@vue/cli-plugin-e2e-cypress": "^5.0.8",
     "@vue/cli-plugin-eslint": "^5.0.8",
     "@vue/cli-service": "^5.0.8",
     "@vue/compiler-sfc": "^3.2.41",
