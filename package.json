@@ -1,6 +1,6 @@
 {
   "name": "vue-shepherd",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "A Vue wrapper for the site tour library Shepherd.",
   "author": {
     "name": "Robert Wagner",
@@ -20,8 +20,8 @@
     "test:e2e": "vue-cli-service test:e2e"
   },
   "main": "dist/vue-shepherd.ssr.js",
-  "browser": "dist/vue-shepherd.esm.js",
-  "module": "dist/vue-shepherd.esm.js",
+  "browser": "dist/vue-shepherd.min.js",
+  "module": "src/entry.js",
   "unpkg": "dist/vue-shepherd.min.js",
   "files": [
     "dist/vue-shepherd.common.js",
@@ -38,48 +38,35 @@
     "shepherd.js": "^10.0.1"
   },
   "devDependencies": {
-    "@rollup/plugin-alias": "^4.0.0",
-    "@rollup/plugin-commonjs": "^23.0.0",
-    "@rollup/plugin-node-resolve": "^15.0.0",
-    "@rollup/plugin-replace": "^5.0.0",
+    "@rollup/plugin-alias": "^3.1.9",
+    "@rollup/plugin-commonjs": "^22.0.2",
+    "@rollup/plugin-node-resolve": "^14.1.0",
+    "@rollup/plugin-replace": "^4.0.0",
     "@vue/cli-plugin-babel": "^5.0.8",
-    "@vue/cli-plugin-e2e-cypress": "^5.0.4",
+    "@vue/cli-plugin-e2e-cypress": "^5.0.8",
     "@vue/cli-plugin-eslint": "^5.0.8",
     "@vue/cli-service": "^5.0.8",
-    "@vue/compiler-sfc": "^3.2.41",
+    "@vue/compat": "^3.2.37",
+    "@vue/compiler-sfc": "^3.2.37",
     "babel-eslint": "^10.1.0",
     "cross-env": "^7.0.2",
-    "cypress": "^10.10.0",
+    "cypress": "^10.9.0",
     "eslint": "^7.32.0",
-    "eslint-plugin-vue": "^7.2.0",
-    "minimist": "^1.2.7",
-    "release-it": "^14.14.3",
-    "release-it-lerna-changelog": "^5.0.0",
+    "eslint-plugin-vue": "^9.4.0",
+    "minimist": "^1.2.5",
+    "release-it": "^15.5.0",
+    "release-it-lerna-changelog": "^4.0.1",
     "rollup": "^2.79.1",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-filesize": "^9.1.2",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-vue": "^6.0.0",
-    "vue": "^2.7.13",
-    "vue-template-compiler": "^2.7.13"
+    "vue": "^3.2.37",
+    "vue-eslint-parser": "^9.0.3"
   },
   "peerDependencies": {
-    "vue": "^2.7.13"
-  },
-  "eslintConfig": {
-    "env": {
-      "node": true
-    },
-    "parserOptions": {
-      "parser": "babel-eslint"
-    },
-    "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended"
-    ],
-    "rules": {},
-    "root": true
+    "vue": ">=3.0.0"
   },
   "keywords": [
     "vue",
@@ -111,9 +98,6 @@
   },
   "repository": "https://github.com/shipshapecode/vue-shepherd",
   "sideeffects": false,
-  "resolutions": {
-    "cypress": "^5.6.0"
-  },
   "volta": {
     "node": "16.17.1",
     "yarn": "1.22.10"

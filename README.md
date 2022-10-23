@@ -13,63 +13,95 @@
 
 This is a Vue wrapper for the [Shepherd](https://github.com/shipshapecode/shepherd), site tour, library.
 
-## Installation
-
-### NPM
-
 ```bash
 npm install vue-shepherd --save
 ```
 
-When using with a module system, you must explicitly install vue-shepherd via Vue.use():
-
-```js
-import Vue from 'vue';
-import VueShepherd from 'vue-shepherd';
-
-Vue.use(VueShepherd);
-```
-
 ## Usage
 
-You will need to import the styles first:
-
-```css
-@import '~shepherd.js/dist/css/shepherd.css';
-```
-
-The plugin extends Vue with a set of directives and $shepherd() constructor function.
-
-### Constructor Function
+### Composition API (suggested)
 
 ```vue
 <template>
-  <div>
+  <div ref="el">
+    Testing
+  </div>
+</template>
+
+<script setup>
+  import { ref, onMounted } from 'vue'
+  import { useShepherd } from 'vue-shepherd'
+
+  const el = ref(null);
+
+  const tour = useShepherd({
+    useModalOverlay: true
+  });
+  
+  onMounted(() =>  {
+    tour.addStep({
+      attachTo: { element: el.value, on: 'top' },
+      text: 'Test'
+    });
+
+    tour.start();
+  });
+</script>
+```
+
+### Option API
+
+To use vue-shepherd with Option API you have to install the plugin which will add the '$shepherd' function to your vue app.
+
+```js
+import { createApp } from 'vue';
+import VueShepherdPlugin from 'vue-shepherd';
+import '~shepherd.js/dist/css/shepherd.css';
+
+createApp().use(VueShepherdPlugin).mount('#app');
+```
+
+```vue
+<template>
+  <div ref="el">
     Testing
   </div>
 </template>
 
 <script>
-  export default {
-    name: 'ShepherdExample',
-    mounted() {
-      this.$nextTick(() => {
-        const tour = this.$shepherd({
+  import { defineComponent } from 'vue'
+
+  export default defineComponent({
+    data(){
+      return {
+        tour: null
+      }
+    },
+
+    methods: {
+      createTour(){
+        this.tour = this.$shepherd({
           useModalOverlay: true
         });
 
-        tour.addStep({
-          attachTo: { element: this.$el, on: 'top' },
+        this.tour.addStep({
+          attachTo: { element: this.$refs.el, on: 'top' },
           text: 'Test'
         });
+      }
+    },
 
-        tour.start();
-      });
+    created(){
+      this.createTour();
+    },
+
+    mounted(){
+      this.tour.start();
     }
-  };
+  });
 </script>
 ```
 
-### Directives
+## Directives
 
 WIP

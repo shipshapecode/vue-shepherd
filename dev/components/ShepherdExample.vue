@@ -1,3 +1,70 @@
+<script setup>
+import { ref, onMounted } from 'vue';
+import { useShepherd } from '@/entry.js';
+
+const installElement = ref(null);
+const usageElement = ref(null);
+
+const tour = useShepherd({
+  useModalOverlay: true,
+});
+
+const createTourSteps = () => {
+  tour.addSteps([
+    {
+      attachTo: {
+        element: installElement.value,
+        on: 'top',
+      },
+      buttons: [
+        {
+          action: function () {
+            return this.cancel();
+          },
+          secondary: true,
+          text: 'Exit',
+        },
+        {
+          action: function () {
+            return this.next();
+          },
+          text: 'Next',
+        },
+      ],
+      text: 'Install test',
+    },
+    {
+      attachTo: {
+        element: usageElement.value,
+        on: 'top',
+      },
+      buttons: [
+        {
+          action: function () {
+            return this.back();
+          },
+          secondary: true,
+          text: 'Back',
+        },
+        {
+          action: function () {
+            return this.next();
+          },
+          text: 'Next',
+        },
+      ],
+      text: 'Usage test',
+    },
+  ]);
+
+  return tour;
+};
+
+onMounted(() => {
+  createTourSteps().start();
+});
+</script>
+
 <template>
   <div class="page">
     <div class="container">
@@ -9,11 +76,15 @@
 
       <h5>Installation</h5>
 
-      <div class="install-element">Install instructions go here</div>
+      <div class="install-element" ref="installElement">
+        Install instructions go here
+      </div>
 
       <h5>Usage</h5>
 
-      <div class="usage-element">Usage instructions go here</div>
+      <div class="usage-element" ref="usageElement">
+        Usage instructions go here
+      </div>
 
       <div class="medium-8 columns medium-centered text-center">
         <a
@@ -273,65 +344,3 @@
     </div>
   </div>
 </template>
-
-<script>
-export default {
-  name: 'ShepherdExample',
-  mounted() {
-    this.$nextTick(() => {
-      const tour = this.$shepherd({
-        useModalOverlay: true,
-      });
-
-      tour.addSteps([
-        {
-          attachTo: {
-            element: this.$el.querySelector('.install-element'),
-            on: 'top',
-          },
-          buttons: [
-            {
-              action: function () {
-                return this.cancel();
-              },
-              secondary: true,
-              text: 'Exit',
-            },
-            {
-              action: function () {
-                return this.next();
-              },
-              text: 'Next',
-            },
-          ],
-          text: 'Install test',
-        },
-        {
-          attachTo: {
-            element: this.$el.querySelector('.usage-element'),
-            on: 'top',
-          },
-          buttons: [
-            {
-              action: function () {
-                return this.back();
-              },
-              secondary: true,
-              text: 'Back',
-            },
-            {
-              action: function () {
-                return this.next();
-              },
-              text: 'Next',
-            },
-          ],
-          text: 'Usage test',
-        },
-      ]);
-
-      tour.start();
-    });
-  },
-};
-</script>

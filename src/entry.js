@@ -1,18 +1,17 @@
 import Shepherd from 'shepherd.js';
 
+const shepherdKey = '$shepherd';
+// create and export composition API's composable function.
+export const useShepherd = (...args) => new Shepherd.Tour(...args);
 
-// install function executed by Vue.use()
-const install = function installVueShepherd(Vue) {
+const install = function installVueShepherd(app) {
   if (install.installed) return;
   install.installed = true;
-  Vue.prototype.$shepherd = (...args) => {
-    return new Shepherd.Tour(...args);
-  };
+
+  app.config.globalProperties[shepherdKey] = useShepherd;
 };
 
-const plugin = {
-  install
-};
+const plugin = { install };
 
 // To auto-install on non-es builds, when vue is found
 // eslint-disable-next-line no-redeclare
