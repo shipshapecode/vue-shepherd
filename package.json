@@ -43,7 +43,7 @@
     "@rollup/plugin-node-resolve": "^14.1.0",
     "@rollup/plugin-replace": "^4.0.0",
     "@vue/cli-plugin-babel": "^5.0.8",
-    "@vue/cli-plugin-e2e-cypress": "^5.0.4",
+    "@vue/cli-plugin-e2e-cypress": "^5.0.8",
     "@vue/cli-plugin-eslint": "^5.0.8",
     "@vue/cli-service": "^5.0.8",
     "@vue/compat": "^3.2.37",
@@ -54,7 +54,7 @@
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^9.4.0",
     "minimist": "^1.2.5",
-    "release-it": "^14.14.3",
+    "release-it": "^15.5.0",
     "release-it-lerna-changelog": "^4.0.1",
     "rollup": "^2.79.1",
     "rollup-plugin-babel": "^4.4.0",
@@ -98,9 +98,6 @@
   },
   "repository": "https://github.com/shipshapecode/vue-shepherd",
   "sideeffects": false,
-  "resolutions": {
-    "cypress": "^5.6.0"
-  },
   "volta": {
     "node": "16.17.1",
     "yarn": "1.22.10"
