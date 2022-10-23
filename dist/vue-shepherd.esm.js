@@ -6087,7 +6087,7 @@ Object.assign(Shepherd, {
   Step
 });
 
-const shepherdKey = "$shepherd"; // create and export composition API's composable function.
+const shepherdKey = '$shepherd'; // create and export composition API's composable function.
 
 const useShepherd = function () {
   for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {

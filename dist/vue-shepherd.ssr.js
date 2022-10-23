@@ -6085,7 +6085,7 @@ class Tour extends Evented {
 Object.assign(Shepherd, {
   Tour,
   Step
-});const shepherdKey = "$shepherd"; // create and export composition API's composable function.
+});const shepherdKey = '$shepherd'; // create and export composition API's composable function.
 
 const useShepherd = function () {
   for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
@@ -6111,9 +6111,9 @@ const plugin = {
 {
   let GlobalVue = null;
 
-  if (typeof window !== "undefined") {
+  if (typeof window !== 'undefined') {
     GlobalVue = window.Vue;
-  } else if (typeof global !== "undefined") {
+  } else if (typeof global !== 'undefined') {
     GlobalVue = global.Vue;
   }
 
