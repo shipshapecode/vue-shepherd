@@ -1,5 +1,5 @@
-import { createApp } from "vue";
-import Dev from "./serve.vue";
-import plugin from "@/entry";
+import { createApp } from 'vue';
+import Dev from './serve.vue';
+import plugin from '@/entry';
 
-createApp(Dev).use(plugin).mount("#app");
+createApp(Dev).use(plugin).mount('#app');

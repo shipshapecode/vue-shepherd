@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted } from "vue";
-import { useShepherd } from "@/entry.js";
+import { ref, onMounted } from 'vue';
+import { useShepherd } from '@/entry.js';
 
 const installElement = ref(null);
 const usageElement = ref(null);
@@ -14,7 +14,7 @@ const createTourSteps = () => {
     {
       attachTo: {
         element: installElement.value,
-        on: "top",
+        on: 'top',
       },
       buttons: [
         {
@@ -22,21 +22,21 @@ const createTourSteps = () => {
             return this.cancel();
           },
           secondary: true,
-          text: "Exit",
+          text: 'Exit',
         },
         {
           action: function () {
             return this.next();
           },
-          text: "Next",
+          text: 'Next',
         },
       ],
-      text: "Install test",
+      text: 'Install test',
     },
     {
       attachTo: {
         element: usageElement.value,
-        on: "top",
+        on: 'top',
       },
       buttons: [
         {
@@ -44,16 +44,16 @@ const createTourSteps = () => {
             return this.back();
           },
           secondary: true,
-          text: "Back",
+          text: 'Back',
         },
         {
           action: function () {
             return this.next();
           },
-          text: "Next",
+          text: 'Next',
         },
       ],
-      text: "Usage test",
+      text: 'Usage test',
     },
   ]);
 
