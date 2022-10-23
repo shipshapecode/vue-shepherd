@@ -1,4 +1,13 @@
 
+
+## v2.0.0 (2022-10-23)
+
+#### :boom: Breaking Change
+* [#99](https://github.com/shipshapecode/vue-shepherd/pull/99) Vue 3 Support ([@fech-dev](https://github.com/fech-dev))
+
+#### Committers: 1
+- Federico Mameli ([@fech-dev](https://github.com/fech-dev))
+
 ## v0.3.0 (2022-06-20)
 
 #### :boom: Breaking Change
