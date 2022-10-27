@@ -102,6 +102,13 @@ createApp().use(VueShepherdPlugin).mount('#app');
 </script>
 ```
 
+## SSR
+For server side rendering project, you should import the `vue-shepherd.ssr.js` file.
+
+```js
+import VueShepherd from 'vue-shepherd/dist/vue-shepherd.ssr.js';
+```
+
 ## Directives
 
 WIP
