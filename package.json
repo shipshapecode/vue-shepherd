@@ -19,8 +19,7 @@
     "start": "yarn serve",
     "test:e2e": "vue-cli-service test:e2e"
   },
-  "main": "dist/vue-shepherd.ssr.js",
-  "browser": "dist/vue-shepherd.min.js",
+  "main": "dist/vue-shepherd.esm.js",
   "module": "src/entry.js",
   "unpkg": "dist/vue-shepherd.min.js",
   "files": [
