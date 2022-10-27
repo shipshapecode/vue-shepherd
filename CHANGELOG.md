@@ -1,5 +1,14 @@
 
 
+
+## v2.0.1 (2022-10-27)
+
+#### :bug: Bug Fix
+* [#147](https://github.com/shipshapecode/vue-shepherd/pull/147) fix/import error ([@fech-dev](https://github.com/fech-dev))
+
+#### Committers: 1
+- Federico Mameli ([@fech-dev](https://github.com/fech-dev))
+
 ## v2.0.0 (2022-10-23)
 
 #### :boom: Breaking Change
