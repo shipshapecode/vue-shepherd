@@ -50,7 +50,7 @@
     "babel-eslint": "^10.1.0",
     "cross-env": "^7.0.2",
     "cypress": "^11.0.1",
-    "eslint": "^7.32.0",
+    "eslint": "^8.28.0",
     "eslint-plugin-vue": "^9.7.0",
     "minimist": "^1.2.5",
     "release-it": "^15.5.0",
