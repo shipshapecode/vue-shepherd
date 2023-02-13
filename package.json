@@ -52,7 +52,7 @@
     "cypress": "^12.5.1",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^9.9.0",
-    "minimist": "^1.2.5",
+    "minimist": "^1.2.8",
     "release-it": "^15.6.0",
     "release-it-lerna-changelog": "^5.0.0",
     "rollup": "^2.79.1",
