@@ -34,9 +34,10 @@
     "src"
   ],
   "dependencies": {
-    "shepherd.js": "^11.0.1"
+    "shepherd.js": "^11.1.0"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.21.3",
     "@rollup/plugin-alias": "^4.0.3",
     "@rollup/plugin-commonjs": "^24.0.1",
     "@rollup/plugin-node-resolve": "^15.0.1",
@@ -47,10 +48,9 @@
     "@vue/cli-service": "^5.0.8",
     "@vue/compat": "^3.2.47",
     "@vue/compiler-sfc": "^3.2.45",
-    "babel-eslint": "^10.1.0",
     "cross-env": "^7.0.2",
     "cypress": "^12.9.0",
-    "eslint": "^7.32.0",
+    "eslint": "^8.37.0",
     "eslint-plugin-vue": "^9.10.0",
     "minimist": "^1.2.8",
     "release-it": "^15.10.1",
