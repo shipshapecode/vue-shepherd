@@ -3961,12 +3961,7 @@ deepmerge@^1.5.2:
   resolved "https://registry.yarnpkg.com/deepmerge/-/deepmerge-1.5.2.tgz#10499d868844cdad4fee0842df8c7f6f0c95a753"
   integrity sha512-95k0GDqvBjZavkuvzx/YqVLv/6YYa17fz6ILMSf7neqQITCPbnfEnQvEgMPNjH4kgobe7+WIL0yJEHku+H3qtQ==
 
-deepmerge@^4.2.2:
-  version "4.2.2"
-  resolved "https://registry.yarnpkg.com/deepmerge/-/deepmerge-4.2.2.tgz#44d2ea3679b8f4d4ffba33f03d865fc1e7bf4955"
-  integrity sha512-FJ3UgI4gIl+PHZm53knsuSFpE+nESMr7M4v9QcgB7S63Kj/6WqMiFQJpBBYz1Pt+66bZpP3Q7Lye0Oo9MPKEdg==
-
-deepmerge@^4.3.1:
+deepmerge@^4.2.2, deepmerge@^4.3.1:
   version "4.3.1"
   resolved "https://registry.yarnpkg.com/deepmerge/-/deepmerge-4.3.1.tgz#44b5f2147cd3b00d4b56137685966f26fd25dd4a"
   integrity sha512-3sUqbMEc77XqpdNO7FRyRog+eW3ph+GYCbj+rK+uYyRMuwsVy0rMiVtPn+QJlKFvWP/1PYpapqYn0Me2knFn+A==
@@ -9079,10 +9074,10 @@ shelljs@0.8.5:
     interpret "^1.0.0"
     rechoir "^0.6.2"
 
-shepherd.js@^11.1.0:
-  version "11.1.0"
-  resolved "https://registry.yarnpkg.com/shepherd.js/-/shepherd.js-11.1.0.tgz#c7812d18a35c0d3cb74889dd0b3ae4ec0831ab66"
-  integrity sha512-uqONLaPvTi0yj9EYiWeChMCOcykmSX2Aviyik9SUK6fz41B895r4ISlF3vCQCIto4REuqYD9Ni+lty9mV3fA5A==
+shepherd.js@^11.1.1:
+  version "11.1.1"
+  resolved "https://registry.yarnpkg.com/shepherd.js/-/shepherd.js-11.1.1.tgz#70ce0e1c7605a389863dd3360e4ec8f88b24e79f"
+  integrity sha512-7nVEgLTZUu5qQCKTlzQeKL1AQd2rG9Y9iqzZUgGvCFwMUZZhfwtZ6eEyMWMYw0zl8qKjSrjgzxFOe+SpfO43aA==
   dependencies:
     "@floating-ui/dom" "^1.2.5"
     deepmerge "^4.3.1"
