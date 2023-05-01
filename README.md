@@ -91,11 +91,8 @@ createApp().use(VueShepherdPlugin).mount('#app');
       }
     },
 
-    created(){
-      this.createTour();
-    },
-
     mounted(){
+      this.createTour();
       this.tour.start();
     }
   });
