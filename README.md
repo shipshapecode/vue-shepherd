@@ -7,9 +7,7 @@
 [![npm version](https://badge.fury.io/js/vue-shepherd.svg)](http://badge.fury.io/js/vue-shepherd)
 ![Download count all time](https://img.shields.io/npm/dt/vue-shepherd.svg)
 [![npm](https://img.shields.io/npm/dm/vue-shepherd.svg)]()
-[![Build Status](https://travis-ci.org/shipshapecode/vue-shepherd.svg)](https://travis-ci.org/shipshapecode/vue-shepherd)
-[![Code Climate](https://codeclimate.com/github/shipshapecode/vue-shepherd/badges/gpa.svg)](https://codeclimate.com/github/shipshapecode/vue-shepherd)
-[![Test Coverage](https://codeclimate.com/github/shipshapecode/vue-shepherd/badges/coverage.svg)](https://codeclimate.com/github/shipshapecode/vue-shepherd/coverage)
+[![CI Build](https://github.com/shipshapecode/vue-shepherd/actions/workflows/main.yml/badge.svg)](https://github.com/shipshapecode/vue-shepherd/actions/workflows/main.yml)
 
 This is a Vue wrapper for the [Shepherd](https://github.com/shipshapecode/shepherd), site tour, library.
 
