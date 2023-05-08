@@ -53,7 +53,7 @@
     "eslint": "^8.39.0",
     "eslint-plugin-vue": "^9.11.0",
     "minimist": "^1.2.8",
-    "release-it": "^15.10.2",
+    "release-it": "^15.10.3",
     "release-it-lerna-changelog": "^5.0.0",
     "rollup": "^2.79.1",
     "rollup-plugin-babel": "^4.4.0",
