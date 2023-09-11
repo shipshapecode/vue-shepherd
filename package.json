@@ -50,7 +50,7 @@
     "@vue/compiler-sfc": "^3.3.2",
     "cross-env": "^7.0.2",
     "cypress": "^13.1.0",
-    "eslint": "^8.48.0",
+    "eslint": "^8.49.0",
     "eslint-plugin-vue": "^9.17.0",
     "minimist": "^1.2.8",
     "release-it": "^15.11.0",
