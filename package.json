@@ -1,6 +1,6 @@
 {
   "name": "vue-shepherd",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "A Vue wrapper for the site tour library Shepherd.",
   "author": {
     "name": "Robert Wagner",
@@ -29,10 +29,13 @@
     "dist/vue-shepherd.esm.js.map",
     "dist/vue-shepherd.min.js",
     "dist/vue-shepherd.ssr.js",
+    "dist/index.d.ts",
     "package.json",
     "README.md",
-    "src"
+    "src",
+    "tsconfig.json"
   ],
+  "types": "./dist/index.d.ts",
   "dependencies": {
     "shepherd.js": "^11.2.0"
   },
