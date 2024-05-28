@@ -1,114 +1,8 @@
-'use strict';Object.defineProperty(exports,'__esModule',{value:true});/*! shepherd.js 11.2.0 */
-
-var isMergeableObject = function isMergeableObject(value) {
-  return isNonNullObject(value) && !isSpecial(value);
-};
-function isNonNullObject(value) {
-  return !!value && typeof value === 'object';
-}
-function isSpecial(value) {
-  var stringValue = Object.prototype.toString.call(value);
-  return stringValue === '[object RegExp]' || stringValue === '[object Date]' || isReactElement(value);
-}
-
-// see https://github.com/facebook/react/blob/b5ac963fb791d1298e7f396236383bc955f916c1/src/isomorphic/classic/element/ReactElement.js#L21-L25
-var canUseSymbol = typeof Symbol === 'function' && Symbol.for;
-var REACT_ELEMENT_TYPE = canUseSymbol ? Symbol.for('react.element') : 0xeac7;
-function isReactElement(value) {
-  return value.$$typeof === REACT_ELEMENT_TYPE;
-}
-function emptyTarget(val) {
-  return Array.isArray(val) ? [] : {};
-}
-function cloneUnlessOtherwiseSpecified(value, options) {
-  return options.clone !== false && options.isMergeableObject(value) ? deepmerge(emptyTarget(value), value, options) : value;
-}
-function defaultArrayMerge(target, source, options) {
-  return target.concat(source).map(function (element) {
-    return cloneUnlessOtherwiseSpecified(element, options);
-  });
-}
-function getMergeFunction(key, options) {
-  if (!options.customMerge) {
-    return deepmerge;
-  }
-  var customMerge = options.customMerge(key);
-  return typeof customMerge === 'function' ? customMerge : deepmerge;
-}
-function getEnumerableOwnPropertySymbols(target) {
-  return Object.getOwnPropertySymbols ? Object.getOwnPropertySymbols(target).filter(function (symbol) {
-    return Object.propertyIsEnumerable.call(target, symbol);
-  }) : [];
-}
-function getKeys(target) {
-  return Object.keys(target).concat(getEnumerableOwnPropertySymbols(target));
-}
-function propertyIsOnObject(object, property) {
-  try {
-    return property in object;
-  } catch (_) {
-    return false;
-  }
-}
-
-// Protects from prototype poisoning and unexpected merging up the prototype chain.
-function propertyIsUnsafe(target, key) {
-  return propertyIsOnObject(target, key) // Properties are safe to merge if they don't exist in the target yet,
-  && !(Object.hasOwnProperty.call(target, key) // unsafe if they exist up the prototype chain,
-  && Object.propertyIsEnumerable.call(target, key)); // and also unsafe if they're nonenumerable.
-}
-
-function mergeObject(target, source, options) {
-  var destination = {};
-  if (options.isMergeableObject(target)) {
-    getKeys(target).forEach(function (key) {
-      destination[key] = cloneUnlessOtherwiseSpecified(target[key], options);
-    });
-  }
-  getKeys(source).forEach(function (key) {
-    if (propertyIsUnsafe(target, key)) {
-      return;
-    }
-    if (propertyIsOnObject(target, key) && options.isMergeableObject(source[key])) {
-      destination[key] = getMergeFunction(key, options)(target[key], source[key], options);
-    } else {
-      destination[key] = cloneUnlessOtherwiseSpecified(source[key], options);
-    }
-  });
-  return destination;
-}
-function deepmerge(target, source, options) {
-  options = options || {};
-  options.arrayMerge = options.arrayMerge || defaultArrayMerge;
-  options.isMergeableObject = options.isMergeableObject || isMergeableObject;
-  // cloneUnlessOtherwiseSpecified is added to `options` so that custom arrayMerge()
-  // implementations can use it. The caller may not replace it.
-  options.cloneUnlessOtherwiseSpecified = cloneUnlessOtherwiseSpecified;
-  var sourceIsArray = Array.isArray(source);
-  var targetIsArray = Array.isArray(target);
-  var sourceAndTargetTypesMatch = sourceIsArray === targetIsArray;
-  if (!sourceAndTargetTypesMatch) {
-    return cloneUnlessOtherwiseSpecified(source, options);
-  } else if (sourceIsArray) {
-    return options.arrayMerge(target, source, options);
-  } else {
-    return mergeObject(target, source, options);
-  }
-}
-deepmerge.all = function deepmergeAll(array, options) {
-  if (!Array.isArray(array)) {
-    throw new Error('first argument should be an array');
-  }
-  return array.reduce(function (prev, next) {
-    return deepmerge(prev, next, options);
-  }, {});
-};
-var deepmerge_1 = deepmerge;
-var cjs = deepmerge_1;
+'use strict';Object.defineProperty(exports,'__esModule',{value:true});/*! shepherd.js 12.0.4 */
 
 /**
  * Checks if `value` is classified as an `Element`.
- * @param {*} value The param to check if it is an Element
+ * @param value The param to check if it is an Element
  */
 function isElement$1(value) {
   return value instanceof Element;
@@ -116,7 +10,7 @@ function isElement$1(value) {
 
 /**
  * Checks if `value` is classified as an `HTMLElement`.
- * @param {*} value The param to check if it is an HTMLElement
+ * @param value The param to check if it is an HTMLElement
  */
 function isHTMLElement$1(value) {
   return value instanceof HTMLElement;
@@ -124,15 +18,16 @@ function isHTMLElement$1(value) {
 
 /**
  * Checks if `value` is classified as a `Function` object.
- * @param {*} value The param to check if it is a function
+ * @param value The param to check if it is a function
  */
+// eslint-disable-next-line @typescript-eslint/ban-types
 function isFunction(value) {
   return typeof value === 'function';
 }
 
 /**
  * Checks if `value` is classified as a `String` object.
- * @param {*} value The param to check if it is a string
+ * @param value The param to check if it is a string
  */
 function isString(value) {
   return typeof value === 'string';
@@ -140,30 +35,59 @@ function isString(value) {
 
 /**
  * Checks if `value` is undefined.
- * @param {*} value The param to check if it is undefined
+ * @param value The param to check if it is undefined
  */
 function isUndefined(value) {
   return value === undefined;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 class Evented {
+  /**
+   * Adds an event listener for the given event string.
+   *
+   * @param {string} event
+   * @param {Function} handler
+   * @param ctx
+   * @param {boolean} once
+   * @returns
+   */
   on(event, handler, ctx, once = false) {
+    var _this$bindings$event;
     if (isUndefined(this.bindings)) {
       this.bindings = {};
     }
     if (isUndefined(this.bindings[event])) {
       this.bindings[event] = [];
     }
-    this.bindings[event].push({
+    (_this$bindings$event = this.bindings[event]) == null || _this$bindings$event.push({
       handler,
       ctx,
       once
     });
     return this;
   }
+
+  /**
+   * Adds an event listener that only fires once for the given event string.
+   *
+   * @param {string} event
+   * @param {Function} handler
+   * @param ctx
+   * @returns
+   */
   once(event, handler, ctx) {
     return this.on(event, handler, ctx, true);
   }
+
+  /**
+   * Removes an event listener for the given event string.
+   *
+   * @param {string} event
+   * @param {Function} handler
+   * @returns
+   */
   off(event, handler) {
     if (isUndefined(this.bindings) || isUndefined(this.bindings[event])) {
       return this;
@@ -171,17 +95,28 @@ class Evented {
     if (isUndefined(handler)) {
       delete this.bindings[event];
     } else {
-      this.bindings[event].forEach((binding, index) => {
+      var _this$bindings$event2;
+      (_this$bindings$event2 = this.bindings[event]) == null || _this$bindings$event2.forEach((binding, index) => {
         if (binding.handler === handler) {
-          this.bindings[event].splice(index, 1);
+          var _this$bindings$event3;
+          (_this$bindings$event3 = this.bindings[event]) == null || _this$bindings$event3.splice(index, 1);
         }
       });
     }
     return this;
   }
+
+  /**
+   * Triggers an event listener for the given event string.
+   *
+   * @param {string} event
+   * @returns
+   */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   trigger(event, ...args) {
     if (!isUndefined(this.bindings) && this.bindings[event]) {
-      this.bindings[event].forEach((binding, index) => {
+      var _this$bindings$event4;
+      (_this$bindings$event4 = this.bindings[event]) == null || _this$bindings$event4.forEach((binding, index) => {
         const {
           ctx,
           handler,
@@ -190,7 +125,8 @@ class Evented {
         const context = ctx || this;
         handler.apply(context, args);
         if (once) {
-          this.bindings[event].splice(index, 1);
+          var _this$bindings$event5;
+          (_this$bindings$event5 = this.bindings[event]) == null || _this$bindings$event5.splice(index, 1);
         }
       });
     }
@@ -198,12 +134,459 @@ class Evented {
   }
 }
 
+function _AsyncGenerator(e) {
+  var r, t;
+  function resume(r, t) {
+    try {
+      var n = e[r](t),
+        o = n.value,
+        u = o instanceof _OverloadYield;
+      Promise.resolve(u ? o.v : o).then(function (t) {
+        if (u) {
+          var i = "return" === r ? "return" : "next";
+          if (!o.k || t.done) return resume(i, t);
+          t = e[i](t).value;
+        }
+        settle(n.done ? "return" : "normal", t);
+      }, function (e) {
+        resume("throw", e);
+      });
+    } catch (e) {
+      settle("throw", e);
+    }
+  }
+  function settle(e, n) {
+    switch (e) {
+      case "return":
+        r.resolve({
+          value: n,
+          done: !0
+        });
+        break;
+      case "throw":
+        r.reject(n);
+        break;
+      default:
+        r.resolve({
+          value: n,
+          done: !1
+        });
+    }
+    (r = r.next) ? resume(r.key, r.arg) : t = null;
+  }
+  this._invoke = function (e, n) {
+    return new Promise(function (o, u) {
+      var i = {
+        key: e,
+        arg: n,
+        resolve: o,
+        reject: u,
+        next: null
+      };
+      t ? t = t.next = i : (r = t = i, resume(e, n));
+    });
+  }, "function" != typeof e.return && (this.return = void 0);
+}
+_AsyncGenerator.prototype["function" == typeof Symbol && Symbol.asyncIterator || "@@asyncIterator"] = function () {
+  return this;
+}, _AsyncGenerator.prototype.next = function (e) {
+  return this._invoke("next", e);
+}, _AsyncGenerator.prototype.throw = function (e) {
+  return this._invoke("throw", e);
+}, _AsyncGenerator.prototype.return = function (e) {
+  return this._invoke("return", e);
+};
+function _OverloadYield(t, e) {
+  this.v = t, this.k = e;
+}
+function _awaitAsyncGenerator(e) {
+  return new _OverloadYield(e, 0);
+}
+function _wrapAsyncGenerator(fn) {
+  return function () {
+    return new _AsyncGenerator(fn.apply(this, arguments));
+  };
+}
+function _extends() {
+  _extends = Object.assign ? Object.assign.bind() : function (target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var source = arguments[i];
+      for (var key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+          target[key] = source[key];
+        }
+      }
+    }
+    return target;
+  };
+  return _extends.apply(this, arguments);
+}
+function _objectWithoutPropertiesLoose(source, excluded) {
+  if (source == null) return {};
+  var target = {};
+  for (var key in source) {
+    if (Object.prototype.hasOwnProperty.call(source, key)) {
+      if (excluded.indexOf(key) >= 0) continue;
+      target[key] = source[key];
+    }
+  }
+  return target;
+}
+
+/**
+ * Special values that tell deepmerge to perform a certain action.
+ */
+const actions = {
+  defaultMerge: Symbol("deepmerge-ts: default merge"),
+  skip: Symbol("deepmerge-ts: skip")
+};
+/**
+ * Special values that tell deepmergeInto to perform a certain action.
+ */
+({
+  defaultMerge: actions.defaultMerge
+});
+
+/**
+ * The default function to update meta data.
+ */
+function defaultMetaDataUpdater(previousMeta, metaMeta) {
+  return metaMeta;
+}
+
+/**
+ * Get the type of the given object.
+ *
+ * @param object - The object to get the type of.
+ * @returns The type of the given object.
+ */
+function getObjectType(object) {
+  if (typeof object !== "object" || object === null) {
+    return 0 /* ObjectType.NOT */;
+  }
+  if (Array.isArray(object)) {
+    return 2 /* ObjectType.ARRAY */;
+  }
+  if (isRecord(object)) {
+    return 1 /* ObjectType.RECORD */;
+  }
+  if (object instanceof Set) {
+    return 3 /* ObjectType.SET */;
+  }
+  if (object instanceof Map) {
+    return 4 /* ObjectType.MAP */;
+  }
+  return 5 /* ObjectType.OTHER */;
+}
+/**
+ * Get the keys of the given objects including symbol keys.
+ *
+ * Note: Only keys to enumerable properties are returned.
+ *
+ * @param objects - An array of objects to get the keys of.
+ * @returns A set containing all the keys of all the given objects.
+ */
+function getKeys(objects) {
+  const keys = new Set();
+  /* eslint-disable functional/no-loop-statements, functional/no-expression-statements -- using a loop here is more efficient. */
+  for (const object of objects) {
+    for (const key of [...Object.keys(object), ...Object.getOwnPropertySymbols(object)]) {
+      keys.add(key);
+    }
+  }
+  /* eslint-enable functional/no-loop-statements, functional/no-expression-statements */
+  return keys;
+}
+/**
+ * Does the given object have the given property.
+ *
+ * @param object - The object to test.
+ * @param property - The property to test.
+ * @returns Whether the object has the property.
+ */
+function objectHasProperty(object, property) {
+  return typeof object === "object" && Object.prototype.propertyIsEnumerable.call(object, property);
+}
+/**
+ * Get an iterable object that iterates over the given iterables.
+ */
+function getIterableOfIterables(iterables) {
+  return {
+    // eslint-disable-next-line functional/functional-parameters
+    *[Symbol.iterator]() {
+      // eslint-disable-next-line functional/no-loop-statements
+      for (const iterable of iterables) {
+        // eslint-disable-next-line functional/no-loop-statements
+        for (const value of iterable) {
+          yield value;
+        }
+      }
+    }
+  };
+}
+const validRecordToStringValues = new Set(["[object Object]", "[object Module]"]);
+/**
+ * Does the given object appear to be a record.
+ */
+function isRecord(value) {
+  // All records are objects.
+  if (!validRecordToStringValues.has(Object.prototype.toString.call(value))) {
+    return false;
+  }
+  const {
+    constructor
+  } = value;
+  // If has modified constructor.
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  if (constructor === undefined) {
+    return true;
+  }
+  // eslint-disable-next-line prefer-destructuring
+  const prototype = constructor.prototype;
+  // If has modified prototype.
+  if (prototype === null || typeof prototype !== "object" || !validRecordToStringValues.has(Object.prototype.toString.call(prototype))) {
+    return false;
+  }
+  // If constructor does not have an Object-specific method.
+  // eslint-disable-next-line sonarjs/prefer-single-boolean-return, no-prototype-builtins
+  if (!prototype.hasOwnProperty("isPrototypeOf")) {
+    return false;
+  }
+  // Most likely a record.
+  return true;
+}
+
+/**
+ * The default strategy to merge records.
+ *
+ * @param values - The records.
+ */
+function mergeRecords$2(values, utils, meta) {
+  const result = {};
+  /* eslint-disable functional/no-loop-statements, functional/no-conditional-statements, functional/no-expression-statements, functional/immutable-data -- using imperative code here is more performant. */
+  for (const key of getKeys(values)) {
+    const propValues = [];
+    for (const value of values) {
+      if (objectHasProperty(value, key)) {
+        propValues.push(value[key]);
+      }
+    }
+    if (propValues.length === 0) {
+      continue;
+    }
+    const updatedMeta = utils.metaDataUpdater(meta, {
+      key,
+      parents: values
+    });
+    const propertyResult = mergeUnknowns(propValues, utils, updatedMeta);
+    if (propertyResult === actions.skip) {
+      continue;
+    }
+    if (key === "__proto__") {
+      Object.defineProperty(result, key, {
+        value: propertyResult,
+        configurable: true,
+        enumerable: true,
+        writable: true
+      });
+    } else {
+      result[key] = propertyResult;
+    }
+  }
+  /* eslint-enable functional/no-loop-statements, functional/no-conditional-statements, functional/no-expression-statements, functional/immutable-data */
+  return result;
+}
+/**
+ * The default strategy to merge arrays.
+ *
+ * @param values - The arrays.
+ */
+function mergeArrays$2(values) {
+  return values.flat();
+}
+/**
+ * The default strategy to merge sets.
+ *
+ * @param values - The sets.
+ */
+function mergeSets$2(values) {
+  return new Set(getIterableOfIterables(values));
+}
+/**
+ * The default strategy to merge maps.
+ *
+ * @param values - The maps.
+ */
+function mergeMaps$2(values) {
+  return new Map(getIterableOfIterables(values));
+}
+/**
+ * Get the last value in the given array.
+ */
+function mergeOthers$2(values) {
+  return values.at(-1);
+}
+var defaultMergeFunctions = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  mergeArrays: mergeArrays$2,
+  mergeMaps: mergeMaps$2,
+  mergeOthers: mergeOthers$2,
+  mergeRecords: mergeRecords$2,
+  mergeSets: mergeSets$2
+});
+
+/**
+ * Deeply merge objects.
+ *
+ * @param objects - The objects to merge.
+ */
+function deepmerge(
+// eslint-disable-next-line functional/functional-parameters
+...objects) {
+  return deepmergeCustom({})(...objects);
+}
+function deepmergeCustom(options, rootMetaData) {
+  const utils = getUtils(options, customizedDeepmerge);
+  /**
+   * The customized deepmerge function.
+   */
+  function customizedDeepmerge(
+  // eslint-disable-next-line functional/functional-parameters
+  ...objects) {
+    return mergeUnknowns(objects, utils, rootMetaData);
+  }
+  return customizedDeepmerge;
+}
+/**
+ * The the utils that are available to the merge functions.
+ *
+ * @param options - The options the user specified
+ */
+function getUtils(options, customizedDeepmerge) {
+  var _options$metaDataUpda, _options$enableImplic;
+  return {
+    defaultMergeFunctions,
+    mergeFunctions: _extends({}, defaultMergeFunctions, Object.fromEntries(Object.entries(options).filter(([key, option]) => Object.hasOwn(defaultMergeFunctions, key)).map(([key, option]) => option === false ? [key, mergeOthers$2] : [key, option]))),
+    metaDataUpdater: (_options$metaDataUpda = options.metaDataUpdater) != null ? _options$metaDataUpda : defaultMetaDataUpdater,
+    deepmerge: customizedDeepmerge,
+    useImplicitDefaultMerging: (_options$enableImplic = options.enableImplicitDefaultMerging) != null ? _options$enableImplic : false,
+    actions
+  };
+}
+/**
+ * Merge unknown things.
+ *
+ * @param values - The values.
+ */
+function mergeUnknowns(values, utils, meta) {
+  if (values.length === 0) {
+    return undefined;
+  }
+  if (values.length === 1) {
+    return mergeOthers$1(values, utils, meta);
+  }
+  const type = getObjectType(values[0]);
+  /* eslint-disable functional/no-loop-statements, functional/no-conditional-statements -- using imperative code here is more performant. */
+  if (type !== 0 /* ObjectType.NOT */ && type !== 5 /* ObjectType.OTHER */) {
+    for (let m_index = 1; m_index < values.length; m_index++) {
+      if (getObjectType(values[m_index]) === type) {
+        continue;
+      }
+      return mergeOthers$1(values, utils, meta);
+    }
+  }
+  /* eslint-enable functional/no-loop-statements, functional/no-conditional-statements */
+  switch (type) {
+    case 1 /* ObjectType.RECORD */:
+      {
+        return mergeRecords$1(values, utils, meta);
+      }
+    case 2 /* ObjectType.ARRAY */:
+      {
+        return mergeArrays$1(values, utils, meta);
+      }
+    case 3 /* ObjectType.SET */:
+      {
+        return mergeSets$1(values, utils, meta);
+      }
+    case 4 /* ObjectType.MAP */:
+      {
+        return mergeMaps$1(values, utils, meta);
+      }
+    default:
+      {
+        return mergeOthers$1(values, utils, meta);
+      }
+  }
+}
+/**
+ * Merge records.
+ *
+ * @param values - The records.
+ */
+function mergeRecords$1(values, utils, meta) {
+  const result = utils.mergeFunctions.mergeRecords(values, utils, meta);
+  if (result === actions.defaultMerge || utils.useImplicitDefaultMerging && result === undefined && utils.mergeFunctions.mergeRecords !== utils.defaultMergeFunctions.mergeRecords) {
+    return utils.defaultMergeFunctions.mergeRecords(values, utils, meta);
+  }
+  return result;
+}
+/**
+ * Merge arrays.
+ *
+ * @param values - The arrays.
+ */
+function mergeArrays$1(values, utils, meta) {
+  const result = utils.mergeFunctions.mergeArrays(values, utils, meta);
+  if (result === actions.defaultMerge || utils.useImplicitDefaultMerging && result === undefined && utils.mergeFunctions.mergeArrays !== utils.defaultMergeFunctions.mergeArrays) {
+    return utils.defaultMergeFunctions.mergeArrays(values);
+  }
+  return result;
+}
+/**
+ * Merge sets.
+ *
+ * @param values - The sets.
+ */
+function mergeSets$1(values, utils, meta) {
+  const result = utils.mergeFunctions.mergeSets(values, utils, meta);
+  if (result === actions.defaultMerge || utils.useImplicitDefaultMerging && result === undefined && utils.mergeFunctions.mergeSets !== utils.defaultMergeFunctions.mergeSets) {
+    return utils.defaultMergeFunctions.mergeSets(values);
+  }
+  return result;
+}
+/**
+ * Merge maps.
+ *
+ * @param values - The maps.
+ */
+function mergeMaps$1(values, utils, meta) {
+  const result = utils.mergeFunctions.mergeMaps(values, utils, meta);
+  if (result === actions.defaultMerge || utils.useImplicitDefaultMerging && result === undefined && utils.mergeFunctions.mergeMaps !== utils.defaultMergeFunctions.mergeMaps) {
+    return utils.defaultMergeFunctions.mergeMaps(values);
+  }
+  return result;
+}
+/**
+ * Merge other things.
+ *
+ * @param values - The other things.
+ */
+function mergeOthers$1(values, utils, meta) {
+  const result = utils.mergeFunctions.mergeOthers(values, utils, meta);
+  if (result === actions.defaultMerge || utils.useImplicitDefaultMerging && result === undefined && utils.mergeFunctions.mergeOthers !== utils.defaultMergeFunctions.mergeOthers) {
+    return utils.defaultMergeFunctions.mergeOthers(values);
+  }
+  return result;
+}
+
 /**
  * Binds all the methods on a JS Class to the `this` context of the class.
  * Adapted from https://github.com/sindresorhus/auto-bind
- * @param {object} self The `this` context of the class
- * @return {object} The `this` context of the class
+ * @param self The `this` context of the class
+ * @return The `this` context of the class
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function autoBind(self) {
   const keys = Object.getOwnPropertyNames(self.constructor.prototype);
   for (let i = 0; i < keys.length; i++) {
@@ -218,12 +601,11 @@ function autoBind(self) {
 
 /**
  * Sets up the handler to determine if we should advance the tour
- * @param {string} selector
- * @param {Step} step The step instance
- * @return {Function}
+ * @param step The step instance
+ * @param selector
  * @private
  */
-function _setupAdvanceOnHandler(selector, step) {
+function _setupAdvanceOnHandler(step, selector) {
   return event => {
     if (step.isOpen()) {
       const targetIsEl = step.el && event.currentTarget === step.el;
@@ -237,7 +619,7 @@ function _setupAdvanceOnHandler(selector, step) {
 
 /**
  * Bind the event handler for advanceOn
- * @param {Step} step The step instance
+ * @param step The step instance
  */
 function bindAdvance(step) {
   // An empty selector matches the step element
@@ -246,18 +628,17 @@ function bindAdvance(step) {
     selector
   } = step.options.advanceOn || {};
   if (event) {
-    const handler = _setupAdvanceOnHandler(selector, step);
+    const handler = _setupAdvanceOnHandler(step, selector);
 
     // TODO: this should also bind/unbind on show/hide
-    let el;
-    try {
+    let el = null;
+    if (!isUndefined(selector)) {
       el = document.querySelector(selector);
-    } catch (e) {
-      // TODO
+      if (!el) {
+        return console.error(`No element was found for the selector supplied to advanceOn: ${selector}`);
+      }
     }
-    if (!isUndefined(selector) && !el) {
-      return console.error(`No element was found for the selector supplied to advanceOn: ${selector}`);
-    } else if (el) {
+    if (el) {
       el.addEventListener(event, handler);
       step.on('destroy', () => {
         return el.removeEventListener(event, handler);
@@ -273,10 +654,17 @@ function bindAdvance(step) {
   }
 }
 
+class StepNoOp {
+  constructor(_options) {}
+}
+class TourNoOp {
+  constructor(_tour, _options) {}
+}
+
 /**
  * Ensure class prefix ends in `-`
- * @param {string} prefix The prefix to prepend to the class names generated by nano-css
- * @return {string} The prefix ending in `-`
+ * @param prefix - The prefix to prepend to the class names generated by nano-css
+ * @return The prefix ending in `-`
  */
 function normalizePrefix(prefix) {
   if (!isString(prefix) || prefix === '') {
@@ -287,7 +675,7 @@ function normalizePrefix(prefix) {
 
 /**
  * Resolves attachTo options, converting element option value to a qualified HTMLElement.
- * @param {Step} step The step instance
+ * @param step - The step instance
  * @returns {{}|{element, on}}
  * `element` is a qualified HTML Element
  * `on` is a string position value
@@ -317,8 +705,6 @@ function parseAttachTo(step) {
 /**
  * Checks if the step should be centered or not. Does not trigger attachTo.element evaluation, making it a pure
  * alternative for the deprecated step.isCentered() method.
- * @param resolvedAttachToOptions
- * @returns {boolean}
  */
 function shouldCenterStep(resolvedAttachToOptions) {
   if (resolvedAttachToOptions === undefined || resolvedAttachToOptions === null) {
@@ -329,7 +715,6 @@ function shouldCenterStep(resolvedAttachToOptions) {
 
 /**
  * Create a unique id for steps, tours, modals, etc
- * @return {string}
  */
 function uuid() {
   let d = Date.now();
@@ -338,33 +723,6 @@ function uuid() {
     d = Math.floor(d / 16);
     return (c == 'x' ? r : r & 0x3 | 0x8).toString(16);
   });
-}
-
-function _extends() {
-  _extends = Object.assign ? Object.assign.bind() : function (target) {
-    for (var i = 1; i < arguments.length; i++) {
-      var source = arguments[i];
-      for (var key in source) {
-        if (Object.prototype.hasOwnProperty.call(source, key)) {
-          target[key] = source[key];
-        }
-      }
-    }
-    return target;
-  };
-  return _extends.apply(this, arguments);
-}
-function _objectWithoutPropertiesLoose(source, excluded) {
-  if (source == null) return {};
-  var target = {};
-  var sourceKeys = Object.keys(source);
-  var key, i;
-  for (i = 0; i < sourceKeys.length; i++) {
-    key = sourceKeys[i];
-    if (excluded.indexOf(key) >= 0) continue;
-    target[key] = source[key];
-  }
-  return target;
 }
 
 const min = Math.min;
@@ -545,7 +903,7 @@ function computeCoordsFromPlacement(_ref, placement, rtl) {
 
 /**
  * Computes the `x` and `y` coordinates that will place the floating element
- * next to a reference element when it is given a certain positioning strategy.
+ * next to a given reference element.
  *
  * This export does not have any `platform` interface logic. You will need to
  * write one for the platform you are using Floating UI with.
@@ -619,7 +977,6 @@ const computePosition$1 = async (reference, floating, config) => {
         } = computeCoordsFromPlacement(rects, statefulPlacement, rtl));
       }
       i = -1;
-      continue;
     }
   }
   return {
@@ -681,6 +1038,7 @@ async function detectOverflow(state, options) {
     y: 1
   };
   const elementClientRect = rectToClientRect(platform.convertOffsetParentRelativeRectToViewportRelativeRect ? await platform.convertOffsetParentRelativeRectToViewportRelativeRect({
+    elements,
     rect,
     offsetParent,
     strategy
@@ -698,7 +1056,7 @@ async function detectOverflow(state, options) {
  * appears centered to the reference element.
  * @see https://floating-ui.com/docs/arrow
  */
-const arrow = options => ({
+const arrow$1 = options => ({
   name: 'arrow',
   options,
   async fn(state) {
@@ -708,7 +1066,8 @@ const arrow = options => ({
       placement,
       rects,
       platform,
-      elements
+      elements,
+      middlewareData
     } = state;
     // Since `element` is required, we don't Partial<> the type.
     const {
@@ -756,16 +1115,19 @@ const arrow = options => ({
 
     // If the reference is small enough that the arrow's padding causes it to
     // to point to nothing for an aligned placement, adjust the offset of the
-    // floating element itself. This stops `shift()` from taking action, but can
-    // be worked around by calling it again after the `arrow()` if desired.
-    const shouldAddOffset = getAlignment(placement) != null && center != offset && rects.reference[length] / 2 - (center < min$1 ? minPadding : maxPadding) - arrowDimensions[length] / 2 < 0;
-    const alignmentOffset = shouldAddOffset ? center < min$1 ? min$1 - center : max - center : 0;
+    // floating element itself. To ensure `shift()` continues to take action,
+    // a single reset is performed when this is true.
+    const shouldAddOffset = !middlewareData.arrow && getAlignment(placement) != null && center !== offset && rects.reference[length] / 2 - (center < min$1 ? minPadding : maxPadding) - arrowDimensions[length] / 2 < 0;
+    const alignmentOffset = shouldAddOffset ? center < min$1 ? center - min$1 : center - max : 0;
     return {
-      [axis]: coords[axis] - alignmentOffset,
-      data: {
+      [axis]: coords[axis] + alignmentOffset,
+      data: _extends({
         [axis]: offset,
-        centerOffset: center - offset + alignmentOffset
-      }
+        centerOffset: center - offset - alignmentOffset
+      }, shouldAddOffset && {
+        alignmentOffset
+      }),
+      reset: shouldAddOffset
     };
   }
 });
@@ -776,7 +1138,7 @@ const arrow = options => ({
  * clipping boundary. Alternative to `autoPlacement`.
  * @see https://floating-ui.com/docs/flip
  */
-const flip = function flip(options) {
+const flip$1 = function flip(options) {
   if (options === void 0) {
     options = {};
   }
@@ -784,7 +1146,7 @@ const flip = function flip(options) {
     name: 'flip',
     options,
     async fn(state) {
-      var _middlewareData$flip;
+      var _middlewareData$arrow, _middlewareData$flip;
       const {
         placement,
         middlewareData,
@@ -803,6 +1165,14 @@ const flip = function flip(options) {
           flipAlignment = true
         } = _evaluate2,
         detectOverflowOptions = _objectWithoutPropertiesLoose(_evaluate2, _excluded2);
+
+      // If a reset by the arrow was caused due to an alignment offset being
+      // added, we should skip any logic now since `flip()` has already done its
+      // work.
+      // https://github.com/floating-ui/floating-ui/issues/2549#issuecomment-1719601643
+      if ((_middlewareData$arrow = middlewareData.arrow) != null && _middlewareData$arrow.alignmentOffset) {
+        return {};
+      }
       const side = getSide(placement);
       const isBasePlacement = getSide(initialPlacement) === initialPlacement;
       const rtl = await (platform.isRTL == null ? void 0 : platform.isRTL(elements.floating));
@@ -883,7 +1253,7 @@ const flip = function flip(options) {
  * keep it in view when it will overflow the clipping boundary.
  * @see https://floating-ui.com/docs/shift
  */
-const shift = function shift(options) {
+const shift$1 = function shift(options) {
   if (options === void 0) {
     options = {};
   }
@@ -953,7 +1323,7 @@ const shift = function shift(options) {
 /**
  * Built-in `limiter` that will stop `shift()` at a certain point.
  */
-const limitShift = function limitShift(options) {
+const limitShift$1 = function limitShift(options) {
   if (options === void 0) {
     options = {};
   }
@@ -1029,7 +1399,7 @@ function getNodeName(node) {
 }
 function getWindow(node) {
   var _node$ownerDocument;
-  return (node == null ? void 0 : (_node$ownerDocument = node.ownerDocument) == null ? void 0 : _node$ownerDocument.defaultView) || window;
+  return (node == null || (_node$ownerDocument = node.ownerDocument) == null ? void 0 : _node$ownerDocument.defaultView) || window;
 }
 function getDocumentElement(node) {
   var _ref;
@@ -1128,18 +1498,21 @@ function getNearestOverflowAncestor(node) {
   }
   return getNearestOverflowAncestor(parentNode);
 }
-function getOverflowAncestors(node, list) {
+function getOverflowAncestors(node, list, traverseIframes) {
   var _node$ownerDocument2;
   if (list === void 0) {
     list = [];
+  }
+  if (traverseIframes === void 0) {
+    traverseIframes = true;
   }
   const scrollableAncestor = getNearestOverflowAncestor(node);
   const isBody = scrollableAncestor === ((_node$ownerDocument2 = node.ownerDocument) == null ? void 0 : _node$ownerDocument2.body);
   const win = getWindow(scrollableAncestor);
   if (isBody) {
-    return list.concat(win, win.visualViewport || [], isOverflowElement(scrollableAncestor) ? scrollableAncestor : []);
+    return list.concat(win, win.visualViewport || [], isOverflowElement(scrollableAncestor) ? scrollableAncestor : [], win.frameElement && traverseIframes ? getOverflowAncestors(win.frameElement) : []);
   }
-  return list.concat(scrollableAncestor, getOverflowAncestors(scrollableAncestor));
+  return list.concat(scrollableAncestor, getOverflowAncestors(scrollableAncestor, [], traverseIframes));
 }
 
 function getCssDimensions(element) {
@@ -1239,8 +1612,9 @@ function getBoundingClientRect(element, includeScale, isFixedStrategy, offsetPar
   if (domElement) {
     const win = getWindow(domElement);
     const offsetWin = offsetParent && isElement(offsetParent) ? getWindow(offsetParent) : offsetParent;
-    let currentIFrame = win.frameElement;
-    while (currentIFrame && offsetParent && offsetWin !== win) {
+    let currentWin = win;
+    let currentIFrame = currentWin.frameElement;
+    while (currentIFrame && offsetParent && offsetWin !== currentWin) {
       const iframeScale = getScale(currentIFrame);
       const iframeRect = currentIFrame.getBoundingClientRect();
       const css = getComputedStyle(currentIFrame);
@@ -1252,7 +1626,8 @@ function getBoundingClientRect(element, includeScale, isFixedStrategy, offsetPar
       height *= iframeScale.y;
       x += left;
       y += top;
-      currentIFrame = getWindow(currentIFrame).frameElement;
+      currentWin = getWindow(currentIFrame);
+      currentIFrame = currentWin.frameElement;
     }
   }
   return rectToClientRect({
@@ -1262,15 +1637,27 @@ function getBoundingClientRect(element, includeScale, isFixedStrategy, offsetPar
     y
   });
 }
+const topLayerSelectors = [':popover-open', ':modal'];
+function isTopLayer(floating) {
+  return topLayerSelectors.some(selector => {
+    try {
+      return floating.matches(selector);
+    } catch (e) {
+      return false;
+    }
+  });
+}
 function convertOffsetParentRelativeRectToViewportRelativeRect(_ref) {
   let {
+    elements,
     rect,
     offsetParent,
     strategy
   } = _ref;
-  const isOffsetParentAnElement = isHTMLElement(offsetParent);
+  const isFixed = strategy === 'fixed';
   const documentElement = getDocumentElement(offsetParent);
-  if (offsetParent === documentElement) {
+  const topLayer = elements ? isTopLayer(elements.floating) : false;
+  if (offsetParent === documentElement || topLayer && isFixed) {
     return rect;
   }
   let scroll = {
@@ -1279,7 +1666,8 @@ function convertOffsetParentRelativeRectToViewportRelativeRect(_ref) {
   };
   let scale = createCoords(1);
   const offsets = createCoords(0);
-  if (isOffsetParentAnElement || !isOffsetParentAnElement && strategy !== 'fixed') {
+  const isOffsetParentAnElement = isHTMLElement(offsetParent);
+  if (isOffsetParentAnElement || !isOffsetParentAnElement && !isFixed) {
     if (getNodeName(offsetParent) !== 'body' || isOverflowElement(documentElement)) {
       scroll = getNodeScroll(offsetParent);
     }
@@ -1401,7 +1789,7 @@ function getClippingElementAncestors(element, cache) {
   if (cachedResult) {
     return cachedResult;
   }
-  let result = getOverflowAncestors(element).filter(el => isElement(el) && getNodeName(el) !== 'body');
+  let result = getOverflowAncestors(element, [], false).filter(el => isElement(el) && getNodeName(el) !== 'body');
   let currentContainingBlockComputedStyle = null;
   const elementIsFixed = getComputedStyle(element).position === 'fixed';
   let currentNode = elementIsFixed ? getParentNode(element) : element;
@@ -1455,7 +1843,14 @@ function getClippingRect(_ref) {
   };
 }
 function getDimensions(element) {
-  return getCssDimensions(element);
+  const {
+    width,
+    height
+  } = getCssDimensions(element);
+  return {
+    width,
+    height
+  };
 }
 function getRectRelativeToOffsetParent(element, offsetParent, strategy) {
   const isOffsetParentAnElement = isHTMLElement(offsetParent);
@@ -1479,9 +1874,11 @@ function getRectRelativeToOffsetParent(element, offsetParent, strategy) {
       offsets.x = getWindowScrollBarX(documentElement);
     }
   }
+  const x = rect.left + scroll.scrollLeft - offsets.x;
+  const y = rect.top + scroll.scrollTop - offsets.y;
   return {
-    x: rect.left + scroll.scrollLeft - offsets.x,
-    y: rect.top + scroll.scrollTop - offsets.y,
+    x,
+    y,
     width: rect.width,
     height: rect.height
   };
@@ -1500,7 +1897,7 @@ function getTrueOffsetParent(element, polyfill) {
 // such as table ancestors and cross browser bugs.
 function getOffsetParent(element, polyfill) {
   const window = getWindow(element);
-  if (!isHTMLElement(element)) {
+  if (!isHTMLElement(element) || isTopLayer(element)) {
     return window;
   }
   let offsetParent = getTrueOffsetParent(element, polyfill);
@@ -1512,20 +1909,15 @@ function getOffsetParent(element, polyfill) {
   }
   return offsetParent || getContainingBlock(element) || window;
 }
-const getElementRects = async function getElementRects(_ref) {
-  let {
-    reference,
-    floating,
-    strategy
-  } = _ref;
+const getElementRects = async function getElementRects(data) {
   const getOffsetParentFn = this.getOffsetParent || getOffsetParent;
   const getDimensionsFn = this.getDimensions;
   return {
-    reference: getRectRelativeToOffsetParent(reference, await getOffsetParentFn(floating), strategy),
+    reference: getRectRelativeToOffsetParent(data.reference, await getOffsetParentFn(data.floating), data.strategy),
     floating: _extends({
       x: 0,
       y: 0
-    }, await getDimensionsFn(floating))
+    }, await getDimensionsFn(data.floating))
   };
 };
 function isRTL(element) {
@@ -1550,8 +1942,9 @@ function observeMove(element, onMove) {
   let timeoutId;
   const root = getDocumentElement(element);
   function cleanup() {
+    var _io;
     clearTimeout(timeoutId);
-    io && io.disconnect();
+    (_io = io) == null || _io.disconnect();
     io = null;
   }
   function refresh(skip, threshold) {
@@ -1656,7 +2049,8 @@ function autoUpdate(reference, floating, update, options) {
         resizeObserver.unobserve(floating);
         cancelAnimationFrame(reobserveFrame);
         reobserveFrame = requestAnimationFrame(() => {
-          resizeObserver && resizeObserver.observe(floating);
+          var _resizeObserver;
+          (_resizeObserver = resizeObserver) == null || _resizeObserver.observe(floating);
         });
       }
       update();
@@ -1681,12 +2075,13 @@ function autoUpdate(reference, floating, update, options) {
   }
   update();
   return () => {
+    var _resizeObserver2;
     ancestors.forEach(ancestor => {
       ancestorScroll && ancestor.removeEventListener('scroll', update);
       ancestorResize && ancestor.removeEventListener('resize', update);
     });
-    cleanupIo && cleanupIo();
-    resizeObserver && resizeObserver.disconnect();
+    cleanupIo == null || cleanupIo();
+    (_resizeObserver2 = resizeObserver) == null || _resizeObserver2.disconnect();
     resizeObserver = null;
     if (animationFrame) {
       cancelAnimationFrame(frameId);
@@ -1695,9 +2090,35 @@ function autoUpdate(reference, floating, update, options) {
 }
 
 /**
+ * Optimizes the visibility of the floating element by shifting it in order to
+ * keep it in view when it will overflow the clipping boundary.
+ * @see https://floating-ui.com/docs/shift
+ */
+const shift = shift$1;
+
+/**
+ * Optimizes the visibility of the floating element by flipping the `placement`
+ * in order to keep it in view when the preferred placement(s) will overflow the
+ * clipping boundary. Alternative to `autoPlacement`.
+ * @see https://floating-ui.com/docs/flip
+ */
+const flip = flip$1;
+
+/**
+ * Provides data to position an inner element of the floating element so that it
+ * appears centered to the reference element.
+ * @see https://floating-ui.com/docs/arrow
+ */
+const arrow = arrow$1;
+
+/**
+ * Built-in `limiter` that will stop `shift()` at a certain point.
+ */
+const limitShift = limitShift$1;
+
+/**
  * Computes the `x` and `y` coordinates that will place the floating element
- * next to a reference element when it is given a certain CSS positioning
- * strategy.
+ * next to a given reference element.
  */
 const computePosition = (reference, floating, options) => {
   // This caches the expensive `getClippingElementAncestors` function so that
@@ -1716,17 +2137,9 @@ const computePosition = (reference, floating, options) => {
 };
 
 /**
- * Floating UI Options
- *
- * @typedef {object} FloatingUIOptions
- */
-
-/**
  * Determines options for the tooltip and initializes event listeners.
  *
- * @param {Step} step The step instance
- *
- * @return {FloatingUIOptions}
+ * @param step The step instance
  */
 function setupTooltip(step) {
   if (step.cleanup) {
@@ -1738,13 +2151,14 @@ function setupTooltip(step) {
   const shouldCenter = shouldCenterStep(attachToOptions);
   if (shouldCenter) {
     target = document.body;
+    // @ts-expect-error TODO: fix this type error when we type Svelte
     const content = step.shepherdElementComponent.getElement();
     content.classList.add('shepherd-centered');
   }
   step.cleanup = autoUpdate(target, step.el, () => {
     // The element might have already been removed by the end of the tour.
     if (!step.el) {
-      step.cleanup();
+      step.cleanup == null || step.cleanup();
       return;
     }
     setPosition(target, step, floatingUIOptions, shouldCenter);
@@ -1763,14 +2177,14 @@ function setupTooltip(step) {
  */
 function mergeTooltipConfig(tourOptions, options) {
   return {
-    floatingUIOptions: cjs(tourOptions.floatingUIOptions || {}, options.floatingUIOptions || {})
+    floatingUIOptions: deepmerge(tourOptions.floatingUIOptions || {}, options.floatingUIOptions || {})
   };
 }
 
 /**
  * Cleanup function called when the step is closed/destroyed.
  *
- * @param {Step} step
+ * @param step
  */
 function destroyTooltip(step) {
   if (step.cleanup) {
@@ -1778,11 +2192,6 @@ function destroyTooltip(step) {
   }
   step.cleanup = null;
 }
-
-/**
- *
- * @return {Promise<*>}
- */
 function setPosition(target, step, floatingUIOptions, shouldCenter) {
   return computePosition(target, step.el, floatingUIOptions).then(floatingUIposition(step, shouldCenter))
   // Wait before forcing focus.
@@ -1791,20 +2200,13 @@ function setPosition(target, step, floatingUIOptions, shouldCenter) {
   }))
   // Replaces focusAfterRender modifier.
   .then(step => {
-    if (step && step.el) {
+    if (step != null && step.el) {
       step.el.focus({
         preventScroll: true
       });
     }
   });
 }
-
-/**
- *
- * @param step
- * @param shouldCenter
- * @return {function({x: *, y: *, placement: *, middlewareData: *}): Promise<unknown>}
- */
 function floatingUIposition(step, shouldCenter) {
   return ({
     x,
@@ -1829,20 +2231,14 @@ function floatingUIposition(step, shouldCenter) {
         top: `${y}px`
       });
     }
-    step.el.dataset.popperPlacement = placement;
+    step.el.dataset['popperPlacement'] = placement;
     placeArrow(step.el, middlewareData);
     return step;
   };
 }
-
-/**
- *
- * @param el
- * @param middlewareData
- */
 function placeArrow(el, middlewareData) {
   const arrowEl = el.querySelector('.shepherd-arrow');
-  if (arrowEl && middlewareData.arrow) {
+  if (isHTMLElement$1(arrowEl) && middlewareData.arrow) {
     const {
       x: arrowX,
       y: arrowY
@@ -1857,15 +2253,14 @@ function placeArrow(el, middlewareData) {
 /**
  * Gets the `Floating UI` options from a set of base `attachTo` options
  * @param attachToOptions
- * @param {Step} step The step instance
- * @return {Object}
+ * @param step The step instance
  * @private
  */
 function getFloatingUIOptions(attachToOptions, step) {
   const options = {
-    strategy: 'absolute',
-    middleware: []
+    strategy: 'absolute'
   };
+  options.middleware = [];
   const arrowEl = addArrow(step);
   const shouldCenter = shouldCenterStep(attachToOptions);
   if (!shouldCenter) {
@@ -1882,13 +2277,8 @@ function getFloatingUIOptions(attachToOptions, step) {
     }
     options.placement = attachToOptions.on;
   }
-  return cjs(step.options.floatingUIOptions || {}, options);
+  return deepmerge(step.options.floatingUIOptions || {}, options);
 }
-
-/**
- * @param {Step} step
- * @return {HTMLElement|false|null}
- */
 function addArrow(step) {
   if (step.options.arrow && step.el) {
     return step.el.querySelector('.shepherd-arrow');
@@ -1896,11 +2286,20 @@ function addArrow(step) {
   return false;
 }
 
+/** @returns {void} */
 function noop() {}
+
+/**
+ * @template T
+ * @template S
+ * @param {T} tar
+ * @param {S} src
+ * @returns {T & S}
+ */
 function assign(tar, src) {
   // @ts-ignore
   for (const k in src) tar[k] = src[k];
-  return tar;
+  return /** @type {T & S} */tar;
 }
 function run(fn) {
   return fn();
@@ -1908,53 +2307,126 @@ function run(fn) {
 function blank_object() {
   return Object.create(null);
 }
+
+/**
+ * @param {Function[]} fns
+ * @returns {void}
+ */
 function run_all(fns) {
   fns.forEach(run);
 }
+
+/**
+ * @param {any} thing
+ * @returns {thing is Function}
+ */
 function is_function(thing) {
   return typeof thing === 'function';
 }
+
+/** @returns {boolean} */
 function safe_not_equal(a, b) {
   return a != a ? b == b : a !== b || a && typeof a === 'object' || typeof a === 'function';
 }
+
+/** @returns {boolean} */
 function is_empty(obj) {
   return Object.keys(obj).length === 0;
 }
+
+/**
+ * @param {Node} target
+ * @param {Node} node
+ * @returns {void}
+ */
 function append(target, node) {
   target.appendChild(node);
 }
+
+/**
+ * @param {Node} target
+ * @param {Node} node
+ * @param {Node} [anchor]
+ * @returns {void}
+ */
 function insert(target, node, anchor) {
   target.insertBefore(node, anchor || null);
 }
+
+/**
+ * @param {Node} node
+ * @returns {void}
+ */
 function detach(node) {
   if (node.parentNode) {
     node.parentNode.removeChild(node);
   }
 }
+
+/**
+ * @returns {void} */
 function destroy_each(iterations, detaching) {
   for (let i = 0; i < iterations.length; i += 1) {
     if (iterations[i]) iterations[i].d(detaching);
   }
 }
+
+/**
+ * @template {keyof HTMLElementTagNameMap} K
+ * @param {K} name
+ * @returns {HTMLElementTagNameMap[K]}
+ */
 function element(name) {
   return document.createElement(name);
 }
+
+/**
+ * @template {keyof SVGElementTagNameMap} K
+ * @param {K} name
+ * @returns {SVGElement}
+ */
 function svg_element(name) {
   return document.createElementNS('http://www.w3.org/2000/svg', name);
 }
+
+/**
+ * @param {string} data
+ * @returns {Text}
+ */
 function text(data) {
   return document.createTextNode(data);
 }
+
+/**
+ * @returns {Text} */
 function space() {
   return text(' ');
 }
+
+/**
+ * @returns {Text} */
 function empty() {
   return text('');
 }
+
+/**
+ * @param {EventTarget} node
+ * @param {string} event
+ * @param {EventListenerOrEventListenerObject} handler
+ * @param {boolean | AddEventListenerOptions | EventListenerOptions} [options]
+ * @returns {() => void}
+ */
 function listen(node, event, handler, options) {
   node.addEventListener(event, handler, options);
   return () => node.removeEventListener(event, handler, options);
 }
+
+/**
+ * @param {Element} node
+ * @param {string} attribute
+ * @param {string} [value]
+ * @returns {void}
+ */
 function attr(node, attribute, value) {
   if (value == null) node.removeAttribute(attribute);else if (node.getAttribute(attribute) !== value) node.setAttribute(attribute, value);
 }
@@ -1966,6 +2438,12 @@ function attr(node, attribute, value) {
  * If this list becomes too big, rethink this approach.
  */
 const always_set_through_set_attribute = ['width', 'height'];
+
+/**
+ * @param {Element & ElementCSSInlineStyle} node
+ * @param {{ [x: string]: string }} attributes
+ * @returns {void}
+ */
 function set_attributes(node, attributes) {
   // @ts-ignore
   const descriptors = Object.getOwnPropertyDescriptors(node.__proto__);
@@ -1975,7 +2453,7 @@ function set_attributes(node, attributes) {
     } else if (key === 'style') {
       node.style.cssText = attributes[key];
     } else if (key === '__value') {
-      node.value = node[key] = attributes[key];
+      /** @type {any} */node.value = node[key] = attributes[key];
     } else if (descriptors[key] && descriptors[key].set && always_set_through_set_attribute.indexOf(key) === -1) {
       node[key] = attributes[key];
     } else {
@@ -1983,13 +2461,47 @@ function set_attributes(node, attributes) {
     }
   }
 }
+
+/**
+ * @param {Element} element
+ * @returns {ChildNode[]}
+ */
 function children(element) {
   return Array.from(element.childNodes);
 }
+
+/**
+ * @returns {void} */
 function toggle_class(element, name, toggle) {
-  element.classList[toggle ? 'add' : 'remove'](name);
+  // The `!!` is required because an `undefined` flag means flipping the current state.
+  element.classList.toggle(name, !!toggle);
 }
+
+/**
+ * @typedef {Node & {
+ * 	claim_order?: number;
+ * 	hydrate_init?: true;
+ * 	actual_end_child?: NodeEx;
+ * 	childNodes: NodeListOf<NodeEx>;
+ * }} NodeEx
+ */
+
+/** @typedef {ChildNode & NodeEx} ChildNodeEx */
+
+/** @typedef {NodeEx & { claim_order: number }} NodeEx2 */
+
+/**
+ * @typedef {ChildNodeEx[] & {
+ * 	claim_info?: {
+ * 		last_index: number;
+ * 		total_claimed: number;
+ * 	};
+ * }} ChildNodeArray
+ */
+
 let current_component;
+
+/** @returns {void} */
 function set_current_component(component) {
   current_component = component;
 }
@@ -1997,41 +2509,58 @@ function get_current_component() {
   if (!current_component) throw new Error('Function called outside component initialization');
   return current_component;
 }
+
 /**
  * The `onMount` function schedules a callback to run as soon as the component has been mounted to the DOM.
  * It must be called during the component's initialisation (but doesn't need to live *inside* the component;
  * it can be called from an external module).
  *
- * `onMount` does not run inside a [server-side component](/docs#run-time-server-side-component-api).
+ * If a function is returned _synchronously_ from `onMount`, it will be called when the component is unmounted.
  *
- * https://svelte.dev/docs#run-time-svelte-onmount
+ * `onMount` does not run inside a [server-side component](https://svelte.dev/docs#run-time-server-side-component-api).
+ *
+ * https://svelte.dev/docs/svelte#onmount
+ * @template T
+ * @param {() => import('./private.js').NotFunction<T> | Promise<import('./private.js').NotFunction<T>> | (() => any)} fn
+ * @returns {void}
  */
 function onMount(fn) {
   get_current_component().$$.on_mount.push(fn);
 }
+
 /**
  * Schedules a callback to run immediately after the component has been updated.
  *
  * The first time the callback runs will be after the initial `onMount`
+ *
+ * https://svelte.dev/docs/svelte#afterupdate
+ * @param {() => any} fn
+ * @returns {void}
  */
 function afterUpdate(fn) {
   get_current_component().$$.after_update.push(fn);
 }
+
 const dirty_components = [];
 const binding_callbacks = [];
 let render_callbacks = [];
 const flush_callbacks = [];
 const resolved_promise = /* @__PURE__ */Promise.resolve();
 let update_scheduled = false;
+
+/** @returns {void} */
 function schedule_update() {
   if (!update_scheduled) {
     update_scheduled = true;
     resolved_promise.then(flush);
   }
 }
+
+/** @returns {void} */
 function add_render_callback(fn) {
   render_callbacks.push(fn);
 }
+
 // flush() calls callbacks in this order:
 // 1. All beforeUpdate callbacks, in order: parents before children
 // 2. All bind:this callbacks, in reverse order: children before parents.
@@ -2052,6 +2581,8 @@ function add_render_callback(fn) {
 //    function, guarantees this behavior.
 const seen_callbacks = new Set();
 let flushidx = 0; // Do *not* move this inside the flush() function
+
+/** @returns {void} */
 function flush() {
   // Do not reenter flush while dirty components are updated, as this can
   // result in an infinite loop. Instead, let the inner flush handle it.
@@ -2100,6 +2631,8 @@ function flush() {
   seen_callbacks.clear();
   set_current_component(saved_component);
 }
+
+/** @returns {void} */
 function update($$) {
   if ($$.fragment !== null) {
     $$.update();
@@ -2110,8 +2643,11 @@ function update($$) {
     $$.after_update.forEach(add_render_callback);
   }
 }
+
 /**
  * Useful for example to execute remaining `afterUpdate` callbacks before executing `destroy`.
+ * @param {Function[]} fns
+ * @returns {void}
  */
 function flush_render_callbacks(fns) {
   const filtered = [];
@@ -2120,8 +2656,16 @@ function flush_render_callbacks(fns) {
   targets.forEach(c => c());
   render_callbacks = filtered;
 }
+
 const outroing = new Set();
+
+/**
+ * @type {Outro}
+ */
 let outros;
+
+/**
+ * @returns {void} */
 function group_outros() {
   outros = {
     r: 0,
@@ -2130,18 +2674,34 @@ function group_outros() {
   };
 }
 
+/**
+ * @returns {void} */
 function check_outros() {
   if (!outros.r) {
     run_all(outros.c);
   }
   outros = outros.p;
 }
+
+/**
+ * @param {import('./private.js').Fragment} block
+ * @param {0 | 1} [local]
+ * @returns {void}
+ */
 function transition_in(block, local) {
   if (block && block.i) {
     outroing.delete(block);
     block.i(local);
   }
 }
+
+/**
+ * @param {import('./private.js').Fragment} block
+ * @param {0 | 1} local
+ * @param {0 | 1} [detach]
+ * @param {() => void} [callback]
+ * @returns {void}
+ */
 function transition_out(block, local, detach, callback) {
   if (block && block.o) {
     if (outroing.has(block)) return;
@@ -2158,6 +2718,44 @@ function transition_out(block, local, detach, callback) {
     callback();
   }
 }
+
+/** @typedef {1} INTRO */
+/** @typedef {0} OUTRO */
+/** @typedef {{ direction: 'in' | 'out' | 'both' }} TransitionOptions */
+/** @typedef {(node: Element, params: any, options: TransitionOptions) => import('../transition/public.js').TransitionConfig} TransitionFn */
+
+/**
+ * @typedef {Object} Outro
+ * @property {number} r
+ * @property {Function[]} c
+ * @property {Object} p
+ */
+
+/**
+ * @typedef {Object} PendingProgram
+ * @property {number} start
+ * @property {INTRO|OUTRO} b
+ * @property {Outro} [group]
+ */
+
+/**
+ * @typedef {Object} Program
+ * @property {number} a
+ * @property {INTRO|OUTRO} b
+ * @property {1|-1} d
+ * @property {number} duration
+ * @property {number} start
+ * @property {number} end
+ * @property {Outro} [group]
+ */
+
+// general each functions:
+
+function ensure_array_like(array_like_or_iterator) {
+  return (array_like_or_iterator == null ? void 0 : array_like_or_iterator.length) !== undefined ? array_like_or_iterator : Array.from(array_like_or_iterator);
+}
+
+/** @returns {{}} */
 function get_spread_update(levels, updates) {
   const update = {};
   const to_null_out = {};
@@ -2190,34 +2788,38 @@ function get_spread_update(levels, updates) {
   }
   return update;
 }
+
+/** @returns {void} */
 function create_component(block) {
   block && block.c();
 }
-function mount_component(component, target, anchor, customElement) {
+
+/** @returns {void} */
+function mount_component(component, target, anchor) {
   const {
     fragment,
     after_update
   } = component.$$;
   fragment && fragment.m(target, anchor);
-  if (!customElement) {
-    // onMount happens before the initial afterUpdate
-    add_render_callback(() => {
-      const new_on_destroy = component.$$.on_mount.map(run).filter(is_function);
-      // if the component was destroyed immediately
-      // it will update the `$$.on_destroy` reference to `null`.
-      // the destructured on_destroy may still reference to the old array
-      if (component.$$.on_destroy) {
-        component.$$.on_destroy.push(...new_on_destroy);
-      } else {
-        // Edge case - component was destroyed immediately,
-        // most likely as a result of a binding initialising
-        run_all(new_on_destroy);
-      }
-      component.$$.on_mount = [];
-    });
-  }
+  // onMount happens before the initial afterUpdate
+  add_render_callback(() => {
+    const new_on_destroy = component.$$.on_mount.map(run).filter(is_function);
+    // if the component was destroyed immediately
+    // it will update the `$$.on_destroy` reference to `null`.
+    // the destructured on_destroy may still reference to the old array
+    if (component.$$.on_destroy) {
+      component.$$.on_destroy.push(...new_on_destroy);
+    } else {
+      // Edge case - component was destroyed immediately,
+      // most likely as a result of a binding initialising
+      run_all(new_on_destroy);
+    }
+    component.$$.on_mount = [];
+  });
   after_update.forEach(add_render_callback);
 }
+
+/** @returns {void} */
 function destroy_component(component, detaching) {
   const $$ = component.$$;
   if ($$.fragment !== null) {
@@ -2230,6 +2832,8 @@ function destroy_component(component, detaching) {
     $$.ctx = [];
   }
 }
+
+/** @returns {void} */
 function make_dirty(component, i) {
   if (component.$$.dirty[0] === -1) {
     dirty_components.push(component);
@@ -2238,9 +2842,22 @@ function make_dirty(component, i) {
   }
   component.$$.dirty[i / 31 | 0] |= 1 << i % 31;
 }
-function init(component, options, instance, create_fragment, not_equal, props, append_styles, dirty = [-1]) {
+
+// TODO: Document the other params
+/**
+ * @param {SvelteComponent} component
+ * @param {import('./public.js').ComponentConstructorOptions} options
+ *
+ * @param {import('./utils.js')['not_equal']} not_equal Used to compare props and state values.
+ * @param {(target: Element | ShadowRoot) => void} [append_styles] Function that appends styles to the DOM when the component is first initialised.
+ * This will be the `add_css` function from the compiled component.
+ *
+ * @returns {void}
+ */
+function init(component, options, instance, create_fragment, not_equal, props, append_styles = null, dirty = [-1]) {
   const parent_component = current_component;
   set_current_component(component);
+  /** @type {import('./private.js').T$$} */
   const $$ = component.$$ = {
     fragment: null,
     ctx: [],
@@ -2279,8 +2896,9 @@ function init(component, options, instance, create_fragment, not_equal, props, a
   $$.fragment = create_fragment ? create_fragment($$.ctx) : false;
   if (options.target) {
     if (options.hydrate) {
+      // TODO: what is the correct type here?
+      // @ts-expect-error
       const nodes = children(options.target);
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       $$.fragment && $$.fragment.l(nodes);
       nodes.forEach(detach);
     } else {
@@ -2288,19 +2906,49 @@ function init(component, options, instance, create_fragment, not_equal, props, a
       $$.fragment && $$.fragment.c();
     }
     if (options.intro) transition_in(component.$$.fragment);
-    mount_component(component, options.target, options.anchor, options.customElement);
+    mount_component(component, options.target, options.anchor);
     flush();
   }
   set_current_component(parent_component);
 }
+
 /**
  * Base class for Svelte components. Used when dev=false.
+ *
+ * @template {Record<string, any>} [Props=any]
+ * @template {Record<string, any>} [Events=any]
  */
 class SvelteComponent {
+  constructor() {
+    /**
+     * ### PRIVATE API
+     *
+     * Do not use, may change at any time
+     *
+     * @type {any}
+     */
+    this.$$ = undefined;
+    /**
+     * ### PRIVATE API
+     *
+     * Do not use, may change at any time
+     *
+     * @type {any}
+     */
+    this.$$set = undefined;
+  }
+  /** @returns {void} */
   $destroy() {
     destroy_component(this, 1);
     this.$destroy = noop;
   }
+
+  /**
+   * @template {Extract<keyof Events, string>} K
+   * @param {K} type
+   * @param {((e: Events[K]) => void) | null | undefined} callback
+   * @returns {() => void}
+   */
   $on(type, callback) {
     if (!is_function(callback)) {
       return noop;
@@ -2312,16 +2960,38 @@ class SvelteComponent {
       if (index !== -1) callbacks.splice(index, 1);
     };
   }
-  $set($$props) {
-    if (this.$$set && !is_empty($$props)) {
+
+  /**
+   * @param {Partial<Props>} props
+   * @returns {void}
+   */
+  $set(props) {
+    if (this.$$set && !is_empty(props)) {
       this.$$.skip_bound = true;
-      this.$$set($$props);
+      this.$$set(props);
       this.$$.skip_bound = false;
     }
   }
 }
 
-/* src/js/components/shepherd-button.svelte generated by Svelte v3.59.2 */
+/**
+ * @typedef {Object} CustomElementPropDefinition
+ * @property {string} [attribute]
+ * @property {boolean} [reflect]
+ * @property {'String'|'Boolean'|'Number'|'Array'|'Object'} [type]
+ */
+
+// generated during release, do not modify
+
+const PUBLIC_VERSION = '4';
+
+if (typeof window !== 'undefined')
+  // @ts-ignore
+  (window.__svelte || (window.__svelte = {
+    v: new Set()
+  })).v.add(PUBLIC_VERSION);
+
+/* src/components/shepherd-button.svelte generated by Svelte v4.2.15 */
 function create_fragment$8(ctx) {
   let button;
   let button_aria_label_value;
@@ -2335,6 +3005,7 @@ function create_fragment$8(ctx) {
       attr(button, "class", button_class_value = `${/*classes*/ctx[1] || ''} shepherd-button ${/*secondary*/ctx[4] ? 'shepherd-button-secondary' : ''}`);
       button.disabled = /*disabled*/ctx[2];
       attr(button, "tabindex", "0");
+      attr(button, "type", "button");
     },
     m(target, anchor) {
       insert(target, button, anchor);
@@ -2362,7 +3033,9 @@ function create_fragment$8(ctx) {
     i: noop,
     o: noop,
     d(detaching) {
-      if (detaching) detach(button);
+      if (detaching) {
+        detach(button);
+      }
       mounted = false;
       dispose();
     }
@@ -2408,18 +3081,18 @@ class Shepherd_button extends SvelteComponent {
   }
 }
 
-/* src/js/components/shepherd-footer.svelte generated by Svelte v3.59.2 */
+/* src/components/shepherd-footer.svelte generated by Svelte v4.2.15 */
 function get_each_context(ctx, list, i) {
   const child_ctx = ctx.slice();
   child_ctx[2] = list[i];
   return child_ctx;
 }
 
-// (24:4) {#if buttons}
+// (10:2) {#if buttons}
 function create_if_block$3(ctx) {
   let each_1_anchor;
   let current;
-  let each_value = /*buttons*/ctx[1];
+  let each_value = ensure_array_like( /*buttons*/ctx[1]);
   let each_blocks = [];
   for (let i = 0; i < each_value.length; i += 1) {
     each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
@@ -2445,7 +3118,7 @@ function create_if_block$3(ctx) {
     },
     p(ctx, dirty) {
       if (dirty & /*buttons, step*/3) {
-        each_value = /*buttons*/ctx[1];
+        each_value = ensure_array_like( /*buttons*/ctx[1]);
         let i;
         for (i = 0; i < each_value.length; i += 1) {
           const child_ctx = get_each_context(ctx, each_value, i);
@@ -2481,13 +3154,15 @@ function create_if_block$3(ctx) {
       current = false;
     },
     d(detaching) {
+      if (detaching) {
+        detach(each_1_anchor);
+      }
       destroy_each(each_blocks, detaching);
-      if (detaching) detach(each_1_anchor);
     }
   };
 }
 
-// (25:8) {#each buttons as config}
+// (11:4) {#each buttons as config}
 function create_each_block(ctx) {
   let shepherdbutton;
   let current;
@@ -2571,7 +3246,9 @@ function create_fragment$7(ctx) {
       current = false;
     },
     d(detaching) {
-      if (detaching) detach(footer);
+      if (detaching) {
+        detach(footer);
+      }
       if (if_block) if_block.d();
     }
   };
@@ -2600,7 +3277,7 @@ class Shepherd_footer extends SvelteComponent {
   }
 }
 
-/* src/js/components/shepherd-cancel-icon.svelte generated by Svelte v3.59.2 */
+/* src/components/shepherd-cancel-icon.svelte generated by Svelte v4.2.15 */
 function create_fragment$6(ctx) {
   let button;
   let span;
@@ -2633,7 +3310,9 @@ function create_fragment$6(ctx) {
     i: noop,
     o: noop,
     d(detaching) {
-      if (detaching) detach(button);
+      if (detaching) {
+        detach(button);
+      }
       mounted = false;
       dispose();
     }
@@ -2668,7 +3347,7 @@ class Shepherd_cancel_icon extends SvelteComponent {
   }
 }
 
-/* src/js/components/shepherd-title.svelte generated by Svelte v3.59.2 */
+/* src/components/shepherd-title.svelte generated by Svelte v4.2.15 */
 function create_fragment$5(ctx) {
   let h3;
   return {
@@ -2690,7 +3369,10 @@ function create_fragment$5(ctx) {
     i: noop,
     o: noop,
     d(detaching) {
-      if (detaching) detach(h3);
+      if (detaching) {
+        detach(h3);
+      }
+
       /*h3_binding*/
       ctx[3](null);
     }
@@ -2732,7 +3414,7 @@ class Shepherd_title extends SvelteComponent {
   }
 }
 
-/* src/js/components/shepherd-header.svelte generated by Svelte v3.59.2 */
+/* src/components/shepherd-header.svelte generated by Svelte v4.2.15 */
 function create_if_block_1$1(ctx) {
   let shepherdtitle;
   let current;
@@ -2771,7 +3453,7 @@ function create_if_block_1$1(ctx) {
   };
 }
 
-// (39:4) {#if cancelIcon && cancelIcon.enabled}
+// (19:2) {#if cancelIcon && cancelIcon.enabled}
 function create_if_block$2(ctx) {
   let shepherdcancelicon;
   let current;
@@ -2882,7 +3564,9 @@ function create_fragment$4(ctx) {
       current = false;
     },
     d(detaching) {
-      if (detaching) detach(header);
+      if (detaching) {
+        detach(header);
+      }
       if (if_block0) if_block0.d();
       if (if_block1) if_block1.d();
     }
@@ -2918,7 +3602,7 @@ class Shepherd_header extends SvelteComponent {
   }
 }
 
-/* src/js/components/shepherd-text.svelte generated by Svelte v3.59.2 */
+/* src/components/shepherd-text.svelte generated by Svelte v4.2.15 */
 function create_fragment$3(ctx) {
   let div;
   return {
@@ -2940,7 +3624,10 @@ function create_fragment$3(ctx) {
     i: noop,
     o: noop,
     d(detaching) {
-      if (detaching) detach(div);
+      if (detaching) {
+        detach(div);
+      }
+
       /*div_binding*/
       ctx[3](null);
     }
@@ -2989,7 +3676,7 @@ class Shepherd_text extends SvelteComponent {
   }
 }
 
-/* src/js/components/shepherd-content.svelte generated by Svelte v3.59.2 */
+/* src/components/shepherd-content.svelte generated by Svelte v4.2.15 */
 function create_if_block_2(ctx) {
   let shepherdheader;
   let current;
@@ -3028,7 +3715,7 @@ function create_if_block_2(ctx) {
   };
 }
 
-// (28:2) {#if !isUndefined(step.options.text)}
+// (15:2) {#if !isUndefined(step.options.text)}
 function create_if_block_1(ctx) {
   let shepherdtext;
   let current;
@@ -3067,7 +3754,7 @@ function create_if_block_1(ctx) {
   };
 }
 
-// (35:2) {#if Array.isArray(step.options.buttons) && step.options.buttons.length}
+// (19:2) {#if Array.isArray(step.options.buttons) && step.options.buttons.length}
 function create_if_block$1(ctx) {
   let shepherdfooter;
   let current;
@@ -3209,7 +3896,9 @@ function create_fragment$2(ctx) {
       current = false;
     },
     d(detaching) {
-      if (detaching) detach(div);
+      if (detaching) {
+        detach(div);
+      }
       if (if_block0) if_block0.d();
       if (if_block1) if_block1.d();
       if (if_block2) if_block2.d();
@@ -3240,7 +3929,7 @@ class Shepherd_content extends SvelteComponent {
   }
 }
 
-/* src/js/components/shepherd-element.svelte generated by Svelte v3.59.2 */
+/* src/components/shepherd-element.svelte generated by Svelte v4.2.15 */
 function create_if_block(ctx) {
   let div;
   return {
@@ -3253,7 +3942,9 @@ function create_if_block(ctx) {
       insert(target, div, anchor);
     },
     d(detaching) {
-      if (detaching) detach(div);
+      if (detaching) {
+        detach(div);
+      }
     }
   };
 }
@@ -3350,7 +4041,9 @@ function create_fragment$1(ctx) {
       current = false;
     },
     d(detaching) {
-      if (detaching) detach(div);
+      if (detaching) {
+        detach(div);
+      }
       if (if_block) if_block.d();
       destroy_component(shepherdcontent);
       /*div_binding*/
@@ -3449,18 +4142,21 @@ function instance$1($$self, $$props, $$invalidate) {
         break;
       case KEY_ESC:
         if (tour.options.exitOnEsc) {
+          e.preventDefault();
           e.stopPropagation();
           step.cancel();
         }
         break;
       case LEFT_ARROW:
         if (tour.options.keyboardNavigation) {
+          e.preventDefault();
           e.stopPropagation();
           tour.back();
         }
         break;
       case RIGHT_ARROW:
         if (tour.options.keyboardNavigation) {
+          e.preventDefault();
           e.stopPropagation();
           tour.next();
         }
@@ -3516,108 +4212,30 @@ class Shepherd_element extends SvelteComponent {
 }
 
 /**
+ * The options for the step
+ */
+
+/**
  * A class representing steps to be added to a tour.
  * @extends {Evented}
  */
 class Step extends Evented {
-  /**
-   * Create a step
-   * @param {Tour} tour The tour for the step
-   * @param {object} options The options for the step
-   * @param {boolean} options.arrow Whether to display the arrow for the tooltip or not. Defaults to `true`.
-   * @param {object} options.attachTo The element the step should be attached to on the page.
-   * An object with properties `element` and `on`.
-   *
-   * ```js
-   * const step = new Step(tour, {
-   *   attachTo: { element: '.some .selector-path', on: 'left' },
-   *   ...moreOptions
-   * });
-   * ```
-   *
-   * If you don’t specify an `attachTo` the element will appear in the middle of the screen. The same will happen if your `attachTo.element` callback returns `null`, `undefined`, or a selector that does not exist in the DOM.
-   * If you omit the `on` portion of `attachTo`, the element will still be highlighted, but the tooltip will appear
-   * in the middle of the screen, without an arrow pointing to the target.
-   * If the element to highlight does not yet exist while instantiating tour steps, you may use lazy evaluation by supplying a function to `attachTo.element`. The function will be called in the `before-show` phase.
-   * @param {string|HTMLElement|function} options.attachTo.element An element selector string, DOM element, or a function (returning a selector, a DOM element, `null` or `undefined`).
-   * @param {string} options.attachTo.on The optional direction to place the FloatingUI tooltip relative to the element.
-   *   - Possible string values: 'top', 'top-start', 'top-end', 'bottom', 'bottom-start', 'bottom-end', 'right', 'right-start', 'right-end', 'left', 'left-start', 'left-end'
-   * @param {Object} options.advanceOn An action on the page which should advance shepherd to the next step.
-   * It should be an object with a string `selector` and an `event` name
-   * ```js
-   * const step = new Step(tour, {
-   *   advanceOn: { selector: '.some .selector-path', event: 'click' },
-   *   ...moreOptions
-   * });
-   * ```
-   * `event` doesn’t have to be an event inside the tour, it can be any event fired on any element on the page.
-   * You can also always manually advance the Tour by calling `myTour.next()`.
-   * @param {function} options.beforeShowPromise A function that returns a promise.
-   * When the promise resolves, the rest of the `show` code for the step will execute.
-   * @param {Object[]} options.buttons An array of buttons to add to the step. These will be rendered in a
-   * footer below the main body text.
-   * @param {function} options.buttons.button.action A function executed when the button is clicked on.
-   * It is automatically bound to the `tour` the step is associated with, so things like `this.next` will
-   * work inside the action.
-   * You can use action to skip steps or navigate to specific steps, with something like:
-   * ```js
-   * action() {
-   *   return this.show('some_step_name');
-   * }
-   * ```
-   * @param {string} options.buttons.button.classes Extra classes to apply to the `<a>`
-   * @param {boolean} options.buttons.button.disabled Should the button be disabled?
-   * @param {string} options.buttons.button.label The aria-label text of the button
-   * @param {boolean} options.buttons.button.secondary If true, a shepherd-button-secondary class is applied to the button
-   * @param {string} options.buttons.button.text The HTML text of the button
-   * @param {boolean} options.canClickTarget A boolean, that when set to false, will set `pointer-events: none` on the target
-   * @param {object} options.cancelIcon Options for the cancel icon
-   * @param {boolean} options.cancelIcon.enabled Should a cancel “✕” be shown in the header of the step?
-   * @param {string} options.cancelIcon.label The label to add for `aria-label`
-   * @param {string} options.classes A string of extra classes to add to the step's content element.
-   * @param {string} options.highlightClass An extra class to apply to the `attachTo` element when it is
-   * highlighted (that is, when its step is active). You can then target that selector in your CSS.
-   * @param {string} options.id The string to use as the `id` for the step.
-   * @param {number} options.modalOverlayOpeningPadding An amount of padding to add around the modal overlay opening
-   * @param {number | { topLeft: number, bottomLeft: number, bottomRight: number, topRight: number }} options.modalOverlayOpeningRadius An amount of border radius to add around the modal overlay opening
-   * @param {object} options.floatingUIOptions Extra options to pass to FloatingUI
-   * @param {boolean|Object} options.scrollTo Should the element be scrolled to when this step is shown? If true, uses the default `scrollIntoView`,
-   * if an object, passes that object as the params to `scrollIntoView` i.e. `{behavior: 'smooth', block: 'center'}`
-   * @param {function} options.scrollToHandler A function that lets you override the default scrollTo behavior and
-   * define a custom action to do the scrolling, and possibly other logic.
-   * @param {function} options.showOn A function that, when it returns `true`, will show the step.
-   * If it returns false, the step will be skipped.
-   * @param {string} options.text The text in the body of the step. It can be one of three types:
-   * ```
-   * - HTML string
-   * - `HTMLElement` object
-   * - `Function` to be executed when the step is built. It must return one the two options above.
-   * ```
-   * @param {string} options.title The step's title. It becomes an `h3` at the top of the step. It can be one of two types:
-   * ```
-   * - HTML string
-   * - `Function` to be executed when the step is built. It must return HTML string.
-   * ```
-   * @param {object} options.when You can define `show`, `hide`, etc events inside `when`. For example:
-   * ```js
-   * when: {
-   *   show: function() {
-   *     window.scrollTo(0, 0);
-   *   }
-   * }
-   * ```
-   * @return {Step} The newly created Step instance
-   */
   constructor(tour, options = {}) {
-    super(tour, options);
+    super();
+    this._resolvedAttachTo = void 0;
+    this.classPrefix = void 0;
+    this.el = void 0;
+    this.target = void 0;
+    this.tour = void 0;
     this.tour = tour;
     this.classPrefix = this.tour.options ? normalizePrefix(this.tour.options.classPrefix) : '';
+    // @ts-expect-error TODO: investigate where styles comes from
     this.styles = tour.styles;
 
     /**
      * Resolved attachTo options. Due to lazy evaluation, we only resolve the options during `before-show` phase.
      * Do not use this directly, use the _getResolvedAttachToOptions method instead.
-     * @type {null|{}|{element, to}}
+     * @type {StepOptionsAttachTo | null}
      * @private
      */
     this._resolvedAttachTo = null;
@@ -3660,7 +4278,7 @@ class Step extends Evented {
 
   /**
    * Returns the tour for the step
-   * @return {Tour} The tour instance
+   * @return The tour instance
    */
   getTour() {
     return this.tour;
@@ -3670,7 +4288,8 @@ class Step extends Evented {
    * Hide the step
    */
   hide() {
-    this.tour.modal.hide();
+    var _this$tour$modal;
+    (_this$tour$modal = this.tour.modal) == null || _this$tour$modal.hide();
     this.trigger('before-hide');
     if (this.el) {
       this.el.hidden = true;
@@ -3682,7 +4301,6 @@ class Step extends Evented {
   /**
    * Resolves attachTo options.
    * @returns {{}|{element, on}}
-   * @private
    */
   _resolveAttachToOptions() {
     this._resolvedAttachTo = parseAttachTo(this);
@@ -3703,7 +4321,7 @@ class Step extends Evented {
 
   /**
    * Check if the step is open and visible
-   * @return {boolean} True if the step is open and visible
+   * @return True if the step is open and visible
    */
   isOpen() {
     return Boolean(this.el && !this.el.hidden);
@@ -3711,7 +4329,6 @@ class Step extends Evented {
 
   /**
    * Wraps `_show` and ensures `beforeShowPromise` resolves before calling show
-   * @return {*|Promise}
    */
   show() {
     if (isFunction(this.options.beforeShowPromise)) {
@@ -3723,11 +4340,14 @@ class Step extends Evented {
   /**
    * Updates the options of the step.
    *
-   * @param {Object} options The options for the step
+   * @param {StepOptions} options The options for the step
    */
   updateStepOptions(options) {
     Object.assign(this.options, options);
+
+    // @ts-expect-error TODO: get types for Svelte components
     if (this.shepherdElementComponent) {
+      // @ts-expect-error TODO: get types for Svelte components
       this.shepherdElementComponent.$set({
         step: this
       });
@@ -3753,12 +4373,14 @@ class Step extends Evented {
   /**
    * Creates Shepherd element for step based on options
    *
-   * @return {Element} The DOM element for the step tooltip
+   * @return {HTMLElement} The DOM element for the step tooltip
    * @private
    */
   _createTooltipContent() {
     const descriptionId = `${this.id}-description`;
     const labelId = `${this.id}-label`;
+
+    // @ts-expect-error TODO: get types for Svelte components
     this.shepherdElementComponent = new Shepherd_element({
       target: this.tour.options.stepsContainer || document.body,
       props: {
@@ -3766,9 +4388,12 @@ class Step extends Evented {
         descriptionId,
         labelId,
         step: this,
+        // @ts-expect-error TODO: investigate where styles comes from
         styles: this.styles
       }
     });
+
+    // @ts-expect-error TODO: get types for Svelte components
     return this.shepherdElementComponent.getElement();
   }
 
@@ -3776,7 +4401,7 @@ class Step extends Evented {
    * If a custom scrollToHandler is defined, call that, otherwise do the generic
    * scrollIntoView call.
    *
-   * @param {boolean|Object} scrollToOptions If true, uses the default `scrollIntoView`,
+   * @param {boolean | ScrollIntoViewOptions} scrollToOptions - If true, uses the default `scrollIntoView`,
    * if an object, passes that object as the params to `scrollIntoView` i.e. `{ behavior: 'smooth', block: 'center' }`
    * @private
    */
@@ -3793,9 +4418,8 @@ class Step extends Evented {
 
   /**
    * _getClassOptions gets all possible classes for the step
-   * @param {Object} stepOptions The step specific options
-   * @returns {String} unique string from array of classes
-   * @private
+   * @param {StepOptions} stepOptions The step specific options
+   * @returns {string} unique string from array of classes
    */
   _getClassOptions(stepOptions) {
     const defaultStepOptions = this.tour && this.tour.options && this.tour.options.defaultStepOptions;
@@ -3808,12 +4432,11 @@ class Step extends Evented {
 
   /**
    * Sets the options for the step, maps `when` to events, sets up buttons
-   * @param {Object} options The options for the step
-   * @private
+   * @param options - The options for the step
    */
   _setOptions(options = {}) {
     let tourOptions = this.tour && this.tour.options && this.tour.options.defaultStepOptions;
-    tourOptions = cjs({}, tourOptions || {});
+    tourOptions = deepmerge({}, tourOptions || {});
     this.options = Object.assign({
       arrow: true
     }, tourOptions, options, mergeTooltipConfig(tourOptions, options));
@@ -3825,6 +4448,7 @@ class Step extends Evented {
     this.id = this.options.id || `step-${uuid()}`;
     if (when) {
       Object.keys(when).forEach(event => {
+        // @ts-expect-error TODO: fix this type error
         this.on(event, when[event], this);
       });
     }
@@ -3854,17 +4478,20 @@ class Step extends Evented {
    * @private
    */
   _show() {
+    var _this$tour$modal2;
     this.trigger('before-show');
 
     // Force resolve to make sure the options are updated on subsequent shows.
     this._resolveAttachToOptions();
     this._setupElements();
     if (!this.tour.modal) {
-      this.tour._setupModal();
+      this.tour.setupModal();
     }
-    this.tour.modal.setupForStep(this);
+    (_this$tour$modal2 = this.tour.modal) == null || _this$tour$modal2.setupForStep(this);
     this._styleTargetElementForStep(this);
-    this.el.hidden = false;
+    if (this.el) {
+      this.el.hidden = false;
+    }
 
     // start scrolling to target before showing the step
     if (this.options.scrollTo) {
@@ -3872,7 +4499,11 @@ class Step extends Evented {
         this._scrollTo(this.options.scrollTo);
       });
     }
-    this.el.hidden = false;
+    if (this.el) {
+      this.el.hidden = false;
+    }
+
+    // @ts-expect-error TODO: get types for Svelte components
     const content = this.shepherdElementComponent.getElement();
     const target = this.target || document.body;
     target.classList.add(`${this.classPrefix}shepherd-enabled`);
@@ -3885,7 +4516,7 @@ class Step extends Evented {
    * Modulates the styles of the passed step's target element, based on the step's options and
    * the tour's `modal` option, to visually emphasize the element
    *
-   * @param step The step object that attaches to the element
+   * @param {Step} step The step object that attaches to the element
    * @private
    */
   _styleTargetElementForStep(step) {
@@ -3916,6 +4547,159 @@ class Step extends Evented {
   }
 }
 
+function getContext(window) {
+  let context = {};
+  if (window.navigator) {
+    const userAgent = window.navigator.userAgent;
+    context = _extends({}, context, {
+      $os: os(window),
+      $browser: browser(userAgent, window.navigator.vendor, !!window.opera),
+      $referrer: window.document.referrer,
+      $referring_domain: referringDomain(window.document.referrer),
+      $device: device(userAgent),
+      $current_url: window.location.href,
+      $host: window.location.host,
+      $pathname: window.location.pathname,
+      $browser_version: browserVersion(userAgent, window.navigator.vendor, !!window.opera),
+      $screen_height: window.screen.height,
+      $screen_width: window.screen.width,
+      $screen_dpr: window.devicePixelRatio
+    });
+  }
+  context = _extends({}, context, {
+    $lib: 'js',
+    // $lib_version: version,
+    $insert_id: Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10),
+    $time: new Date().getTime() / 1000 // epoch time in seconds
+  });
+  return context; // TODO: strip empty props?
+}
+function includes(haystack, needle) {
+  return haystack.indexOf(needle) >= 0;
+}
+function browser(userAgent, vendor, opera) {
+  vendor = vendor || ''; // vendor is undefined for at least IE9
+  if (opera || includes(userAgent, ' OPR/')) {
+    if (includes(userAgent, 'Mini')) {
+      return 'Opera Mini';
+    }
+    return 'Opera';
+  } else if (/(BlackBerry|PlayBook|BB10)/i.test(userAgent)) {
+    return 'BlackBerry';
+  } else if (includes(userAgent, 'IEMobile') || includes(userAgent, 'WPDesktop')) {
+    return 'Internet Explorer Mobile';
+  } else if (includes(userAgent, 'SamsungBrowser/')) {
+    // https://developer.samsung.com/internet/user-agent-string-format
+    return 'Samsung Internet';
+  } else if (includes(userAgent, 'Edge') || includes(userAgent, 'Edg/')) {
+    return 'Microsoft Edge';
+  } else if (includes(userAgent, 'FBIOS')) {
+    return 'Facebook Mobile';
+  } else if (includes(userAgent, 'Chrome')) {
+    return 'Chrome';
+  } else if (includes(userAgent, 'CriOS')) {
+    return 'Chrome iOS';
+  } else if (includes(userAgent, 'UCWEB') || includes(userAgent, 'UCBrowser')) {
+    return 'UC Browser';
+  } else if (includes(userAgent, 'FxiOS')) {
+    return 'Firefox iOS';
+  } else if (includes(vendor, 'Apple')) {
+    if (includes(userAgent, 'Mobile')) {
+      return 'Mobile Safari';
+    }
+    return 'Safari';
+  } else if (includes(userAgent, 'Android')) {
+    return 'Android Mobile';
+  } else if (includes(userAgent, 'Konqueror')) {
+    return 'Konqueror';
+  } else if (includes(userAgent, 'Firefox')) {
+    return 'Firefox';
+  } else if (includes(userAgent, 'MSIE') || includes(userAgent, 'Trident/')) {
+    return 'Internet Explorer';
+  } else if (includes(userAgent, 'Gecko')) {
+    return 'Mozilla';
+  } else {
+    return '';
+  }
+}
+function browserVersion(userAgent, vendor, opera) {
+  const regexList = {
+    'Internet Explorer Mobile': /rv:(\d+(\.\d+)?)/,
+    'Microsoft Edge': /Edge?\/(\d+(\.\d+)?)/,
+    Chrome: /Chrome\/(\d+(\.\d+)?)/,
+    'Chrome iOS': /CriOS\/(\d+(\.\d+)?)/,
+    'UC Browser': /(UCBrowser|UCWEB)\/(\d+(\.\d+)?)/,
+    Safari: /Version\/(\d+(\.\d+)?)/,
+    'Mobile Safari': /Version\/(\d+(\.\d+)?)/,
+    Opera: /(Opera|OPR)\/(\d+(\.\d+)?)/,
+    Firefox: /Firefox\/(\d+(\.\d+)?)/,
+    'Firefox iOS': /FxiOS\/(\d+(\.\d+)?)/,
+    Konqueror: /Konqueror:(\d+(\.\d+)?)/,
+    BlackBerry: /BlackBerry (\d+(\.\d+)?)/,
+    'Android Mobile': /android\s(\d+(\.\d+)?)/,
+    'Samsung Internet': /SamsungBrowser\/(\d+(\.\d+)?)/,
+    'Internet Explorer': /(rv:|MSIE )(\d+(\.\d+)?)/,
+    Mozilla: /rv:(\d+(\.\d+)?)/
+  };
+  const browserString = browser(userAgent, vendor, opera);
+  const regex = regexList[browserString] || undefined;
+  if (regex === undefined) {
+    return null;
+  }
+  const matches = userAgent.match(regex);
+  if (!matches) {
+    return null;
+  }
+  return parseFloat(matches[matches.length - 2]);
+}
+function os(window) {
+  const a = window.navigator.userAgent;
+  if (/Windows/i.test(a)) {
+    if (/Phone/.test(a) || /WPDesktop/.test(a)) {
+      return 'Windows Phone';
+    }
+    return 'Windows';
+  } else if (/(iPhone|iPad|iPod)/.test(a)) {
+    return 'iOS';
+  } else if (/Android/.test(a)) {
+    return 'Android';
+  } else if (/(BlackBerry|PlayBook|BB10)/i.test(a)) {
+    return 'BlackBerry';
+  } else if (/Mac/i.test(a)) {
+    return 'Mac OS X';
+  } else if (/Linux/.test(a)) {
+    return 'Linux';
+  } else if (/CrOS/.test(a)) {
+    return 'Chrome OS';
+  } else {
+    return '';
+  }
+}
+function device(userAgent) {
+  if (/Windows Phone/i.test(userAgent) || /WPDesktop/.test(userAgent)) {
+    return 'Windows Phone';
+  } else if (/iPad/.test(userAgent)) {
+    return 'iPad';
+  } else if (/iPod/.test(userAgent)) {
+    return 'iPod Touch';
+  } else if (/iPhone/.test(userAgent)) {
+    return 'iPhone';
+  } else if (/(BlackBerry|PlayBook|BB10)/i.test(userAgent)) {
+    return 'BlackBerry';
+  } else if (/Android/.test(userAgent)) {
+    return 'Android';
+  } else {
+    return '';
+  }
+}
+function referringDomain(referrer) {
+  const split = referrer.split('/');
+  if (split.length >= 3) {
+    return split[2];
+  }
+  return '';
+}
+
 /**
  * Cleanup the steps and set pointerEvents back to 'auto'
  * @param tour The tour object
@@ -3927,7 +4711,7 @@ function cleanupSteps(tour) {
     } = tour;
     steps.forEach(step => {
       if (step.options && step.options.canClickTarget === false && step.options.attachTo) {
-        if (step.target instanceof HTMLElement) {
+        if (isHTMLElement$1(step.target)) {
           step.target.classList.remove('shepherd-target-click-disabled');
         }
       }
@@ -3935,15 +4719,355 @@ function cleanupSteps(tour) {
   }
 }
 
+const instanceOfAny = (object, constructors) => constructors.some(c => object instanceof c);
+let idbProxyableTypes;
+let cursorAdvanceMethods;
+// This is a function to prevent it throwing up in node environments.
+function getIdbProxyableTypes() {
+  return idbProxyableTypes || (idbProxyableTypes = [IDBDatabase, IDBObjectStore, IDBIndex, IDBCursor, IDBTransaction]);
+}
+// This is a function to prevent it throwing up in node environments.
+function getCursorAdvanceMethods() {
+  return cursorAdvanceMethods || (cursorAdvanceMethods = [IDBCursor.prototype.advance, IDBCursor.prototype.continue, IDBCursor.prototype.continuePrimaryKey]);
+}
+const transactionDoneMap = new WeakMap();
+const transformCache = new WeakMap();
+const reverseTransformCache = new WeakMap();
+function promisifyRequest(request) {
+  const promise = new Promise((resolve, reject) => {
+    const unlisten = () => {
+      request.removeEventListener('success', success);
+      request.removeEventListener('error', error);
+    };
+    const success = () => {
+      resolve(wrap(request.result));
+      unlisten();
+    };
+    const error = () => {
+      reject(request.error);
+      unlisten();
+    };
+    request.addEventListener('success', success);
+    request.addEventListener('error', error);
+  });
+  // This mapping exists in reverseTransformCache but doesn't doesn't exist in transformCache. This
+  // is because we create many promises from a single IDBRequest.
+  reverseTransformCache.set(promise, request);
+  return promise;
+}
+function cacheDonePromiseForTransaction(tx) {
+  // Early bail if we've already created a done promise for this transaction.
+  if (transactionDoneMap.has(tx)) return;
+  const done = new Promise((resolve, reject) => {
+    const unlisten = () => {
+      tx.removeEventListener('complete', complete);
+      tx.removeEventListener('error', error);
+      tx.removeEventListener('abort', error);
+    };
+    const complete = () => {
+      resolve();
+      unlisten();
+    };
+    const error = () => {
+      reject(tx.error || new DOMException('AbortError', 'AbortError'));
+      unlisten();
+    };
+    tx.addEventListener('complete', complete);
+    tx.addEventListener('error', error);
+    tx.addEventListener('abort', error);
+  });
+  // Cache it for later retrieval.
+  transactionDoneMap.set(tx, done);
+}
+let idbProxyTraps = {
+  get(target, prop, receiver) {
+    if (target instanceof IDBTransaction) {
+      // Special handling for transaction.done.
+      if (prop === 'done') return transactionDoneMap.get(target);
+      // Make tx.store return the only store in the transaction, or undefined if there are many.
+      if (prop === 'store') {
+        return receiver.objectStoreNames[1] ? undefined : receiver.objectStore(receiver.objectStoreNames[0]);
+      }
+    }
+    // Else transform whatever we get back.
+    return wrap(target[prop]);
+  },
+  set(target, prop, value) {
+    target[prop] = value;
+    return true;
+  },
+  has(target, prop) {
+    if (target instanceof IDBTransaction && (prop === 'done' || prop === 'store')) {
+      return true;
+    }
+    return prop in target;
+  }
+};
+function replaceTraps(callback) {
+  idbProxyTraps = callback(idbProxyTraps);
+}
+function wrapFunction(func) {
+  // Due to expected object equality (which is enforced by the caching in `wrap`), we
+  // only create one new func per func.
+  // Cursor methods are special, as the behaviour is a little more different to standard IDB. In
+  // IDB, you advance the cursor and wait for a new 'success' on the IDBRequest that gave you the
+  // cursor. It's kinda like a promise that can resolve with many values. That doesn't make sense
+  // with real promises, so each advance methods returns a new promise for the cursor object, or
+  // undefined if the end of the cursor has been reached.
+  if (getCursorAdvanceMethods().includes(func)) {
+    return function (...args) {
+      // Calling the original function with the proxy as 'this' causes ILLEGAL INVOCATION, so we use
+      // the original object.
+      func.apply(unwrap(this), args);
+      return wrap(this.request);
+    };
+  }
+  return function (...args) {
+    // Calling the original function with the proxy as 'this' causes ILLEGAL INVOCATION, so we use
+    // the original object.
+    return wrap(func.apply(unwrap(this), args));
+  };
+}
+function transformCachableValue(value) {
+  if (typeof value === 'function') return wrapFunction(value);
+  // This doesn't return, it just creates a 'done' promise for the transaction,
+  // which is later returned for transaction.done (see idbObjectHandler).
+  if (value instanceof IDBTransaction) cacheDonePromiseForTransaction(value);
+  if (instanceOfAny(value, getIdbProxyableTypes())) return new Proxy(value, idbProxyTraps);
+  // Return the same value back if we're not going to transform it.
+  return value;
+}
+function wrap(value) {
+  // We sometimes generate multiple promises from a single IDBRequest (eg when cursoring), because
+  // IDB is weird and a single IDBRequest can yield many responses, so these can't be cached.
+  if (value instanceof IDBRequest) return promisifyRequest(value);
+  // If we've already transformed this value before, reuse the transformed value.
+  // This is faster, but it also provides object equality.
+  if (transformCache.has(value)) return transformCache.get(value);
+  const newValue = transformCachableValue(value);
+  // Not all types are transformed.
+  // These may be primitive types, so they can't be WeakMap keys.
+  if (newValue !== value) {
+    transformCache.set(value, newValue);
+    reverseTransformCache.set(newValue, value);
+  }
+  return newValue;
+}
+const unwrap = value => reverseTransformCache.get(value);
+
+/**
+ * Open a database.
+ *
+ * @param name Name of the database.
+ * @param version Schema version.
+ * @param callbacks Additional callbacks.
+ */
+function openDB(name, version, {
+  blocked,
+  upgrade,
+  blocking,
+  terminated
+} = {}) {
+  const request = indexedDB.open(name, version);
+  const openPromise = wrap(request);
+  if (upgrade) {
+    request.addEventListener('upgradeneeded', event => {
+      upgrade(wrap(request.result), event.oldVersion, event.newVersion, wrap(request.transaction), event);
+    });
+  }
+  if (blocked) {
+    request.addEventListener('blocked', event => blocked(
+    // Casting due to https://github.com/microsoft/TypeScript-DOM-lib-generator/pull/1405
+    event.oldVersion, event.newVersion, event));
+  }
+  openPromise.then(db => {
+    if (terminated) db.addEventListener('close', () => terminated());
+    if (blocking) {
+      db.addEventListener('versionchange', event => blocking(event.oldVersion, event.newVersion, event));
+    }
+  }).catch(() => {});
+  return openPromise;
+}
+const readMethods = ['get', 'getKey', 'getAll', 'getAllKeys', 'count'];
+const writeMethods = ['put', 'add', 'delete', 'clear'];
+const cachedMethods = new Map();
+function getMethod(target, prop) {
+  if (!(target instanceof IDBDatabase && !(prop in target) && typeof prop === 'string')) {
+    return;
+  }
+  if (cachedMethods.get(prop)) return cachedMethods.get(prop);
+  const targetFuncName = prop.replace(/FromIndex$/, '');
+  const useIndex = prop !== targetFuncName;
+  const isWrite = writeMethods.includes(targetFuncName);
+  if (
+  // Bail if the target doesn't exist on the target. Eg, getAll isn't in Edge.
+  !(targetFuncName in (useIndex ? IDBIndex : IDBObjectStore).prototype) || !(isWrite || readMethods.includes(targetFuncName))) {
+    return;
+  }
+  const method = async function method(storeName, ...args) {
+    // isWrite ? 'readwrite' : undefined gzipps better, but fails in Edge :(
+    const tx = this.transaction(storeName, isWrite ? 'readwrite' : 'readonly');
+    let target = tx.store;
+    if (useIndex) target = target.index(args.shift());
+    // Must reject if op rejects.
+    // If it's a write operation, must reject if tx.done rejects.
+    // Must reject with op rejection first.
+    // Must resolve with op value.
+    // Must handle both promises (no unhandled rejections)
+    return (await Promise.all([target[targetFuncName](...args), isWrite && tx.done]))[0];
+  };
+  cachedMethods.set(prop, method);
+  return method;
+}
+replaceTraps(oldTraps => _extends({}, oldTraps, {
+  get: (target, prop, receiver) => getMethod(target, prop) || oldTraps.get(target, prop, receiver),
+  has: (target, prop) => !!getMethod(target, prop) || oldTraps.has(target, prop)
+}));
+const advanceMethodProps = ['continue', 'continuePrimaryKey', 'advance'];
+const methodMap = {};
+const advanceResults = new WeakMap();
+const ittrProxiedCursorToOriginalProxy = new WeakMap();
+const cursorIteratorTraps = {
+  get(target, prop) {
+    if (!advanceMethodProps.includes(prop)) return target[prop];
+    let cachedFunc = methodMap[prop];
+    if (!cachedFunc) {
+      cachedFunc = methodMap[prop] = function (...args) {
+        advanceResults.set(this, ittrProxiedCursorToOriginalProxy.get(this)[prop](...args));
+      };
+    }
+    return cachedFunc;
+  }
+};
+function iterate() {
+  return _iterate.apply(this, arguments);
+}
+function _iterate() {
+  _iterate = _wrapAsyncGenerator(function* (...args) {
+    // tslint:disable-next-line:no-this-assignment
+    let cursor = this;
+    if (!(cursor instanceof IDBCursor)) {
+      cursor = yield _awaitAsyncGenerator(cursor.openCursor(...args));
+    }
+    if (!cursor) return;
+    cursor = cursor;
+    const proxiedCursor = new Proxy(cursor, cursorIteratorTraps);
+    ittrProxiedCursorToOriginalProxy.set(proxiedCursor, cursor);
+    // Map this double-proxy back to the original, so other cursor methods work.
+    reverseTransformCache.set(proxiedCursor, unwrap(cursor));
+    while (cursor) {
+      yield proxiedCursor;
+      // If one of the advancing methods was not called, call continue().
+      cursor = yield _awaitAsyncGenerator(advanceResults.get(proxiedCursor) || cursor.continue());
+      advanceResults.delete(proxiedCursor);
+    }
+  });
+  return _iterate.apply(this, arguments);
+}
+function isIteratorProp(target, prop) {
+  return prop === Symbol.asyncIterator && instanceOfAny(target, [IDBIndex, IDBObjectStore, IDBCursor]) || prop === 'iterate' && instanceOfAny(target, [IDBIndex, IDBObjectStore]);
+}
+replaceTraps(oldTraps => _extends({}, oldTraps, {
+  get(target, prop, receiver) {
+    if (isIteratorProp(target, prop)) return iterate;
+    return oldTraps.get(target, prop, receiver);
+  },
+  has(target, prop) {
+    return isIteratorProp(target, prop) || oldTraps.has(target, prop);
+  }
+}));
+
+class DataRequest {
+  constructor(apiKey, apiPath, properties) {
+    this.apiKey = void 0;
+    this.apiPath = void 0;
+    this.properties = void 0;
+    this.tourStateDb = void 0;
+    if (!apiKey) {
+      throw new Error('Shepherd Pro: Missing required apiKey option.');
+    }
+    if (!apiPath) {
+      throw new Error('Shepherd Pro: Missing required apiPath option.');
+    }
+    this.apiKey = apiKey;
+    this.apiPath = apiPath;
+    this.properties = properties;
+  }
+
+  /**
+   * Gets a list of the state for all the tours associated with a given apiKey
+   */
+  async getTourState() {
+    try {
+      const response = await fetch(`${this.apiPath}/api/v1/state`, {
+        headers: {
+          Authorization: `ApiKey ${this.apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        method: 'GET'
+      });
+      if (!response.ok) {
+        throw new Error('Could not fetch state for tours 🐑');
+      }
+      const {
+        data
+      } = await response.json();
+      this.tourStateDb = await openDB('TourState', 1, {
+        upgrade(db) {
+          db.createObjectStore('tours', {
+            keyPath: 'uniqueId'
+          });
+        }
+      });
+      if (Array.isArray(data) && data.length) {
+        const tx = this.tourStateDb.transaction('tours', 'readwrite');
+        const tourAddTxs = data.map(tourState => {
+          return tx.store.put(tourState);
+        });
+        await Promise.all([...tourAddTxs, tx.done]);
+      }
+    } catch (error) {
+      throw new Error('Error fetching data: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    }
+  }
+
+  /**
+   * Send events to the ShepherdPro API
+   * @param body The data to send for the event
+   */
+  async sendEvents(body) {
+    body.data['properties'] = this.properties;
+    try {
+      const response = await fetch(`${this.apiPath}/api/v1/actor`, {
+        headers: {
+          Authorization: `ApiKey ${this.apiKey}`,
+          'Content-Type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify(body)
+      });
+      if (!response.ok) {
+        throw new Error('Could not create an event 🐑');
+      }
+      const {
+        data
+      } = await response.json();
+      return data;
+    } catch (error) {
+      throw new Error('Error fetching data: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    }
+  }
+}
+
 /**
  * Generates the svg path data for a rounded rectangle overlay
- * @param {Object} dimension - Dimensions of rectangle.
- * @param {number} width - Width.
- * @param {number} height - Height.
- * @param {number} [x=0] - Offset from top left corner in x axis. default 0.
- * @param {number} [y=0] - Offset from top left corner in y axis. default 0.
- * @param {number | { topLeft: number, topRight: number, bottomRight: number, bottomLeft: number }} [r=0] - Corner Radius. Keep this smaller than half of width or height.
- * @returns {string} - Rounded rectangle overlay path data.
+ * @param dimension - Dimensions of rectangle.
+ * @param dimension.width - Width.
+ * @param dimension.height - Height.
+ * @param dimension.x - Offset from top left corner in x axis. default 0.
+ * @param dimension.y - Offset from top left corner in y axis. default 0.
+ * @param dimension.r - Corner Radius. Keep this smaller than half of width or height.
+ * @returns Rounded rectangle overlay path data.
  */
 function makeOverlayPath({
   width,
@@ -3984,7 +5108,7 @@ a${topRight},${topRight},0,0,0-${topRight}-${topRight}\
 Z`;
 }
 
-/* src/js/components/shepherd-modal.svelte generated by Svelte v3.59.2 */
+/* src/components/shepherd-modal.svelte generated by Svelte v4.2.15 */
 function create_fragment(ctx) {
   let svg;
   let path;
@@ -4019,7 +5143,10 @@ function create_fragment(ctx) {
     i: noop,
     o: noop,
     d(detaching) {
-      if (detaching) detach(svg);
+      if (detaching) {
+        detach(svg);
+      }
+
       /*svg_binding*/
       ctx[11](null);
       mounted = false;
@@ -4038,6 +5165,35 @@ function _getScrollParent(element) {
     return element;
   }
   return _getScrollParent(element.parentElement);
+}
+
+/**
+ * Get the top and left offset required to position the modal overlay cutout
+ * when the target element is within an iframe
+ * @param {HTMLElement} element The target element
+ * @private
+ */
+function _getIframeOffset(element) {
+  let offset = {
+    top: 0,
+    left: 0
+  };
+  if (!element) {
+    return offset;
+  }
+  let targetWindow = element.ownerDocument.defaultView;
+  while (targetWindow !== window.top) {
+    var _targetWindow;
+    const targetIframe = (_targetWindow = targetWindow) == null ? void 0 : _targetWindow.frameElement;
+    if (targetIframe) {
+      var _targetIframeRect$scr, _targetIframeRect$scr2;
+      const targetIframeRect = targetIframe.getBoundingClientRect();
+      offset.top += targetIframeRect.top + ((_targetIframeRect$scr = targetIframeRect.scrollTop) != null ? _targetIframeRect$scr : 0);
+      offset.left += targetIframeRect.left + ((_targetIframeRect$scr2 = targetIframeRect.scrollLeft) != null ? _targetIframeRect$scr2 : 0);
+    }
+    targetWindow = targetWindow.parent;
+  }
+  return offset;
 }
 
 /**
@@ -4071,7 +5227,6 @@ function instance($$self, $$props, $$invalidate) {
     element,
     openingProperties
   } = $$props;
-  uuid();
   let modalIsVisible = false;
   let rafId = undefined;
   let pathDefinition;
@@ -4092,7 +5247,7 @@ function instance($$self, $$props, $$invalidate) {
     // Ensure we cleanup all event listeners when we hide the modal
     _cleanupStepEventListeners();
   }
-  function positionModal(modalOverlayOpeningPadding = 0, modalOverlayOpeningRadius = 0, scrollParent, targetElement) {
+  function positionModal(modalOverlayOpeningPadding = 0, modalOverlayOpeningRadius = 0, modalOverlayOpeningXOffset = 0, modalOverlayOpeningYOffset = 0, scrollParent, targetElement) {
     if (targetElement) {
       const {
         y,
@@ -4108,8 +5263,8 @@ function instance($$self, $$props, $$invalidate) {
       $$invalidate(4, openingProperties = {
         width: width + modalOverlayOpeningPadding * 2,
         height: height + modalOverlayOpeningPadding * 2,
-        x: (x || left) - modalOverlayOpeningPadding,
-        y: y - modalOverlayOpeningPadding,
+        x: (x || left) + modalOverlayOpeningXOffset - modalOverlayOpeningPadding,
+        y: y + modalOverlayOpeningYOffset - modalOverlayOpeningPadding,
         r: modalOverlayOpeningRadius
       });
     } else {
@@ -4169,14 +5324,17 @@ function instance($$self, $$props, $$invalidate) {
   function _styleForStep(step) {
     const {
       modalOverlayOpeningPadding,
-      modalOverlayOpeningRadius
+      modalOverlayOpeningRadius,
+      modalOverlayOpeningXOffset = 0,
+      modalOverlayOpeningYOffset = 0
     } = step.options;
+    const iframeOffset = _getIframeOffset(step.target);
     const scrollParent = _getScrollParent(step.target);
 
     // Setup recursive function to call requestAnimationFrame to update the modal opening position
     const rafLoop = () => {
       rafId = undefined;
-      positionModal(modalOverlayOpeningPadding, modalOverlayOpeningRadius, scrollParent, step.target);
+      positionModal(modalOverlayOpeningPadding, modalOverlayOpeningRadius, modalOverlayOpeningXOffset + iframeOffset.left, modalOverlayOpeningYOffset + iframeOffset.top, scrollParent, step.target);
       rafId = requestAnimationFrame(rafLoop);
     };
     rafLoop();
@@ -4233,38 +5391,94 @@ class Shepherd_modal extends SvelteComponent {
   }
 }
 
-const Shepherd = new Evented();
+/**
+ * The options for the tour
+ */
+
+const SHEPHERD_DEFAULT_API = 'https://shepherdpro.com';
+const SHEPHERD_USER_ID = 'shepherdPro:userId';
+class ShepherdPro extends Evented {
+  constructor(...args) {
+    super(...args);
+    // Shepherd Pro fields
+    this.apiKey = void 0;
+    this.apiPath = void 0;
+    this.dataRequester = void 0;
+    this.isProEnabled = false;
+    /**
+     * Extra properties to pass to Shepherd Pro
+     */
+    this.properties = void 0;
+    // Vanilla Shepherd
+    this.activeTour = void 0;
+  }
+  /**
+   * Call init to take full advantage of ShepherdPro functionality
+   * @param {string} apiKey The API key for your ShepherdPro account
+   * @param {string} apiPath
+   * @param {object} properties Extra properties to be passed to Shepherd Pro
+   */
+  async init(apiKey, apiPath, properties) {
+    if (!apiKey) {
+      throw new Error('Shepherd Pro: Missing required apiKey option.');
+    }
+    this.apiKey = apiKey;
+    this.apiPath = apiPath != null ? apiPath : SHEPHERD_DEFAULT_API;
+    this.properties = properties != null ? properties : {};
+    this.properties['context'] = getContext(window);
+    if (this.apiKey) {
+      this.dataRequester = new DataRequest(this.apiKey, this.apiPath, this.properties);
+      this.isProEnabled = true;
+      // Setup actor before first tour is loaded if none exists
+      const shepherdProId = localStorage.getItem(SHEPHERD_USER_ID);
+      const promises = [this.dataRequester.getTourState()];
+      if (!shepherdProId) {
+        promises.push(this.createNewActor());
+      }
+      await Promise.all(promises);
+    }
+  }
+  async createNewActor() {
+    if (!this.dataRequester) return;
+
+    // Setup type returns an actor
+    const response = await this.dataRequester.sendEvents({
+      data: {
+        currentUserId: null,
+        eventType: 'setup'
+      }
+    });
+    localStorage.setItem(SHEPHERD_USER_ID, String(response.actorId));
+  }
+
+  /**
+   * Checks if a given tour's id is enabled
+   * @param tourId A string denoting the id of the tour
+   */
+  async isTourEnabled(tourId) {
+    var _this$dataRequester$t, _tourState$isActive;
+    if (!this.dataRequester) return;
+    const tourState = await ((_this$dataRequester$t = this.dataRequester.tourStateDb) == null ? void 0 : _this$dataRequester$t.get('tours', tourId));
+    return (_tourState$isActive = tourState == null ? void 0 : tourState.isActive) != null ? _tourState$isActive : true;
+  }
+}
 
 /**
  * Class representing the site tour
  * @extends {Evented}
  */
 class Tour extends Evented {
-  /**
-   * @param {Object} options The options for the tour
-   * @param {boolean | function(): boolean | Promise<boolean> | function(): Promise<boolean>} options.confirmCancel If true, will issue a `window.confirm` before cancelling.
-   * If it is a function(support Async Function), it will be called and wait for the return value, and will only be cancelled if the value returned is true
-   * @param {string} options.confirmCancelMessage The message to display in the `window.confirm` dialog
-   * @param {string} options.classPrefix The prefix to add to the `shepherd-enabled` and `shepherd-target` class names as well as the `data-shepherd-step-id`.
-   * @param {Object} options.defaultStepOptions Default options for Steps ({@link Step#constructor}), created through `addStep`
-   * @param {boolean} options.exitOnEsc Exiting the tour with the escape key will be enabled unless this is explicitly
-   * set to false.
-   * @param {boolean} options.keyboardNavigation Navigating the tour via left and right arrow keys will be enabled
-   * unless this is explicitly set to false.
-   * @param {HTMLElement} options.stepsContainer An optional container element for the steps.
-   * If not set, the steps will be appended to `document.body`.
-   * @param {HTMLElement} options.modalContainer An optional container element for the modal.
-   * If not set, the modal will be appended to `document.body`.
-   * @param {object[] | Step[]} options.steps An array of step options objects or Step instances to initialize the tour with
-   * @param {string} options.tourName An optional "name" for the tour. This will be appended to the the tour's
-   * dynamically generated `id` property.
-   * @param {boolean} options.useModalOverlay Whether or not steps should be placed above a darkened
-   * modal overlay. If true, the overlay will create an opening around the target element so that it
-   * can remain interactive
-   * @returns {Tour}
-   */
   constructor(options = {}) {
-    super(options);
+    super();
+    this.trackedEvents = ['active', 'cancel', 'complete', 'show'];
+    this.classPrefix = void 0;
+    this.currentStep = void 0;
+    this.focusedElBeforeOpen = void 0;
+    this.id = void 0;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.modal = void 0;
+    this.options = void 0;
+    this.steps = void 0;
     autoBind(this);
     const defaultTourOptions = {
       exitOnEsc: true,
@@ -4281,21 +5495,58 @@ class Tour extends Evented {
       (e => {
         this.on(e, opts => {
           opts = opts || {};
-          opts.tour = this;
+          opts['tour'] = this;
           Shepherd.trigger(e, opts);
         });
       })(event);
     });
-    this._setTourID();
+    this._setTourID(options.id);
+    const {
+      dataRequester
+    } = Shepherd;
+    // If we have an API key, then setup Pro features
+    if (dataRequester) {
+      this.trackedEvents.forEach(event => this.on(event, opts => {
+        const {
+          tour
+        } = opts;
+        const {
+          id,
+          steps
+        } = tour;
+        let position;
+        if (event !== 'active') {
+          const {
+            step: currentStep
+          } = opts;
+          if (currentStep) {
+            position = steps.findIndex(step => step.id === currentStep.id) + 1;
+          }
+        }
+        const data = {
+          currentUserId: localStorage.getItem(SHEPHERD_USER_ID),
+          eventType: event,
+          journeyData: {
+            id,
+            currentStep: position,
+            numberOfSteps: steps.length,
+            tourOptions: tour.options
+          }
+        };
+        dataRequester.sendEvents({
+          data
+        });
+      }));
+    }
     return this;
   }
 
   /**
    * Adds a new step to the tour
-   * @param {Object|Step} options An object containing step options or a Step instance
-   * @param {number} index The optional index to insert the step at. If undefined, the step
+   * @param {StepOptions} options - An object containing step options or a Step instance
+   * @param {number | undefined} index - The optional index to insert the step at. If undefined, the step
    * is added to the end of the array.
-   * @return {Step} The newly added step
+   * @return The newly added step
    */
   addStep(options, index) {
     let step = options;
@@ -4314,7 +5565,7 @@ class Tour extends Evented {
 
   /**
    * Add multiple steps to the tour
-   * @param {Array<object> | Array<Step>} steps The steps to add to the tour
+   * @param {Array<StepOptions> | Array<Step> | undefined} steps - The steps to add to the tour
    */
   addSteps(steps) {
     if (Array.isArray(steps)) {
@@ -4341,9 +5592,13 @@ class Tour extends Evented {
    */
   async cancel() {
     if (this.options.confirmCancel) {
-      const confirmCancelIsFunction = typeof this.options.confirmCancel === 'function';
       const cancelMessage = this.options.confirmCancelMessage || 'Are you sure you want to stop the tour?';
-      const stopTour = confirmCancelIsFunction ? await this.options.confirmCancel() : window.confirm(cancelMessage);
+      let stopTour;
+      if (isFunction(this.options.confirmCancel)) {
+        stopTour = await this.options.confirmCancel();
+      } else {
+        stopTour = window.confirm(cancelMessage);
+      }
       if (stopTour) {
         this._done('cancel');
       }
@@ -4361,8 +5616,8 @@ class Tour extends Evented {
 
   /**
    * Gets the step from a given id
-   * @param {Number|String} id The id of the step to retrieve
-   * @return {Step} The step corresponding to the `id`
+   * @param {number | string} id - The id of the step to retrieve
+   * @return The step corresponding to the `id`
    */
   getById(id) {
     return this.steps.find(step => {
@@ -4372,7 +5627,6 @@ class Tour extends Evented {
 
   /**
    * Gets the current step
-   * @returns {Step|null}
    */
   getCurrentStep() {
     return this.currentStep;
@@ -4390,7 +5644,6 @@ class Tour extends Evented {
 
   /**
    * Check if the tour is active
-   * @return {boolean}
    */
   isActive() {
     return Shepherd.activeTour === this;
@@ -4411,7 +5664,7 @@ class Tour extends Evented {
 
   /**
    * Removes the step from the tour
-   * @param {String} name The id for the step to remove
+   * @param {string} name - The id for the step to remove
    */
   removeStep(name) {
     const current = this.getCurrentStep();
@@ -4437,8 +5690,8 @@ class Tour extends Evented {
 
   /**
    * Show a specific step in the tour
-   * @param {Number|String} key The key to look up the step by
-   * @param {Boolean} forward True if we are going forward, false if backward
+   * @param {number | string} key - The key to look up the step by
+   * @param {boolean} forward - True if we are going forward, false if backward
    */
   show(key = 0, forward = true) {
     const step = isString(key) ? this.getById(key) : this.steps[key];
@@ -4463,20 +5716,24 @@ class Tour extends Evented {
   /**
    * Start the tour
    */
-  start() {
+  async start() {
+    // Check if ShepherdPro is enabled, and if so check if the tour id is active or not.
+    if (Shepherd.isProEnabled && !(await Shepherd.isTourEnabled(this.options.id))) {
+      return;
+    }
     this.trigger('start');
 
     // Save the focused element before the tour opens
     this.focusedElBeforeOpen = document.activeElement;
     this.currentStep = null;
-    this._setupModal();
+    this.setupModal();
     this._setupActiveTour();
     this.next();
   }
 
   /**
    * Called whenever the tour is cancelled or completed, basically anytime we exit the tour
-   * @param {String} event The event name to trigger
+   * @param {string} event - The event name to trigger
    * @private
    */
   _done(event) {
@@ -4500,6 +5757,7 @@ class Tour extends Evented {
         const modalContainer = document.querySelector('.shepherd-modal-overlay-container');
         if (modalContainer) {
           modalContainer.remove();
+          this.modal = null;
         }
       }
     }
@@ -4512,7 +5770,6 @@ class Tour extends Evented {
 
   /**
    * Make this tour "active"
-   * @private
    */
   _setupActiveTour() {
     this.trigger('active', {
@@ -4522,14 +5779,13 @@ class Tour extends Evented {
   }
 
   /**
-   * _setupModal create the modal container and instance
-   * @private
+   * setupModal create the modal container and instance
    */
-  _setupModal() {
+  setupModal() {
     this.modal = new Shepherd_modal({
       target: this.options.modalContainer || document.body,
       props: {
-        classPrefix: this.classPrefix,
+        // @ts-expect-error TODO: investigate where styles comes from
         styles: this.styles
       }
     });
@@ -4537,8 +5793,8 @@ class Tour extends Evented {
 
   /**
    * Called when `showOn` evaluates to false, to skip the step or complete the tour if it's the last step
-   * @param {Step} step The step to skip
-   * @param {Boolean} forward True if we are going forward, false if backward
+   * @param {Step} step - The step to skip
+   * @param {boolean} forward - True if we are going forward, false if backward
    * @private
    */
   _skipStep(step, forward) {
@@ -4566,30 +5822,25 @@ class Tour extends Evented {
   }
 
   /**
-   * Sets this.id to `${tourName}--${uuid}`
+   * Sets this.id to a provided tourName and id or `${tourName}--${uuid}`
+   * @param {string} optionsId - True if we are going forward, false if backward
    * @private
    */
-  _setTourID() {
+  _setTourID(optionsId) {
     const tourName = this.options.tourName || 'tour';
-    this.id = `${tourName}--${uuid()}`;
+    const tourId = optionsId || uuid();
+    this.id = `${tourName}--${tourId}`;
   }
 }
 
+/**
+ * @public
+ */
+const Shepherd = new ShepherdPro();
+
 const isServerSide = typeof window === 'undefined';
-class NoOp {
-  constructor() {}
-}
-if (isServerSide) {
-  Object.assign(Shepherd, {
-    Tour: NoOp,
-    Step: NoOp
-  });
-} else {
-  Object.assign(Shepherd, {
-    Tour,
-    Step
-  });
-}const shepherdKey = '$shepherd';
+Shepherd.Step = isServerSide ? StepNoOp : Step;
+Shepherd.Tour = isServerSide ? TourNoOp : Tour;const shepherdKey = '$shepherd';
 // create and export composition API's composable function.
 const useShepherd = (...args) => new Shepherd.Tour(...args);
 const install = function installVueShepherd(app) {

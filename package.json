@@ -1,6 +1,6 @@
 {
   "name": "vue-shepherd",
-  "version": "3.1.0",
+  "version": "4.0.0",
   "description": "A Vue wrapper for the site tour library Shepherd.",
   "author": {
     "name": "Robert Wagner",
@@ -37,7 +37,7 @@
   ],
   "types": "./dist/index.d.ts",
   "dependencies": {
-    "shepherd.js": "^11.2.0"
+    "shepherd.js": "^12.0.4"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.24.6",
