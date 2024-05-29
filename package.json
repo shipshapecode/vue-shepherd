@@ -101,7 +101,7 @@
   "repository": "https://github.com/shipshapecode/vue-shepherd",
   "sideeffects": false,
   "volta": {
-    "node": "16.17.1",
-    "yarn": "1.22.10"
+    "node": "18.20.3",
+    "yarn": "1.22.19"
   }
 }
