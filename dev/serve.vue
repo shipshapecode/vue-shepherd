@@ -1,5 +1,6 @@
 <script setup>
 import ShepherdExample from './components/ShepherdExample.vue';
+import 'shepherd.js/dist/css/shepherd.css';
 </script>
 
 <template>
@@ -7,8 +8,6 @@ import ShepherdExample from './components/ShepherdExample.vue';
 </template>
 
 <style>
-@import '~shepherd.js/dist/css/shepherd.css';
-
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
