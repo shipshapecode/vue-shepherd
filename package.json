@@ -52,7 +52,7 @@
     "@vue/compat": "^3.4.31",
     "@vue/compiler-sfc": "^3.4.31",
     "cross-env": "^7.0.2",
-    "cypress": "^13.13.0",
+    "cypress": "^13.13.1",
     "eslint": "^8.57.0",
     "eslint-plugin-vue": "^9.27.0",
     "minimist": "^1.2.8",
