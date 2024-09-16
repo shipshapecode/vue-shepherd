@@ -1,6 +1,21 @@
 
 
 
+
+## v4.1.0 (2024-09-16)
+
+#### :rocket: Enhancement
+* [#375](https://github.com/shipshapecode/vue-shepherd/pull/375) Add Native Typescript Declarations ([@Kenneth-Sills](https://github.com/Kenneth-Sills))
+
+#### :memo: Documentation
+* [#435](https://github.com/shipshapecode/vue-shepherd/pull/435) Update README.md ([@Mtillmann](https://github.com/Mtillmann))
+* [#228](https://github.com/shipshapecode/vue-shepherd/pull/228) Fix bug in README.md ([@lcb931023](https://github.com/lcb931023))
+
+#### Committers: 3
+- Changbai Li ([@lcb931023](https://github.com/lcb931023))
+- Kenneth Sills ([@Kenneth-Sills](https://github.com/Kenneth-Sills))
+- Martin Tillmann ([@Mtillmann](https://github.com/Mtillmann))
+
 ## v3.0.0 (2023-04-03)
 
 ## v2.0.1 (2022-10-27)
