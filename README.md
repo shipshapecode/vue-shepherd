@@ -19,6 +19,13 @@ npm install vue-shepherd --save
 
 ### Composition API (suggested)
 
+First, in your `main.js`, import the styles
+
+```js
+import 'shepherd.js/dist/css/shepherd.css'
+```
+Then, use shepherd in your components:
+
 ```vue
 <template>
   <div ref="el">
