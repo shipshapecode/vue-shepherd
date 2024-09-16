@@ -24,7 +24,7 @@ First, in your `main.js`, import the styles
 ```js
 import 'shepherd.js/dist/css/shepherd.css'
 ```
-Then, use shepher in your components:
+Then, use shepherd in your components:
 
 ```vue
 <template>
