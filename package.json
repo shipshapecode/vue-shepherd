@@ -54,7 +54,7 @@
     "cross-env": "^7.0.2",
     "cypress": "^13.16.0",
     "eslint": "^8.57.1",
-    "eslint-plugin-vue": "^9.31.0",
+    "eslint-plugin-vue": "^9.32.0",
     "minimist": "^1.2.8",
     "release-it": "^15.11.0",
     "release-it-lerna-changelog": "^5.0.0",
