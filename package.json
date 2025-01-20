@@ -37,7 +37,7 @@
   ],
   "types": "./dist/index.d.ts",
   "dependencies": {
-    "shepherd.js": "^14.3.0"
+    "shepherd.js": "^14.4.0"
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.26.5",
