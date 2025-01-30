@@ -4,11 +4,11 @@ import vue from 'rollup-plugin-vue';
 import alias from '@rollup/plugin-alias';
 import commonjs from '@rollup/plugin-commonjs';
 import replace from '@rollup/plugin-replace';
-import babel from 'rollup-plugin-babel';
+import { babel } from '@rollup/plugin-babel';
 import filesize from 'rollup-plugin-filesize';
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 import resolve from '@rollup/plugin-node-resolve';
-import { terser } from 'rollup-plugin-terser';
+import terser from '@rollup/plugin-terser';
 import minimist from 'minimist';
 
 // Get browserslist config and remove ie from es build targets
