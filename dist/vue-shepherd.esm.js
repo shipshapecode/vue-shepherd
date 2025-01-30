@@ -1,4 +1,4 @@
-/*! shepherd.js 13.0.3 */
+/*! shepherd.js 14.4.0 */
 
 /**
  * Checks if `value` is classified as an `Element`.
@@ -169,11 +169,33 @@ const actions = {
 
 /**
  * The default function to update meta data.
+ *
+ * It doesn't update the meta data.
  */
 function defaultMetaDataUpdater(previousMeta, metaMeta) {
   return metaMeta;
 }
+/**
+ * The default function to filter values.
+ *
+ * It filters out undefined values.
+ */
+function defaultFilterValues(values, meta) {
+  return values.filter(value => value !== undefined);
+}
 
+/**
+ * The different types of objects deepmerge-ts support.
+ */
+var ObjectType;
+(function (ObjectType) {
+  ObjectType[ObjectType["NOT"] = 0] = "NOT";
+  ObjectType[ObjectType["RECORD"] = 1] = "RECORD";
+  ObjectType[ObjectType["ARRAY"] = 2] = "ARRAY";
+  ObjectType[ObjectType["SET"] = 3] = "SET";
+  ObjectType[ObjectType["MAP"] = 4] = "MAP";
+  ObjectType[ObjectType["OTHER"] = 5] = "OTHER";
+})(ObjectType || (ObjectType = {}));
 /**
  * Get the type of the given object.
  *
@@ -208,13 +230,11 @@ function getObjectType(object) {
  */
 function getKeys(objects) {
   const keys = new Set();
-  /* eslint-disable functional/no-loop-statements, functional/no-expression-statements -- using a loop here is more efficient. */
   for (const object of objects) {
     for (const key of [...Object.keys(object), ...Object.getOwnPropertySymbols(object)]) {
       keys.add(key);
     }
   }
-  /* eslint-enable functional/no-loop-statements, functional/no-expression-statements */
   return keys;
 }
 /**
@@ -232,11 +252,8 @@ function objectHasProperty(object, property) {
  */
 function getIterableOfIterables(iterables) {
   return {
-    // eslint-disable-next-line functional/functional-parameters
     *[Symbol.iterator]() {
-      // eslint-disable-next-line functional/no-loop-statements
       for (const iterable of iterables) {
-        // eslint-disable-next-line functional/no-loop-statements
         for (const value of iterable) {
           yield value;
         }
@@ -257,18 +274,17 @@ function isRecord(value) {
     constructor
   } = value;
   // If has modified constructor.
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  // eslint-disable-next-line ts/no-unnecessary-condition
   if (constructor === undefined) {
     return true;
   }
-  // eslint-disable-next-line prefer-destructuring
   const prototype = constructor.prototype;
   // If has modified prototype.
   if (prototype === null || typeof prototype !== "object" || !validRecordToStringValues.has(Object.prototype.toString.call(prototype))) {
     return false;
   }
   // If constructor does not have an Object-specific method.
-  // eslint-disable-next-line sonarjs/prefer-single-boolean-return, no-prototype-builtins
+  // eslint-disable-next-line sonar/prefer-single-boolean-return, no-prototype-builtins
   if (!prototype.hasOwnProperty("isPrototypeOf")) {
     return false;
   }
@@ -281,9 +297,8 @@ function isRecord(value) {
  *
  * @param values - The records.
  */
-function mergeRecords$2(values, utils, meta) {
+function mergeRecords$1(values, utils, meta) {
   const result = {};
-  /* eslint-disable functional/no-loop-statements, functional/no-conditional-statements, functional/no-expression-statements, functional/immutable-data -- using imperative code here is more performant. */
   for (const key of getKeys(values)) {
     const propValues = [];
     for (const value of values) {
@@ -313,7 +328,6 @@ function mergeRecords$2(values, utils, meta) {
       result[key] = propertyResult;
     }
   }
-  /* eslint-enable functional/no-loop-statements, functional/no-conditional-statements, functional/no-expression-statements, functional/immutable-data */
   return result;
 }
 /**
@@ -321,7 +335,7 @@ function mergeRecords$2(values, utils, meta) {
  *
  * @param values - The arrays.
  */
-function mergeArrays$2(values) {
+function mergeArrays$1(values) {
   return values.flat();
 }
 /**
@@ -329,7 +343,7 @@ function mergeArrays$2(values) {
  *
  * @param values - The sets.
  */
-function mergeSets$2(values) {
+function mergeSets$1(values) {
   return new Set(getIterableOfIterables(values));
 }
 /**
@@ -337,32 +351,32 @@ function mergeSets$2(values) {
  *
  * @param values - The maps.
  */
-function mergeMaps$2(values) {
+function mergeMaps$1(values) {
   return new Map(getIterableOfIterables(values));
 }
 /**
- * Get the last value in the given array.
+ * Get the last non-undefined value in the given array.
  */
-function mergeOthers$2(values) {
+function mergeOthers$1(values) {
   return values.at(-1);
 }
-var defaultMergeFunctions = /*#__PURE__*/Object.freeze({
-  __proto__: null,
-  mergeArrays: mergeArrays$2,
-  mergeMaps: mergeMaps$2,
-  mergeOthers: mergeOthers$2,
-  mergeRecords: mergeRecords$2,
-  mergeSets: mergeSets$2
-});
+/**
+ * The merge functions.
+ */
+const mergeFunctions = {
+  mergeRecords: mergeRecords$1,
+  mergeArrays: mergeArrays$1,
+  mergeSets: mergeSets$1,
+  mergeMaps: mergeMaps$1,
+  mergeOthers: mergeOthers$1
+};
 
 /**
  * Deeply merge objects.
  *
  * @param objects - The objects to merge.
  */
-function deepmerge(
-// eslint-disable-next-line functional/functional-parameters
-...objects) {
+function deepmerge(...objects) {
   return deepmergeCustom({})(...objects);
 }
 function deepmergeCustom(options, rootMetaData) {
@@ -370,9 +384,7 @@ function deepmergeCustom(options, rootMetaData) {
   /**
    * The customized deepmerge function.
    */
-  function customizedDeepmerge(
-  // eslint-disable-next-line functional/functional-parameters
-  ...objects) {
+  function customizedDeepmerge(...objects) {
     return mergeUnknowns(objects, utils, rootMetaData);
   }
   return customizedDeepmerge;
@@ -383,13 +395,14 @@ function deepmergeCustom(options, rootMetaData) {
  * @param options - The options the user specified
  */
 function getUtils(options, customizedDeepmerge) {
-  var _options$metaDataUpda, _options$enableImplic;
+  var _options$metaDataUpda, _options$enableImplic, _options$filterValues;
   return {
-    defaultMergeFunctions,
-    mergeFunctions: _extends({}, defaultMergeFunctions, Object.fromEntries(Object.entries(options).filter(([key, option]) => Object.hasOwn(defaultMergeFunctions, key)).map(([key, option]) => option === false ? [key, mergeOthers$2] : [key, option]))),
+    defaultMergeFunctions: mergeFunctions,
+    mergeFunctions: _extends({}, mergeFunctions, Object.fromEntries(Object.entries(options).filter(([key, option]) => Object.hasOwn(mergeFunctions, key)).map(([key, option]) => option === false ? [key, mergeFunctions.mergeOthers] : [key, option]))),
     metaDataUpdater: (_options$metaDataUpda = options.metaDataUpdater) != null ? _options$metaDataUpda : defaultMetaDataUpdater,
     deepmerge: customizedDeepmerge,
     useImplicitDefaultMerging: (_options$enableImplic = options.enableImplicitDefaultMerging) != null ? _options$enableImplic : false,
+    filterValues: options.filterValues === false ? undefined : (_options$filterValues = options.filterValues) != null ? _options$filterValues : defaultFilterValues,
     actions
   };
 }
@@ -399,43 +412,43 @@ function getUtils(options, customizedDeepmerge) {
  * @param values - The values.
  */
 function mergeUnknowns(values, utils, meta) {
-  if (values.length === 0) {
+  var _utils$filterValues;
+  const filteredValues = (_utils$filterValues = utils.filterValues == null ? void 0 : utils.filterValues(values, meta)) != null ? _utils$filterValues : values;
+  if (filteredValues.length === 0) {
     return undefined;
   }
-  if (values.length === 1) {
-    return mergeOthers$1(values, utils, meta);
+  if (filteredValues.length === 1) {
+    return mergeOthers(filteredValues, utils, meta);
   }
-  const type = getObjectType(values[0]);
-  /* eslint-disable functional/no-loop-statements, functional/no-conditional-statements -- using imperative code here is more performant. */
+  const type = getObjectType(filteredValues[0]);
   if (type !== 0 /* ObjectType.NOT */ && type !== 5 /* ObjectType.OTHER */) {
-    for (let m_index = 1; m_index < values.length; m_index++) {
-      if (getObjectType(values[m_index]) === type) {
+    for (let m_index = 1; m_index < filteredValues.length; m_index++) {
+      if (getObjectType(filteredValues[m_index]) === type) {
         continue;
       }
-      return mergeOthers$1(values, utils, meta);
+      return mergeOthers(filteredValues, utils, meta);
     }
   }
-  /* eslint-enable functional/no-loop-statements, functional/no-conditional-statements */
   switch (type) {
     case 1 /* ObjectType.RECORD */:
       {
-        return mergeRecords$1(values, utils, meta);
+        return mergeRecords(filteredValues, utils, meta);
       }
     case 2 /* ObjectType.ARRAY */:
       {
-        return mergeArrays$1(values, utils, meta);
+        return mergeArrays(filteredValues, utils, meta);
       }
     case 3 /* ObjectType.SET */:
       {
-        return mergeSets$1(values, utils, meta);
+        return mergeSets(filteredValues, utils, meta);
       }
     case 4 /* ObjectType.MAP */:
       {
-        return mergeMaps$1(values, utils, meta);
+        return mergeMaps(filteredValues, utils, meta);
       }
     default:
       {
-        return mergeOthers$1(values, utils, meta);
+        return mergeOthers(filteredValues, utils, meta);
       }
   }
 }
@@ -444,7 +457,7 @@ function mergeUnknowns(values, utils, meta) {
  *
  * @param values - The records.
  */
-function mergeRecords$1(values, utils, meta) {
+function mergeRecords(values, utils, meta) {
   const result = utils.mergeFunctions.mergeRecords(values, utils, meta);
   if (result === actions.defaultMerge || utils.useImplicitDefaultMerging && result === undefined && utils.mergeFunctions.mergeRecords !== utils.defaultMergeFunctions.mergeRecords) {
     return utils.defaultMergeFunctions.mergeRecords(values, utils, meta);
@@ -456,7 +469,7 @@ function mergeRecords$1(values, utils, meta) {
  *
  * @param values - The arrays.
  */
-function mergeArrays$1(values, utils, meta) {
+function mergeArrays(values, utils, meta) {
   const result = utils.mergeFunctions.mergeArrays(values, utils, meta);
   if (result === actions.defaultMerge || utils.useImplicitDefaultMerging && result === undefined && utils.mergeFunctions.mergeArrays !== utils.defaultMergeFunctions.mergeArrays) {
     return utils.defaultMergeFunctions.mergeArrays(values);
@@ -468,7 +481,7 @@ function mergeArrays$1(values, utils, meta) {
  *
  * @param values - The sets.
  */
-function mergeSets$1(values, utils, meta) {
+function mergeSets(values, utils, meta) {
   const result = utils.mergeFunctions.mergeSets(values, utils, meta);
   if (result === actions.defaultMerge || utils.useImplicitDefaultMerging && result === undefined && utils.mergeFunctions.mergeSets !== utils.defaultMergeFunctions.mergeSets) {
     return utils.defaultMergeFunctions.mergeSets(values);
@@ -480,7 +493,7 @@ function mergeSets$1(values, utils, meta) {
  *
  * @param values - The maps.
  */
-function mergeMaps$1(values, utils, meta) {
+function mergeMaps(values, utils, meta) {
   const result = utils.mergeFunctions.mergeMaps(values, utils, meta);
   if (result === actions.defaultMerge || utils.useImplicitDefaultMerging && result === undefined && utils.mergeFunctions.mergeMaps !== utils.defaultMergeFunctions.mergeMaps) {
     return utils.defaultMergeFunctions.mergeMaps(values);
@@ -492,7 +505,7 @@ function mergeMaps$1(values, utils, meta) {
  *
  * @param values - The other things.
  */
-function mergeOthers$1(values, utils, meta) {
+function mergeOthers(values, utils, meta) {
   const result = utils.mergeFunctions.mergeOthers(values, utils, meta);
   if (result === actions.defaultMerge || utils.useImplicitDefaultMerging && result === undefined && utils.mergeFunctions.mergeOthers !== utils.defaultMergeFunctions.mergeOthers) {
     return utils.defaultMergeFunctions.mergeOthers(values);
@@ -622,6 +635,18 @@ function parseAttachTo(step) {
   return returnOpts;
 }
 
+/*
+ * Resolves the step's `extraHighlights` option, converting any locator values to HTMLElements.
+ */
+function parseExtraHighlights(step) {
+  if (step.options.extraHighlights) {
+    return step.options.extraHighlights.flatMap(highlight => {
+      return Array.from(document.querySelectorAll(highlight));
+    });
+  }
+  return [];
+}
+
 /**
  * Checks if the step should be centered or not. Does not trigger attachTo.element evaluation, making it a pure
  * alternative for the deprecated step.isCentered() method.
@@ -645,6 +670,14 @@ function uuid() {
   });
 }
 
+/**
+ * Custom positioning reference element.
+ * @see https://floating-ui.com/docs/virtual-elements
+ */
+
+const sides = ['top', 'right', 'bottom', 'left'];
+const alignments = ['start', 'end'];
+const placements = /*#__PURE__*/sides.reduce((acc, side) => acc.concat(side, side + "-" + alignments[0], side + "-" + alignments[1]), []);
 const min = Math.min;
 const max = Math.max;
 const round = Math.round;
@@ -773,7 +806,8 @@ function rectToClientRect(rect) {
   };
 }
 
-const _excluded2 = ["mainAxis", "crossAxis", "fallbackPlacements", "fallbackStrategy", "fallbackAxisSideDirection", "flipAlignment"],
+const _excluded = ["crossAxis", "alignment", "allowedPlacements", "autoAlignment"],
+  _excluded2 = ["mainAxis", "crossAxis", "fallbackPlacements", "fallbackStrategy", "fallbackAxisSideDirection", "flipAlignment"],
   _excluded4 = ["mainAxis", "crossAxis", "limiter"];
 function computeCoordsFromPlacement(_ref, placement, rtl) {
   let {
@@ -1063,6 +1097,109 @@ const arrow$1 = options => ({
     };
   }
 });
+function getPlacementList(alignment, autoAlignment, allowedPlacements) {
+  const allowedPlacementsSortedByAlignment = alignment ? [...allowedPlacements.filter(placement => getAlignment(placement) === alignment), ...allowedPlacements.filter(placement => getAlignment(placement) !== alignment)] : allowedPlacements.filter(placement => getSide(placement) === placement);
+  return allowedPlacementsSortedByAlignment.filter(placement => {
+    if (alignment) {
+      return getAlignment(placement) === alignment || (autoAlignment ? getOppositeAlignmentPlacement(placement) !== placement : false);
+    }
+    return true;
+  });
+}
+/**
+ * Optimizes the visibility of the floating element by choosing the placement
+ * that has the most space available automatically, without needing to specify a
+ * preferred placement. Alternative to `flip`.
+ * @see https://floating-ui.com/docs/autoPlacement
+ */
+const autoPlacement$1 = function autoPlacement(options) {
+  if (options === void 0) {
+    options = {};
+  }
+  return {
+    name: 'autoPlacement',
+    options,
+    async fn(state) {
+      var _middlewareData$autoP, _middlewareData$autoP2, _placementsThatFitOnE;
+      const {
+        rects,
+        middlewareData,
+        placement,
+        platform,
+        elements
+      } = state;
+      const _evaluate = evaluate(options, state),
+        {
+          crossAxis = false,
+          alignment,
+          allowedPlacements = placements,
+          autoAlignment = true
+        } = _evaluate,
+        detectOverflowOptions = _objectWithoutPropertiesLoose(_evaluate, _excluded);
+      const placements$1 = alignment !== undefined || allowedPlacements === placements ? getPlacementList(alignment || null, autoAlignment, allowedPlacements) : allowedPlacements;
+      const overflow = await detectOverflow(state, detectOverflowOptions);
+      const currentIndex = ((_middlewareData$autoP = middlewareData.autoPlacement) == null ? void 0 : _middlewareData$autoP.index) || 0;
+      const currentPlacement = placements$1[currentIndex];
+      if (currentPlacement == null) {
+        return {};
+      }
+      const alignmentSides = getAlignmentSides(currentPlacement, rects, await (platform.isRTL == null ? void 0 : platform.isRTL(elements.floating)));
+
+      // Make `computeCoords` start from the right place.
+      if (placement !== currentPlacement) {
+        return {
+          reset: {
+            placement: placements$1[0]
+          }
+        };
+      }
+      const currentOverflows = [overflow[getSide(currentPlacement)], overflow[alignmentSides[0]], overflow[alignmentSides[1]]];
+      const allOverflows = [...(((_middlewareData$autoP2 = middlewareData.autoPlacement) == null ? void 0 : _middlewareData$autoP2.overflows) || []), {
+        placement: currentPlacement,
+        overflows: currentOverflows
+      }];
+      const nextPlacement = placements$1[currentIndex + 1];
+
+      // There are more placements to check.
+      if (nextPlacement) {
+        return {
+          data: {
+            index: currentIndex + 1,
+            overflows: allOverflows
+          },
+          reset: {
+            placement: nextPlacement
+          }
+        };
+      }
+      const placementsSortedByMostSpace = allOverflows.map(d => {
+        const alignment = getAlignment(d.placement);
+        return [d.placement, alignment && crossAxis ?
+        // Check along the mainAxis and main crossAxis side.
+        d.overflows.slice(0, 2).reduce((acc, v) => acc + v, 0) :
+        // Check only the mainAxis.
+        d.overflows[0], d.overflows];
+      }).sort((a, b) => a[1] - b[1]);
+      const placementsThatFitOnEachSide = placementsSortedByMostSpace.filter(d => d[2].slice(0,
+      // Aligned placements should not check their opposite crossAxis
+      // side.
+      getAlignment(d[0]) ? 2 : 3).every(v => v <= 0));
+      const resetPlacement = ((_placementsThatFitOnE = placementsThatFitOnEachSide[0]) == null ? void 0 : _placementsThatFitOnE[0]) || placementsSortedByMostSpace[0][0];
+      if (resetPlacement !== placement) {
+        return {
+          data: {
+            index: currentIndex + 1,
+            overflows: allOverflows
+          },
+          reset: {
+            placement: resetPlacement
+          }
+        };
+      }
+      return {};
+    }
+  };
+};
 
 /**
  * Optimizes the visibility of the floating element by flipping the `placement`
@@ -1331,6 +1468,9 @@ const limitShift$1 = function limitShift(options) {
   };
 };
 
+function hasWindow() {
+  return typeof window !== 'undefined';
+}
 function getNodeName(node) {
   if (isNode(node)) {
     return (node.nodeName || '').toLowerCase();
@@ -1349,17 +1489,25 @@ function getDocumentElement(node) {
   return (_ref = (isNode(node) ? node.ownerDocument : node.document) || window.document) == null ? void 0 : _ref.documentElement;
 }
 function isNode(value) {
+  if (!hasWindow()) {
+    return false;
+  }
   return value instanceof Node || value instanceof getWindow(value).Node;
 }
 function isElement(value) {
+  if (!hasWindow()) {
+    return false;
+  }
   return value instanceof Element || value instanceof getWindow(value).Element;
 }
 function isHTMLElement(value) {
+  if (!hasWindow()) {
+    return false;
+  }
   return value instanceof HTMLElement || value instanceof getWindow(value).HTMLElement;
 }
 function isShadowRoot(value) {
-  // Browsers without `ShadowRoot` support.
-  if (typeof ShadowRoot === 'undefined') {
+  if (!hasWindow() || typeof ShadowRoot === 'undefined') {
     return false;
   }
   return value instanceof ShadowRoot || value instanceof getWindow(value).ShadowRoot;
@@ -1463,9 +1611,13 @@ function getOverflowAncestors(node, list, traverseIframes) {
   const isBody = scrollableAncestor === ((_node$ownerDocument2 = node.ownerDocument) == null ? void 0 : _node$ownerDocument2.body);
   const win = getWindow(scrollableAncestor);
   if (isBody) {
-    return list.concat(win, win.visualViewport || [], isOverflowElement(scrollableAncestor) ? scrollableAncestor : [], win.frameElement && traverseIframes ? getOverflowAncestors(win.frameElement) : []);
+    const frameElement = getFrameElement(win);
+    return list.concat(win, win.visualViewport || [], isOverflowElement(scrollableAncestor) ? scrollableAncestor : [], frameElement && traverseIframes ? getOverflowAncestors(frameElement) : []);
   }
   return list.concat(scrollableAncestor, getOverflowAncestors(scrollableAncestor, [], traverseIframes));
+}
+function getFrameElement(win) {
+  return win.parent && Object.getPrototypeOf(win.parent) ? win.frameElement : null;
 }
 
 function getCssDimensions(element) {
@@ -1566,7 +1718,7 @@ function getBoundingClientRect(element, includeScale, isFixedStrategy, offsetPar
     const win = getWindow(domElement);
     const offsetWin = offsetParent && isElement(offsetParent) ? getWindow(offsetParent) : offsetParent;
     let currentWin = win;
-    let currentIFrame = currentWin.frameElement;
+    let currentIFrame = getFrameElement(currentWin);
     while (currentIFrame && offsetParent && offsetWin !== currentWin) {
       const iframeScale = getScale(currentIFrame);
       const iframeRect = currentIFrame.getBoundingClientRect();
@@ -1580,7 +1732,7 @@ function getBoundingClientRect(element, includeScale, isFixedStrategy, offsetPar
       x += left;
       y += top;
       currentWin = getWindow(currentIFrame);
-      currentIFrame = currentWin.frameElement;
+      currentIFrame = getFrameElement(currentWin);
     }
   }
   return rectToClientRect({
@@ -1589,6 +1741,30 @@ function getBoundingClientRect(element, includeScale, isFixedStrategy, offsetPar
     x,
     y
   });
+}
+
+// If <html> has a CSS width greater than the viewport, then this will be
+// incorrect for RTL.
+function getWindowScrollBarX(element, rect) {
+  const leftScroll = getNodeScroll(element).scrollLeft;
+  if (!rect) {
+    return getBoundingClientRect(getDocumentElement(element)).left + leftScroll;
+  }
+  return rect.left + leftScroll;
+}
+function getHTMLOffset(documentElement, scroll, ignoreScrollbarX) {
+  if (ignoreScrollbarX === void 0) {
+    ignoreScrollbarX = false;
+  }
+  const htmlRect = documentElement.getBoundingClientRect();
+  const x = htmlRect.left + scroll.scrollLeft - (ignoreScrollbarX ? 0 :
+  // RTL <body> scrollbar.
+  getWindowScrollBarX(documentElement, htmlRect));
+  const y = htmlRect.top + scroll.scrollTop;
+  return {
+    x,
+    y
+  };
 }
 function convertOffsetParentRelativeRectToViewportRelativeRect(_ref) {
   let {
@@ -1621,20 +1797,16 @@ function convertOffsetParentRelativeRectToViewportRelativeRect(_ref) {
       offsets.y = offsetRect.y + offsetParent.clientTop;
     }
   }
+  const htmlOffset = documentElement && !isOffsetParentAnElement && !isFixed ? getHTMLOffset(documentElement, scroll, true) : createCoords(0);
   return {
     width: rect.width * scale.x,
     height: rect.height * scale.y,
-    x: rect.x * scale.x - scroll.scrollLeft * scale.x + offsets.x,
-    y: rect.y * scale.y - scroll.scrollTop * scale.y + offsets.y
+    x: rect.x * scale.x - scroll.scrollLeft * scale.x + offsets.x + htmlOffset.x,
+    y: rect.y * scale.y - scroll.scrollTop * scale.y + offsets.y + htmlOffset.y
   };
 }
 function getClientRects(element) {
   return Array.from(element.getClientRects());
-}
-function getWindowScrollBarX(element) {
-  // If <html> has a CSS width greater than the viewport, then this will be
-  // incorrect for RTL.
-  return getBoundingClientRect(getDocumentElement(element)).left + getNodeScroll(element).scrollLeft;
 }
 
 // Gets the entire size of the scrollable document area, even extending outside
@@ -1709,10 +1881,12 @@ function getClientRectFromClippingAncestor(element, clippingAncestor, strategy) 
     rect = getInnerBoundingClientRect(clippingAncestor, strategy);
   } else {
     const visualOffsets = getVisualOffsets(element);
-    rect = _extends({}, clippingAncestor, {
+    rect = {
       x: clippingAncestor.x - visualOffsets.x,
-      y: clippingAncestor.y - visualOffsets.y
-    });
+      y: clippingAncestor.y - visualOffsets.y,
+      width: clippingAncestor.width,
+      height: clippingAncestor.height
+    };
   }
   return rectToClientRect(rect);
 }
@@ -1814,11 +1988,14 @@ function getRectRelativeToOffsetParent(element, offsetParent, strategy) {
       offsets.x = offsetRect.x + offsetParent.clientLeft;
       offsets.y = offsetRect.y + offsetParent.clientTop;
     } else if (documentElement) {
+      // If the <body> scrollbar appears on the left (e.g. RTL systems). Use
+      // Firefox with layout.scrollbar.side = 3 in about:config to test this.
       offsets.x = getWindowScrollBarX(documentElement);
     }
   }
-  const x = rect.left + scroll.scrollLeft - offsets.x;
-  const y = rect.top + scroll.scrollTop - offsets.y;
+  const htmlOffset = documentElement && !isOffsetParentAnElement && !isFixed ? getHTMLOffset(documentElement, scroll) : createCoords(0);
+  const x = rect.left + scroll.scrollLeft - offsets.x - htmlOffset.x;
+  const y = rect.top + scroll.scrollTop - offsets.y - htmlOffset.y;
   return {
     x,
     y,
@@ -1836,7 +2013,16 @@ function getTrueOffsetParent(element, polyfill) {
   if (polyfill) {
     return polyfill(element);
   }
-  return element.offsetParent;
+  let rawOffsetParent = element.offsetParent;
+
+  // Firefox returns the <html> element as the offsetParent if it's non-static,
+  // while Chrome and Safari return the <body> element. The <body> element must
+  // be used to perform the correct calculations even if the <html> element is
+  // non-static.
+  if (getDocumentElement(element) === rawOffsetParent) {
+    rawOffsetParent = rawOffsetParent.ownerDocument.body;
+  }
+  return rawOffsetParent;
 }
 
 // Gets the closest ancestor positioned element. Handles some edge cases,
@@ -2051,6 +2237,14 @@ function autoUpdate(reference, floating, update, options) {
 }
 
 /**
+ * Optimizes the visibility of the floating element by choosing the placement
+ * that has the most space available automatically, without needing to specify a
+ * preferred placement. Alternative to `flip`.
+ * @see https://floating-ui.com/docs/autoPlacement
+ */
+const autoPlacement = autoPlacement$1;
+
+/**
  * Optimizes the visibility of the floating element by shifting it in order to
  * keep it in view when it will overflow the clipping boundary.
  * @see https://floating-ui.com/docs/shift
@@ -2218,30 +2412,40 @@ function placeArrow(el, middlewareData) {
  * @private
  */
 function getFloatingUIOptions(attachToOptions, step) {
+  var _attachToOptions$on, _attachToOptions$on2, _attachToOptions$on3;
   const options = {
     strategy: 'absolute'
   };
   options.middleware = [];
   const arrowEl = addArrow(step);
   const shouldCenter = shouldCenterStep(attachToOptions);
+  const hasAutoPlacement = (_attachToOptions$on = attachToOptions.on) == null ? void 0 : _attachToOptions$on.includes('auto');
+  const hasEdgeAlignment = (attachToOptions == null || (_attachToOptions$on2 = attachToOptions.on) == null ? void 0 : _attachToOptions$on2.includes('-start')) || (attachToOptions == null || (_attachToOptions$on3 = attachToOptions.on) == null ? void 0 : _attachToOptions$on3.includes('-end'));
   if (!shouldCenter) {
-    options.middleware.push(flip(),
+    if (hasAutoPlacement) {
+      var _attachToOptions$on4;
+      options.middleware.push(autoPlacement({
+        crossAxis: true,
+        alignment: hasEdgeAlignment ? attachToOptions == null || (_attachToOptions$on4 = attachToOptions.on) == null ? void 0 : _attachToOptions$on4.split('-').pop() : null
+      }));
+    } else {
+      options.middleware.push(flip());
+    }
+    options.middleware.push(
     // Replicate PopperJS default behavior.
     shift({
       limiter: limitShift(),
       crossAxis: true
     }));
     if (arrowEl) {
-      var _attachToOptions$on, _attachToOptions$on2;
-      const hasEdgeAlignment = (attachToOptions == null || (_attachToOptions$on = attachToOptions.on) == null ? void 0 : _attachToOptions$on.includes('-start')) || (attachToOptions == null || (_attachToOptions$on2 = attachToOptions.on) == null ? void 0 : _attachToOptions$on2.includes('-end'));
       options.middleware.push(arrow({
         element: arrowEl,
         padding: hasEdgeAlignment ? 4 : 0
       }));
     }
-    options.placement = attachToOptions.on;
+    if (!hasAutoPlacement) options.placement = attachToOptions.on;
   }
-  return deepmerge(step.options.floatingUIOptions || {}, options);
+  return deepmerge(options, step.options.floatingUIOptions || {});
 }
 function addArrow(step) {
   if (step.options.arrow && step.el) {
@@ -2955,7 +3159,7 @@ if (typeof window !== 'undefined')
     v: new Set()
   })).v.add(PUBLIC_VERSION);
 
-/* src/components/shepherd-button.svelte generated by Svelte v4.2.18 */
+/* src/components/shepherd-button.svelte generated by Svelte v4.2.19 */
 function create_fragment$8(ctx) {
   let button;
   let button_aria_label_value;
@@ -2976,7 +3180,7 @@ function create_fragment$8(ctx) {
       button.innerHTML = /*text*/ctx[5];
       if (!mounted) {
         dispose = listen(button, "click", function () {
-          if (is_function( /*action*/ctx[0])) /*action*/ctx[0].apply(this, arguments);
+          if (is_function(/*action*/ctx[0])) /*action*/ctx[0].apply(this, arguments);
         });
         mounted = true;
       }
@@ -3045,7 +3249,7 @@ class Shepherd_button extends SvelteComponent {
   }
 }
 
-/* src/components/shepherd-footer.svelte generated by Svelte v4.2.18 */
+/* src/components/shepherd-footer.svelte generated by Svelte v4.2.19 */
 function get_each_context(ctx, list, i) {
   const child_ctx = ctx.slice();
   child_ctx[2] = list[i];
@@ -3056,7 +3260,7 @@ function get_each_context(ctx, list, i) {
 function create_if_block$3(ctx) {
   let each_1_anchor;
   let current;
-  let each_value = ensure_array_like( /*buttons*/ctx[1]);
+  let each_value = ensure_array_like(/*buttons*/ctx[1]);
   let each_blocks = [];
   for (let i = 0; i < each_value.length; i += 1) {
     each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
@@ -3082,7 +3286,7 @@ function create_if_block$3(ctx) {
     },
     p(ctx, dirty) {
       if (dirty & /*buttons, step*/3) {
-        each_value = ensure_array_like( /*buttons*/ctx[1]);
+        each_value = ensure_array_like(/*buttons*/ctx[1]);
         let i;
         for (i = 0; i < each_value.length; i += 1) {
           const child_ctx = get_each_context(ctx, each_value, i);
@@ -3180,7 +3384,7 @@ function create_fragment$7(ctx) {
       current = true;
     },
     p(ctx, [dirty]) {
-      if ( /*buttons*/ctx[1]) {
+      if (/*buttons*/ctx[1]) {
         if (if_block) {
           if_block.p(ctx, dirty);
           if (dirty & /*buttons*/2) {
@@ -3241,7 +3445,7 @@ class Shepherd_footer extends SvelteComponent {
   }
 }
 
-/* src/components/shepherd-cancel-icon.svelte generated by Svelte v4.2.18 */
+/* src/components/shepherd-cancel-icon.svelte generated by Svelte v4.2.19 */
 function create_fragment$6(ctx) {
   let button;
   let span;
@@ -3311,7 +3515,7 @@ class Shepherd_cancel_icon extends SvelteComponent {
   }
 }
 
-/* src/components/shepherd-title.svelte generated by Svelte v4.2.18 */
+/* src/components/shepherd-title.svelte generated by Svelte v4.2.19 */
 function create_fragment$5(ctx) {
   let h3;
   return {
@@ -3378,7 +3582,7 @@ class Shepherd_title extends SvelteComponent {
   }
 }
 
-/* src/components/shepherd-header.svelte generated by Svelte v4.2.18 */
+/* src/components/shepherd-header.svelte generated by Svelte v4.2.19 */
 function create_if_block_1$1(ctx) {
   let shepherdtitle;
   let current;
@@ -3477,7 +3681,7 @@ function create_fragment$4(ctx) {
       current = true;
     },
     p(ctx, [dirty]) {
-      if ( /*title*/ctx[2]) {
+      if (/*title*/ctx[2]) {
         if (if_block0) {
           if_block0.p(ctx, dirty);
           if (dirty & /*title*/4) {
@@ -3496,7 +3700,7 @@ function create_fragment$4(ctx) {
         });
         check_outros();
       }
-      if ( /*cancelIcon*/ctx[3] && /*cancelIcon*/ctx[3].enabled) {
+      if (/*cancelIcon*/ctx[3] && /*cancelIcon*/ctx[3].enabled) {
         if (if_block1) {
           if_block1.p(ctx, dirty);
           if (dirty & /*cancelIcon*/8) {
@@ -3566,7 +3770,7 @@ class Shepherd_header extends SvelteComponent {
   }
 }
 
-/* src/components/shepherd-text.svelte generated by Svelte v4.2.18 */
+/* src/components/shepherd-text.svelte generated by Svelte v4.2.19 */
 function create_fragment$3(ctx) {
   let div;
   return {
@@ -3640,7 +3844,7 @@ class Shepherd_text extends SvelteComponent {
   }
 }
 
-/* src/components/shepherd-content.svelte generated by Svelte v4.2.18 */
+/* src/components/shepherd-content.svelte generated by Svelte v4.2.19 */
 function create_if_block_2(ctx) {
   let shepherdheader;
   let current;
@@ -3756,11 +3960,11 @@ function create_if_block$1(ctx) {
 }
 function create_fragment$2(ctx) {
   let div;
-  let show_if_2 = !isUndefined( /*step*/ctx[2].options.title) || /*step*/ctx[2].options.cancelIcon && /*step*/ctx[2].options.cancelIcon.enabled;
+  let show_if_2 = !isUndefined(/*step*/ctx[2].options.title) || /*step*/ctx[2].options.cancelIcon && /*step*/ctx[2].options.cancelIcon.enabled;
   let t0;
-  let show_if_1 = !isUndefined( /*step*/ctx[2].options.text);
+  let show_if_1 = !isUndefined(/*step*/ctx[2].options.text);
   let t1;
-  let show_if = Array.isArray( /*step*/ctx[2].options.buttons) && /*step*/ctx[2].options.buttons.length;
+  let show_if = Array.isArray(/*step*/ctx[2].options.buttons) && /*step*/ctx[2].options.buttons.length;
   let current;
   let if_block0 = show_if_2 && create_if_block_2(ctx);
   let if_block1 = show_if_1 && create_if_block_1(ctx);
@@ -3785,7 +3989,7 @@ function create_fragment$2(ctx) {
       current = true;
     },
     p(ctx, [dirty]) {
-      if (dirty & /*step*/4) show_if_2 = !isUndefined( /*step*/ctx[2].options.title) || /*step*/ctx[2].options.cancelIcon && /*step*/ctx[2].options.cancelIcon.enabled;
+      if (dirty & /*step*/4) show_if_2 = !isUndefined(/*step*/ctx[2].options.title) || /*step*/ctx[2].options.cancelIcon && /*step*/ctx[2].options.cancelIcon.enabled;
       if (show_if_2) {
         if (if_block0) {
           if_block0.p(ctx, dirty);
@@ -3805,7 +4009,7 @@ function create_fragment$2(ctx) {
         });
         check_outros();
       }
-      if (dirty & /*step*/4) show_if_1 = !isUndefined( /*step*/ctx[2].options.text);
+      if (dirty & /*step*/4) show_if_1 = !isUndefined(/*step*/ctx[2].options.text);
       if (show_if_1) {
         if (if_block1) {
           if_block1.p(ctx, dirty);
@@ -3825,7 +4029,7 @@ function create_fragment$2(ctx) {
         });
         check_outros();
       }
-      if (dirty & /*step*/4) show_if = Array.isArray( /*step*/ctx[2].options.buttons) && /*step*/ctx[2].options.buttons.length;
+      if (dirty & /*step*/4) show_if = Array.isArray(/*step*/ctx[2].options.buttons) && /*step*/ctx[2].options.buttons.length;
       if (show_if) {
         if (if_block2) {
           if_block2.p(ctx, dirty);
@@ -3893,7 +4097,7 @@ class Shepherd_content extends SvelteComponent {
   }
 }
 
-/* src/components/shepherd-element.svelte generated by Svelte v4.2.18 */
+/* src/components/shepherd-element.svelte generated by Svelte v4.2.19 */
 function create_if_block(ctx) {
   let div;
   return {
@@ -3913,11 +4117,11 @@ function create_if_block(ctx) {
   };
 }
 function create_fragment$1(ctx) {
-  let div;
+  let dialog;
   let t;
   let shepherdcontent;
-  let div_aria_describedby_value;
-  let div_aria_labelledby_value;
+  let dialog_aria_describedby_value;
+  let dialog_aria_labelledby_value;
   let current;
   let mounted;
   let dispose;
@@ -3929,49 +4133,47 @@ function create_fragment$1(ctx) {
       step: /*step*/ctx[4]
     }
   });
-  let div_levels = [{
-    "aria-describedby": div_aria_describedby_value = !isUndefined( /*step*/ctx[4].options.text) ? /*descriptionId*/ctx[2] : null
+  let dialog_levels = [{
+    "aria-describedby": dialog_aria_describedby_value = !isUndefined(/*step*/ctx[4].options.text) ? /*descriptionId*/ctx[2] : null
   }, {
-    "aria-labelledby": div_aria_labelledby_value = /*step*/ctx[4].options.title ? /*labelId*/ctx[3] : null
+    "aria-labelledby": dialog_aria_labelledby_value = /*step*/ctx[4].options.title ? /*labelId*/ctx[3] : null
   }, /*dataStepId*/ctx[1], {
-    role: "dialog"
-  }, {
-    tabindex: "0"
+    open: "true"
   }];
-  let div_data = {};
-  for (let i = 0; i < div_levels.length; i += 1) {
-    div_data = assign(div_data, div_levels[i]);
+  let dialog_data = {};
+  for (let i = 0; i < dialog_levels.length; i += 1) {
+    dialog_data = assign(dialog_data, dialog_levels[i]);
   }
   return {
     c() {
-      div = element("div");
+      dialog = element("dialog");
       if (if_block) if_block.c();
       t = space();
       create_component(shepherdcontent.$$.fragment);
-      set_attributes(div, div_data);
-      toggle_class(div, "shepherd-has-cancel-icon", /*hasCancelIcon*/ctx[5]);
-      toggle_class(div, "shepherd-has-title", /*hasTitle*/ctx[6]);
-      toggle_class(div, "shepherd-element", true);
+      set_attributes(dialog, dialog_data);
+      toggle_class(dialog, "shepherd-has-cancel-icon", /*hasCancelIcon*/ctx[5]);
+      toggle_class(dialog, "shepherd-has-title", /*hasTitle*/ctx[6]);
+      toggle_class(dialog, "shepherd-element", true);
     },
     m(target, anchor) {
-      insert(target, div, anchor);
-      if (if_block) if_block.m(div, null);
-      append(div, t);
-      mount_component(shepherdcontent, div, null);
-      /*div_binding*/
-      ctx[13](div);
+      insert(target, dialog, anchor);
+      if (if_block) if_block.m(dialog, null);
+      append(dialog, t);
+      mount_component(shepherdcontent, dialog, null);
+      /*dialog_binding*/
+      ctx[13](dialog);
       current = true;
       if (!mounted) {
-        dispose = listen(div, "keydown", /*handleKeyDown*/ctx[7]);
+        dispose = listen(dialog, "keydown", /*handleKeyDown*/ctx[7]);
         mounted = true;
       }
     },
     p(ctx, [dirty]) {
-      if ( /*step*/ctx[4].options.arrow && /*step*/ctx[4].options.attachTo && /*step*/ctx[4].options.attachTo.element && /*step*/ctx[4].options.attachTo.on) {
+      if (/*step*/ctx[4].options.arrow && /*step*/ctx[4].options.attachTo && /*step*/ctx[4].options.attachTo.element && /*step*/ctx[4].options.attachTo.on) {
         if (if_block) ; else {
           if_block = create_if_block();
           if_block.c();
-          if_block.m(div, t);
+          if_block.m(dialog, t);
         }
       } else if (if_block) {
         if_block.d(1);
@@ -3982,18 +4184,16 @@ function create_fragment$1(ctx) {
       if (dirty & /*labelId*/8) shepherdcontent_changes.labelId = /*labelId*/ctx[3];
       if (dirty & /*step*/16) shepherdcontent_changes.step = /*step*/ctx[4];
       shepherdcontent.$set(shepherdcontent_changes);
-      set_attributes(div, div_data = get_spread_update(div_levels, [(!current || dirty & /*step, descriptionId*/20 && div_aria_describedby_value !== (div_aria_describedby_value = !isUndefined( /*step*/ctx[4].options.text) ? /*descriptionId*/ctx[2] : null)) && {
-        "aria-describedby": div_aria_describedby_value
-      }, (!current || dirty & /*step, labelId*/24 && div_aria_labelledby_value !== (div_aria_labelledby_value = /*step*/ctx[4].options.title ? /*labelId*/ctx[3] : null)) && {
-        "aria-labelledby": div_aria_labelledby_value
+      set_attributes(dialog, dialog_data = get_spread_update(dialog_levels, [(!current || dirty & /*step, descriptionId*/20 && dialog_aria_describedby_value !== (dialog_aria_describedby_value = !isUndefined(/*step*/ctx[4].options.text) ? /*descriptionId*/ctx[2] : null)) && {
+        "aria-describedby": dialog_aria_describedby_value
+      }, (!current || dirty & /*step, labelId*/24 && dialog_aria_labelledby_value !== (dialog_aria_labelledby_value = /*step*/ctx[4].options.title ? /*labelId*/ctx[3] : null)) && {
+        "aria-labelledby": dialog_aria_labelledby_value
       }, dirty & /*dataStepId*/2 && /*dataStepId*/ctx[1], {
-        role: "dialog"
-      }, {
-        tabindex: "0"
+        open: "true"
       }]));
-      toggle_class(div, "shepherd-has-cancel-icon", /*hasCancelIcon*/ctx[5]);
-      toggle_class(div, "shepherd-has-title", /*hasTitle*/ctx[6]);
-      toggle_class(div, "shepherd-element", true);
+      toggle_class(dialog, "shepherd-has-cancel-icon", /*hasCancelIcon*/ctx[5]);
+      toggle_class(dialog, "shepherd-has-title", /*hasTitle*/ctx[6]);
+      toggle_class(dialog, "shepherd-element", true);
     },
     i(local) {
       if (current) return;
@@ -4006,11 +4206,11 @@ function create_fragment$1(ctx) {
     },
     d(detaching) {
       if (detaching) {
-        detach(div);
+        detach(dialog);
       }
       if (if_block) if_block.d();
       destroy_component(shepherdcontent);
-      /*div_binding*/
+      /*dialog_binding*/
       ctx[13](null);
       mounted = false;
       dispose();
@@ -4127,7 +4327,7 @@ function instance$1($$self, $$props, $$invalidate) {
         break;
     }
   };
-  function div_binding($$value) {
+  function dialog_binding($$value) {
     binding_callbacks[$$value ? 'unshift' : 'push'](() => {
       element = $$value;
       $$invalidate(0, element);
@@ -4152,7 +4352,7 @@ function instance$1($$self, $$props, $$invalidate) {
       }
     }
   };
-  return [element, dataStepId, descriptionId, labelId, step, hasCancelIcon, hasTitle, handleKeyDown, firstFocusableElement, focusableElements, lastFocusableElement, classPrefix, getElement, div_binding];
+  return [element, dataStepId, descriptionId, labelId, step, hasCancelIcon, hasTitle, handleKeyDown, firstFocusableElement, focusableElements, lastFocusableElement, classPrefix, getElement, dialog_binding];
 }
 class Shepherd_element extends SvelteComponent {
   constructor(options) {
@@ -4187,6 +4387,7 @@ class Step extends Evented {
   constructor(tour, options = {}) {
     super();
     this._resolvedAttachTo = void 0;
+    this._resolvedExtraHighlightElements = void 0;
     this.classPrefix = void 0;
     this.el = void 0;
     this.target = void 0;
@@ -4260,6 +4461,15 @@ class Step extends Evented {
     }
     this._updateStepTargetOnHide();
     this.trigger('hide');
+  }
+
+  /**
+   * Resolves attachTo options.
+   * @returns {{}|{element, on}}
+   */
+  _resolveExtraHiglightElements() {
+    this._resolvedExtraHighlightElements = parseExtraHighlights(this);
+    return this._resolvedExtraHighlightElements;
   }
 
   /**
@@ -4447,6 +4657,7 @@ class Step extends Evented {
 
     // Force resolve to make sure the options are updated on subsequent shows.
     this._resolveAttachToOptions();
+    this._resolveExtraHiglightElements();
     this._setupElements();
     if (!this.tour.modal) {
       this.tour.setupModal();
@@ -4470,9 +4681,14 @@ class Step extends Evented {
     // @ts-expect-error TODO: get types for Svelte components
     const content = this.shepherdElementComponent.getElement();
     const target = this.target || document.body;
+    const extraHighlightElements = this._resolvedExtraHighlightElements;
     target.classList.add(`${this.classPrefix}shepherd-enabled`);
     target.classList.add(`${this.classPrefix}shepherd-target`);
     content.classList.add('shepherd-enabled');
+    extraHighlightElements == null || extraHighlightElements.forEach(el => {
+      el.classList.add(`${this.classPrefix}shepherd-enabled`);
+      el.classList.add(`${this.classPrefix}shepherd-target`);
+    });
     this.trigger('show');
   }
 
@@ -4485,15 +4701,20 @@ class Step extends Evented {
    */
   _styleTargetElementForStep(step) {
     const targetElement = step.target;
+    const extraHighlightElements = step._resolvedExtraHighlightElements;
     if (!targetElement) {
       return;
     }
-    if (step.options.highlightClass) {
-      targetElement.classList.add(step.options.highlightClass);
+    const highlightClass = step.options.highlightClass;
+    if (highlightClass) {
+      targetElement.classList.add(highlightClass);
+      extraHighlightElements == null || extraHighlightElements.forEach(el => el.classList.add(highlightClass));
     }
     targetElement.classList.remove('shepherd-target-click-disabled');
+    extraHighlightElements == null || extraHighlightElements.forEach(el => el.classList.remove('shepherd-target-click-disabled'));
     if (step.options.canClickTarget === false) {
       targetElement.classList.add('shepherd-target-click-disabled');
+      extraHighlightElements == null || extraHighlightElements.forEach(el => el.classList.add('shepherd-target-click-disabled'));
     }
   }
 
@@ -4504,10 +4725,16 @@ class Step extends Evented {
    */
   _updateStepTargetOnHide() {
     const target = this.target || document.body;
-    if (this.options.highlightClass) {
-      target.classList.remove(this.options.highlightClass);
+    const extraHighlightElements = this._resolvedExtraHighlightElements;
+    const highlightClass = this.options.highlightClass;
+    if (highlightClass) {
+      target.classList.remove(highlightClass);
+      extraHighlightElements == null || extraHighlightElements.forEach(el => el.classList.remove(highlightClass));
     }
     target.classList.remove('shepherd-target-click-disabled', `${this.classPrefix}shepherd-enabled`, `${this.classPrefix}shepherd-target`);
+    extraHighlightElements == null || extraHighlightElements.forEach(el => {
+      el.classList.remove('shepherd-target-click-disabled', `${this.classPrefix}shepherd-enabled`, `${this.classPrefix}shepherd-target`);
+    });
   }
 }
 
@@ -4525,6 +4752,13 @@ function cleanupSteps(tour) {
         if (isHTMLElement$1(step.target)) {
           step.target.classList.remove('shepherd-target-click-disabled');
         }
+        if (step._resolvedExtraHighlightElements) {
+          step._resolvedExtraHighlightElements.forEach(element => {
+            if (isHTMLElement$1(element)) {
+              element.classList.remove('shepherd-target-click-disabled');
+            }
+          });
+        }
       }
     });
   }
@@ -4540,46 +4774,51 @@ function cleanupSteps(tour) {
  * @param dimension.r - Corner Radius. Keep this smaller than half of width or height.
  * @returns Rounded rectangle overlay path data.
  */
-function makeOverlayPath({
-  width,
-  height,
-  x = 0,
-  y = 0,
-  r = 0
-}) {
+function makeOverlayPath(overlayPaths) {
+  let openings = '';
   const {
     innerWidth: w,
     innerHeight: h
   } = window;
-  const {
-    topLeft = 0,
-    topRight = 0,
-    bottomRight = 0,
-    bottomLeft = 0
-  } = typeof r === 'number' ? {
-    topLeft: r,
-    topRight: r,
-    bottomRight: r,
-    bottomLeft: r
-  } : r;
+  overlayPaths.forEach(overlayPath => {
+    const {
+      width,
+      height,
+      x = 0,
+      y = 0,
+      r = 0
+    } = overlayPath;
+    const {
+      topLeft = 0,
+      topRight = 0,
+      bottomRight = 0,
+      bottomLeft = 0
+    } = typeof r === 'number' ? {
+      topLeft: r,
+      topRight: r,
+      bottomRight: r,
+      bottomLeft: r
+    } : r;
+    openings += `M${x + topLeft},${y}\
+      a${topLeft},${topLeft},0,0,0-${topLeft},${topLeft}\
+      V${height + y - bottomLeft}\
+      a${bottomLeft},${bottomLeft},0,0,0,${bottomLeft},${bottomLeft}\
+      H${width + x - bottomRight}\
+      a${bottomRight},${bottomRight},0,0,0,${bottomRight}-${bottomRight}\
+      V${y + topRight}\
+      a${topRight},${topRight},0,0,0-${topRight}-${topRight}\
+      Z`;
+  });
   return `M${w},${h}\
-H0\
-V0\
-H${w}\
-V${h}\
-Z\
-M${x + topLeft},${y}\
-a${topLeft},${topLeft},0,0,0-${topLeft},${topLeft}\
-V${height + y - bottomLeft}\
-a${bottomLeft},${bottomLeft},0,0,0,${bottomLeft},${bottomLeft}\
-H${width + x - bottomRight}\
-a${bottomRight},${bottomRight},0,0,0,${bottomRight}-${bottomRight}\
-V${y + topRight}\
-a${topRight},${topRight},0,0,0-${topRight}-${topRight}\
-Z`;
+          H0\
+          V0\
+          H${w}\
+          V${h}\
+          Z\
+          ${openings}`.replace(/\s/g, '');
 }
 
-/* src/components/shepherd-modal.svelte generated by Svelte v4.2.18 */
+/* src/components/shepherd-modal.svelte generated by Svelte v4.2.19 */
 function create_fragment(ctx) {
   let svg;
   let path;
@@ -4704,13 +4943,13 @@ function instance($$self, $$props, $$invalidate) {
   closeModalOpening();
   const getElement = () => element;
   function closeModalOpening() {
-    $$invalidate(4, openingProperties = {
+    $$invalidate(4, openingProperties = [{
       width: 0,
       height: 0,
       x: 0,
       y: 0,
       r: 0
-    });
+    }]);
   }
   function hide() {
     $$invalidate(1, modalIsVisible = false);
@@ -4718,26 +4957,44 @@ function instance($$self, $$props, $$invalidate) {
     // Ensure we cleanup all event listeners when we hide the modal
     _cleanupStepEventListeners();
   }
-  function positionModal(modalOverlayOpeningPadding = 0, modalOverlayOpeningRadius = 0, modalOverlayOpeningXOffset = 0, modalOverlayOpeningYOffset = 0, scrollParent, targetElement) {
+  function positionModal(modalOverlayOpeningPadding = 0, modalOverlayOpeningRadius = 0, modalOverlayOpeningXOffset = 0, modalOverlayOpeningYOffset = 0, scrollParent, targetElement, extraHighlights) {
     if (targetElement) {
-      const {
-        y,
-        height
-      } = _getVisibleHeight(targetElement, scrollParent);
-      const {
-        x,
-        width,
-        left
-      } = targetElement.getBoundingClientRect();
+      const elementsToHighlight = [targetElement, ...(extraHighlights || [])];
+      $$invalidate(4, openingProperties = []);
+      for (const element of elementsToHighlight) {
+        if (!element) continue;
 
-      // getBoundingClientRect is not consistent. Some browsers use x and y, while others use left and top
-      $$invalidate(4, openingProperties = {
-        width: width + modalOverlayOpeningPadding * 2,
-        height: height + modalOverlayOpeningPadding * 2,
-        x: (x || left) + modalOverlayOpeningXOffset - modalOverlayOpeningPadding,
-        y: y + modalOverlayOpeningYOffset - modalOverlayOpeningPadding,
-        r: modalOverlayOpeningRadius
-      });
+        // Skip duplicate elements
+        if (elementsToHighlight.indexOf(element) !== elementsToHighlight.lastIndexOf(element)) {
+          continue;
+        }
+        const {
+          y,
+          height
+        } = _getVisibleHeight(element, scrollParent);
+        const {
+          x,
+          width,
+          left
+        } = element.getBoundingClientRect();
+
+        // Check if the element is contained by another element
+        const isContained = elementsToHighlight.some(otherElement => {
+          if (otherElement === element) return false;
+          const otherRect = otherElement.getBoundingClientRect();
+          return x >= otherRect.left && x + width <= otherRect.right && y >= otherRect.top && y + height <= otherRect.bottom;
+        });
+        if (isContained) continue;
+
+        // getBoundingClientRect is not consistent. Some browsers use x and y, while others use left and top
+        openingProperties.push({
+          width: width + modalOverlayOpeningPadding * 2,
+          height: height + modalOverlayOpeningPadding * 2,
+          x: (x || left) + modalOverlayOpeningXOffset - modalOverlayOpeningPadding,
+          y: y + modalOverlayOpeningYOffset - modalOverlayOpeningPadding,
+          r: modalOverlayOpeningRadius
+        });
+      }
     } else {
       closeModalOpening();
     }
@@ -4805,7 +5062,7 @@ function instance($$self, $$props, $$invalidate) {
     // Setup recursive function to call requestAnimationFrame to update the modal opening position
     const rafLoop = () => {
       rafId = undefined;
-      positionModal(modalOverlayOpeningPadding, modalOverlayOpeningRadius, modalOverlayOpeningXOffset + iframeOffset.left, modalOverlayOpeningYOffset + iframeOffset.top, scrollParent, step.target);
+      positionModal(modalOverlayOpeningPadding, modalOverlayOpeningRadius, modalOverlayOpeningXOffset + iframeOffset.left, modalOverlayOpeningYOffset + iframeOffset.top, scrollParent, step.target, step._resolvedExtraHighlightElements);
       rafId = requestAnimationFrame(rafLoop);
     };
     rafLoop();
@@ -5077,11 +5334,11 @@ class Tour extends Evented {
       if (shouldSkipStep) {
         this._skipStep(step, forward);
       } else {
+        this.currentStep = step;
         this.trigger('show', {
           step,
           previous: this.currentStep
         });
-        this.currentStep = step;
         step.show();
       }
     }
