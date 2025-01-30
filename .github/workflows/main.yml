@@ -23,31 +23,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - uses: bahmutov/npm-install@v1
-        env:
-          CYPRESS_INSTALL_BINARY: 0
-      # confirm there is no Cypress installed
-      - run: pnpm cypress cache path
-      # should return empty list of installed versions
-      - run: pnpm cypress cache list
-      # restore / cache the binary ourselves on Linux
-      # see https://github.com/actions/cache
-      - name: Cache Cypress
-        id: cache-cypress
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/Cypress
-          key: cypress-cache-v2-${{ runner.os }}-${{ hashFiles('**/package.json') }}
-      # now let's install Cypress binary
-      - run: pnpm cypress install
-      - run: pnpm cypress cache list  
+      - name: Install Cypress Binary
+        run: pnpm cypress:install
 
       - name: Cypress - Chrome
         run: pnpm test:e2e --browser chrome --headless
 
       - name: Cypress - Firefox
         run: pnpm test:e2e --browser firefox --headless
-        
+
   automerge:
     needs: [test]
     runs-on: ubuntu-latest
@@ -57,4 +41,4 @@ jobs:
     steps:
       - uses: fastify/github-action-merge-dependabot@v3.11.0
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}  
+          github-token: ${{secrets.GITHUB_TOKEN}}
