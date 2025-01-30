@@ -14,47 +14,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: volta-cli/action@v1
-      # Cache dependencies
-      - name: Cache Dependencies
-        uses: actions/cache@v2
-        id: cache
-        with:
-          path: |
-            **/node_modules
-          key: yarn-${{ hashFiles('**/package.json', 'yarn.lock') }}   
+      - name: Checkout Repo
+        uses: actions/checkout@v4
 
-      # Install project dependencies
-      - name: Install Dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: yarn
+      - name: Setup pnpm
+        uses: wyvox/action-setup-pnpm@v3
 
-      - uses: bahmutov/npm-install@v1
-        env:
-          CYPRESS_INSTALL_BINARY: 0
-      # confirm there is no Cypress installed
-      - run: yarn cypress cache path
-      # should return empty list of installed versions
-      - run: yarn cypress cache list
-      # restore / cache the binary ourselves on Linux
-      # see https://github.com/actions/cache
-      - name: Cache Cypress
-        id: cache-cypress
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/Cypress
-          key: cypress-cache-v2-${{ runner.os }}-${{ hashFiles('**/package.json') }}
-      # now let's install Cypress binary
-      - run: yarn cypress install
-      - run: yarn cypress cache list  
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Cypress Binary
+        run: pnpm cypress install
 
       - name: Cypress - Chrome
-        run: yarn test:e2e --browser chrome --headless
+        uses: cypress-io/github-action@v6
+        with:
+          command: pnpm test:e2e --browser chrome --headless
+          install: false
 
       - name: Cypress - Firefox
-        run: yarn test:e2e --browser firefox --headless
-        
+        uses: cypress-io/github-action@v6
+        with:
+          command: pnpm test:e2e --browser firefox --headless
+          install: false
+
   automerge:
     needs: [test]
     runs-on: ubuntu-latest
@@ -62,6 +45,6 @@ jobs:
       pull-requests: write
       contents: write
     steps:
-      - uses: fastify/github-action-merge-dependabot@v3.2.0
+      - uses: fastify/github-action-merge-dependabot@v3.11.0
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}  
+          github-token: ${{secrets.GITHUB_TOKEN}}

@@ -2,21 +2,23 @@
   "name": "vue-shepherd",
   "version": "4.1.0",
   "description": "A Vue wrapper for the site tour library Shepherd.",
+  "repository": "https://github.com/shipshapecode/vue-shepherd",
+  "license": "MIT",
   "author": {
     "name": "Robert Wagner",
     "email": "rwwagner90@gmail.com",
-    "url": "https://github.com/rwwagner90"
+    "url": "https://github.com/RobbieTheWagner"
   },
   "scripts": {
     "build": "cross-env NODE_ENV=production rollup --config rollup.config.js",
     "build:ssr": "cross-env NODE_ENV=production rollup --config rollup.config.js --format cjs",
     "build:es": "cross-env NODE_ENV=production rollup --config rollup.config.js --format es",
     "build:unpkg": "cross-env NODE_ENV=production rollup --config rollup.config.js --format iife",
-    "dev": "yarn serve",
+    "dev": "pnpm serve",
     "lint": "vue-cli-service lint",
-    "prepublish": "yarn lint && yarn build",
+    "prepublish": "pnpm lint && pnpm build",
     "serve": "vue-cli-service serve dev/serve.js",
-    "start": "yarn serve",
+    "start": "pnpm serve",
     "test:e2e": "vue-cli-service test:e2e"
   },
   "main": "dist/vue-shepherd.esm.js",
@@ -41,10 +43,13 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.26.5",
+    "@release-it-plugins/lerna-changelog": "^7.0.0",
     "@rollup/plugin-alias": "^5.1.1",
+    "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^28.0.2",
     "@rollup/plugin-node-resolve": "^16.0.0",
     "@rollup/plugin-replace": "^6.0.2",
+    "@rollup/plugin-terser": "^0.4.4",
     "@vue/cli-plugin-babel": "^5.0.8",
     "@vue/cli-plugin-e2e-cypress": "^5.0.8",
     "@vue/cli-plugin-eslint": "^5.0.8",
@@ -56,13 +61,10 @@
     "eslint": "^8.57.1",
     "eslint-plugin-vue": "^9.32.0",
     "minimist": "^1.2.8",
-    "release-it": "^15.11.0",
-    "release-it-lerna-changelog": "^5.0.0",
+    "release-it": "^17.10.0",
     "rollup": "^2.79.2",
-    "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-filesize": "^10.0.0",
     "rollup-plugin-peer-deps-external": "^2.2.4",
-    "rollup-plugin-terser": "^7.0.2",
     "rollup-plugin-vue": "^6.0.0",
     "vue": "^3.5.13",
     "vue-eslint-parser": "^9.4.3"
@@ -76,18 +78,17 @@
     "tour",
     "shepherd"
   ],
-  "license": "MIT",
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
   },
   "release-it": {
     "hooks": {
-      "after:bump": "yarn prepublish"
+      "after:bump": "pnpm prepublish"
     },
     "plugins": {
-      "release-it-lerna-changelog": {
+      "@release-it-plugins/lerna-changelog": {
         "infile": "CHANGELOG.md",
-        "launchEditor": false
+        "launchEditor": true
       }
     },
     "git": {
@@ -98,10 +99,9 @@
       "tokenRef": "GITHUB_AUTH"
     }
   },
-  "repository": "https://github.com/shipshapecode/vue-shepherd",
   "sideeffects": false,
-  "volta": {
-    "node": "18.20.3",
-    "yarn": "1.22.19"
+  "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": "18.* || >= 20"
   }
 }
