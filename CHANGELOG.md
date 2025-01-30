@@ -1,6 +1,12 @@
+## v5.0.0 (2025-01-30)
 
+*Note*: This was marked as a breaking change because Shepherd has switched from an [MIT to AGPL-3.0 license](https://github.com/shipshapecode/shepherd/blob/main/LICENSE.md).
 
+#### :house: Internal
+* [#495](https://github.com/shipshapecode/vue-shepherd/pull/495) Switch to pnpm, bump deps ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
 
+#### Committers: 1
+- Robbie Wagner ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
 
 ## v4.1.0 (2024-09-16)
 
