@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       shepherd.js:
-        specifier: ^14.4.0
-        version: 14.4.0
+        specifier: ^14.5.0
+        version: 14.5.0
     devDependencies:
       '@babel/eslint-parser':
         specifier: ^7.26.8
@@ -2352,8 +2352,8 @@ packages:
   deep-is@0.1.4:
     resolution: {integrity: sha512-oIPzksmTg4/MriiaYGO+okXDT7ztn/w3Eptv/+gSIdMdKsJo0u4CfYNFJPy+4SKMuCqGw2wxnA+URMg3t8a/bQ==}
 
-  deepmerge-ts@7.1.4:
-    resolution: {integrity: sha512-fxqo6nHGQ9zOVgI4KXqtWXJR/yCLtC7aXIVq+6jc8tHPFUxlFmuUcm2kC4vztQ+LJxQ3gER/XAWearGYQ8niGA==}
+  deepmerge-ts@7.1.5:
+    resolution: {integrity: sha512-HOJkrhaYsweh+W+e74Yn7YStZOilkoPb6fycpwNLKzSPtruFs48nYis0zy5yJz1+ktUhHxoRDJ27RQAWLIJVJw==}
     engines: {node: '>=16.0.0'}
 
   deepmerge@1.5.2:
@@ -4897,8 +4897,8 @@ packages:
     engines: {node: '>=4'}
     hasBin: true
 
-  shepherd.js@14.4.0:
-    resolution: {integrity: sha512-pXuyhtHPj47Wp6vYESIdhcRrpva67+AolbvVBnJlZNZDa4VBPTwoN+x3R7h1C+RV+z5Tvk3JuLB/8ZgEKMeyEQ==}
+  shepherd.js@14.5.0:
+    resolution: {integrity: sha512-23yBjWnrEeaCHFVUukPNol/K0pdvq6NgyqxDeq1qfJuNhxTHpiAvqTB9ULUogndBcGxfkyTRud95PpUyZwGAGQ==}
     engines: {node: 18.* || >= 20}
 
   side-channel-list@1.0.0:
@@ -8374,7 +8374,7 @@ snapshots:
 
   deep-is@0.1.4: {}
 
-  deepmerge-ts@7.1.4: {}
+  deepmerge-ts@7.1.5: {}
 
   deepmerge@1.5.2: {}
 
@@ -11193,11 +11193,11 @@ snapshots:
       interpret: 1.4.0
       rechoir: 0.6.2
 
-  shepherd.js@14.4.0:
+  shepherd.js@14.5.0:
     dependencies:
       '@floating-ui/dom': 1.6.13
       '@scarf/scarf': 1.4.0
-      deepmerge-ts: 7.1.4
+      deepmerge-ts: 7.1.5
 
   side-channel-list@1.0.0:
     dependencies:
