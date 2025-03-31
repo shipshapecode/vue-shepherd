@@ -41,7 +41,7 @@ importers:
         version: 5.0.8(@vue/cli-service@5.0.8(@vue/compiler-sfc@3.5.13)(encoding@0.1.13)(lodash@4.17.21)(vue@3.5.13)(webpack-sources@3.2.3))(encoding@0.1.13)(vue@3.5.13)
       '@vue/cli-plugin-e2e-cypress':
         specifier: ^5.0.8
-        version: 5.0.8(@vue/cli-service@5.0.8(@vue/compiler-sfc@3.5.13)(encoding@0.1.13)(lodash@4.17.21)(vue@3.5.13)(webpack-sources@3.2.3))(cypress@14.2.0)(encoding@0.1.13)(eslint@8.57.1)
+        version: 5.0.8(@vue/cli-service@5.0.8(@vue/compiler-sfc@3.5.13)(encoding@0.1.13)(lodash@4.17.21)(vue@3.5.13)(webpack-sources@3.2.3))(cypress@14.2.1)(encoding@0.1.13)(eslint@8.57.1)
       '@vue/cli-plugin-eslint':
         specifier: ^5.0.8
         version: 5.0.8(@vue/cli-service@5.0.8(@vue/compiler-sfc@3.5.13)(encoding@0.1.13)(lodash@4.17.21)(vue@3.5.13)(webpack-sources@3.2.3))(encoding@0.1.13)(eslint@8.57.1)
@@ -58,8 +58,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.3
       cypress:
-        specifier: ^14.2.0
-        version: 14.2.0
+        specifier: ^14.2.1
+        version: 14.2.1
       eslint:
         specifier: ^8.57.1
         version: 8.57.1
@@ -1166,8 +1166,8 @@ packages:
   '@types/node@22.12.0':
     resolution: {integrity: sha512-Fll2FZ1riMjNmlmJOdAyY5pUbkftXslB5DgEzlIuNaiWhXd00FhWxVC/r4yV/4wBb9JfImTu+jiSvXTkJ7F/gA==}
 
-  '@types/node@22.13.10':
-    resolution: {integrity: sha512-I6LPUvlRH+O6VRUqYOcMudhaIdUVWfsjnZavnsraHvpBwaEyMN29ry+0UVJhImYL16xsscu0aske3yA+uPOWfw==}
+  '@types/node@22.13.14':
+    resolution: {integrity: sha512-Zs/Ollc1SJ8nKUAgc7ivOEdIBM8JAKgrqqUYi2J997JuKO7/tpQC+WCetQ1sypiKCQWHdvdg9wBNpUPEWZae7w==}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -2319,8 +2319,8 @@ packages:
   csstype@3.1.3:
     resolution: {integrity: sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==}
 
-  cypress@14.2.0:
-    resolution: {integrity: sha512-u7fuc9JEpSYLOdu8mzZDZ/JWsHUzR5pc8i1TeSqMz/bafXp+6IweMAeyphsEJ6/13qbB6nwTEY1m+GUAp6GqCQ==}
+  cypress@14.2.1:
+    resolution: {integrity: sha512-5xd0E7fUp0pjjib1D7ljkmCwFDgMkWuW06jWiz8dKrI7MNRrDo0C65i4Sh+oZ9YHjMHZRJBR0XZk1DfekOhOUw==}
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
     hasBin: true
 
@@ -5225,11 +5225,11 @@ packages:
   thunky@1.1.0:
     resolution: {integrity: sha512-eHY7nBftgThBqOyHGVN+l8gF0BucP09fMo0oO/Lb0w1OF80dJv+lDVpXG60WMQvkcxAkNybKsrEIE3ZtKGmPrA==}
 
-  tldts-core@6.1.84:
-    resolution: {integrity: sha512-NaQa1W76W2aCGjXybvnMYzGSM4x8fvG2AN/pla7qxcg0ZHbooOPhA8kctmOZUDfZyhDL27OGNbwAeig8P4p1vg==}
+  tldts-core@6.1.85:
+    resolution: {integrity: sha512-DTjUVvxckL1fIoPSb3KE7ISNtkWSawZdpfxGxwiIrZoO6EbHVDXXUIlIuWympPaeS+BLGyggozX/HTMsRAdsoA==}
 
-  tldts@6.1.84:
-    resolution: {integrity: sha512-aRGIbCIF3teodtUFAYSdQONVmDRy21REM3o6JnqWn5ZkQBJJ4gHxhw6OfwQ+WkSAi3ASamrS4N4nyazWx6uTYg==}
+  tldts@6.1.85:
+    resolution: {integrity: sha512-gBdZ1RjCSevRPFix/hpaUWeak2/RNUZB4/8frF1r5uYMHjFptkiT0JXIebWvgI/0ZHXvxaUDDJshiA0j6GdL3w==}
     hasBin: true
 
   tmp@0.0.33:
@@ -6889,7 +6889,7 @@ snapshots:
   '@types/body-parser@1.19.5':
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 22.13.10
+      '@types/node': 22.13.14
 
   '@types/bonjour@3.5.13':
     dependencies:
@@ -6902,7 +6902,7 @@ snapshots:
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 22.13.10
+      '@types/node': 22.13.14
 
   '@types/debug@4.1.12':
     dependencies:
@@ -6929,14 +6929,14 @@ snapshots:
 
   '@types/express-serve-static-core@4.19.6':
     dependencies:
-      '@types/node': 22.13.10
+      '@types/node': 22.13.14
       '@types/qs': 6.9.18
       '@types/range-parser': 1.2.7
       '@types/send': 0.17.4
 
   '@types/express-serve-static-core@5.0.6':
     dependencies:
-      '@types/node': 22.13.10
+      '@types/node': 22.13.14
       '@types/qs': 6.9.18
       '@types/range-parser': 1.2.7
       '@types/send': 0.17.4
@@ -6954,7 +6954,7 @@ snapshots:
 
   '@types/http-proxy@1.17.15':
     dependencies:
-      '@types/node': 22.13.10
+      '@types/node': 22.13.14
 
   '@types/json-schema@7.0.15': {}
 
@@ -6970,13 +6970,13 @@ snapshots:
 
   '@types/node-forge@1.3.11':
     dependencies:
-      '@types/node': 22.13.10
+      '@types/node': 22.13.14
 
   '@types/node@22.12.0':
     dependencies:
       undici-types: 6.20.0
 
-  '@types/node@22.13.10':
+  '@types/node@22.13.14':
     dependencies:
       undici-types: 6.20.0
 
@@ -6995,7 +6995,7 @@ snapshots:
   '@types/send@0.17.4':
     dependencies:
       '@types/mime': 1.3.5
-      '@types/node': 22.13.10
+      '@types/node': 22.13.14
 
   '@types/serve-index@1.9.4':
     dependencies:
@@ -7023,7 +7023,7 @@ snapshots:
 
   '@types/yauzl@2.10.3':
     dependencies:
-      '@types/node': 22.13.10
+      '@types/node': 22.13.14
     optional: true
 
   '@ungap/structured-clone@1.3.0': {}
@@ -7172,11 +7172,11 @@ snapshots:
       - vue
       - webpack-cli
 
-  '@vue/cli-plugin-e2e-cypress@5.0.8(@vue/cli-service@5.0.8(@vue/compiler-sfc@3.5.13)(encoding@0.1.13)(lodash@4.17.21)(vue@3.5.13)(webpack-sources@3.2.3))(cypress@14.2.0)(encoding@0.1.13)(eslint@8.57.1)':
+  '@vue/cli-plugin-e2e-cypress@5.0.8(@vue/cli-service@5.0.8(@vue/compiler-sfc@3.5.13)(encoding@0.1.13)(lodash@4.17.21)(vue@3.5.13)(webpack-sources@3.2.3))(cypress@14.2.1)(encoding@0.1.13)(eslint@8.57.1)':
     dependencies:
       '@vue/cli-service': 5.0.8(@vue/compiler-sfc@3.5.13)(encoding@0.1.13)(lodash@4.17.21)(vue@3.5.13)(webpack-sources@3.2.3)
       '@vue/cli-shared-utils': 5.0.8(encoding@0.1.13)
-      cypress: 14.2.0
+      cypress: 14.2.1
       eslint-plugin-cypress: 2.15.2(eslint@8.57.1)
     transitivePeerDependencies:
       - encoding
@@ -8354,7 +8354,7 @@ snapshots:
 
   csstype@3.1.3: {}
 
-  cypress@14.2.0:
+  cypress@14.2.1:
     dependencies:
       '@cypress/request': 3.0.8
       '@cypress/xvfb': 1.2.4(supports-color@8.1.1)
@@ -11601,11 +11601,11 @@ snapshots:
 
   thunky@1.1.0: {}
 
-  tldts-core@6.1.84: {}
+  tldts-core@6.1.85: {}
 
-  tldts@6.1.84:
+  tldts@6.1.85:
     dependencies:
-      tldts-core: 6.1.84
+      tldts-core: 6.1.85
 
   tmp@0.0.33:
     dependencies:
@@ -11623,7 +11623,7 @@ snapshots:
 
   tough-cookie@5.1.2:
     dependencies:
-      tldts: 6.1.84
+      tldts: 6.1.85
 
   tr46@0.0.3: {}
 
