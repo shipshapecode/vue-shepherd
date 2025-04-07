@@ -88,8 +88,8 @@ importers:
         specifier: ^3.5.13
         version: 3.5.13
       vue-eslint-parser:
-        specifier: ^10.1.1
-        version: 10.1.1(eslint@8.57.1)
+        specifier: ^10.1.3
+        version: 10.1.3(eslint@8.57.1)
 
 packages:
 
@@ -5423,8 +5423,8 @@ packages:
     resolution: {integrity: sha512-ZZKSmDAEFOijERBLkmYfJ+vmk3w+7hOLYDNkRCuRuMJGEmqYNCNLyBBFwWKVMhfwaEF3WOd0Zlw86U/WC/+nYw==}
     engines: {'0': node >=0.6.0}
 
-  vue-eslint-parser@10.1.1:
-    resolution: {integrity: sha512-bh2Z/Au5slro9QJ3neFYLanZtb1jH+W2bKqGHXAoYD4vZgNG3KeotL7JpPv5xzY4UXUXJl7TrIsnzECH63kd3Q==}
+  vue-eslint-parser@10.1.3:
+    resolution: {integrity: sha512-dbCBnd2e02dYWsXoqX5yKUZlOt+ExIpq7hmHKPb5ZqKcjf++Eo0hMseFTZMLKThrUk61m+Uv6A2YSBve6ZvuDQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: ^8.57.0 || ^9.0.0
@@ -11728,7 +11728,7 @@ snapshots:
       is-npm: 6.0.0
       latest-version: 9.0.0
       pupa: 3.1.0
-      semver: 7.7.1
+      semver: 7.6.3
       xdg-basedir: 5.1.0
 
   uri-js@4.4.1:
@@ -11772,7 +11772,7 @@ snapshots:
       core-util-is: 1.0.2
       extsprintf: 1.3.0
 
-  vue-eslint-parser@10.1.1(eslint@8.57.1):
+  vue-eslint-parser@10.1.3(eslint@8.57.1):
     dependencies:
       debug: 4.4.0(supports-color@8.1.1)
       eslint: 8.57.1
@@ -11794,7 +11794,7 @@ snapshots:
       espree: 9.6.1
       esquery: 1.6.0
       lodash: 4.17.21
-      semver: 7.7.1
+      semver: 7.7.0
     transitivePeerDependencies:
       - supports-color
 
