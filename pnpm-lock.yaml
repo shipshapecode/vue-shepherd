@@ -41,7 +41,7 @@ importers:
         version: 5.0.8(@vue/cli-service@5.0.8(@vue/compiler-sfc@3.5.13)(encoding@0.1.13)(lodash@4.17.21)(vue@3.5.13)(webpack-sources@3.2.3))(encoding@0.1.13)(vue@3.5.13)
       '@vue/cli-plugin-e2e-cypress':
         specifier: ^5.0.8
-        version: 5.0.8(@vue/cli-service@5.0.8(@vue/compiler-sfc@3.5.13)(encoding@0.1.13)(lodash@4.17.21)(vue@3.5.13)(webpack-sources@3.2.3))(cypress@14.3.0)(encoding@0.1.13)(eslint@8.57.1)
+        version: 5.0.8(@vue/cli-service@5.0.8(@vue/compiler-sfc@3.5.13)(encoding@0.1.13)(lodash@4.17.21)(vue@3.5.13)(webpack-sources@3.2.3))(cypress@14.3.1)(encoding@0.1.13)(eslint@8.57.1)
       '@vue/cli-plugin-eslint':
         specifier: ^5.0.8
         version: 5.0.8(@vue/cli-service@5.0.8(@vue/compiler-sfc@3.5.13)(encoding@0.1.13)(lodash@4.17.21)(vue@3.5.13)(webpack-sources@3.2.3))(encoding@0.1.13)(eslint@8.57.1)
@@ -58,8 +58,8 @@ importers:
         specifier: ^7.0.2
         version: 7.0.3
       cypress:
-        specifier: ^14.3.0
-        version: 14.3.0
+        specifier: ^14.3.1
+        version: 14.3.1
       eslint:
         specifier: ^8.57.1
         version: 8.57.1
@@ -2316,8 +2316,8 @@ packages:
   csstype@3.1.3:
     resolution: {integrity: sha512-M1uQkMl8rQK/szD0LNhtqxIPLpimGm8sOBwU7lLnCpSbTyY3yeU1Vc7l4KT5zT4s/yOxHH5O7tIuuLOCnLADRw==}
 
-  cypress@14.3.0:
-    resolution: {integrity: sha512-rRfPl9Z0/CczuYybBEoLbDVuT1OGkhYaJ0+urRCshgiDRz6QnoA0KQIQnPx7MJ3zy+VCsbUU1pV74n+6cbJEdg==}
+  cypress@14.3.1:
+    resolution: {integrity: sha512-/2q06qvHMK3PNiadnRW1Je0lJ43gAFPQJUAK2zIxjr22kugtWxVQznTBLVu1AvRH+RP3oWZhCdWqiEi+0NuqCg==}
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
     hasBin: true
 
@@ -7170,11 +7170,11 @@ snapshots:
       - vue
       - webpack-cli
 
-  '@vue/cli-plugin-e2e-cypress@5.0.8(@vue/cli-service@5.0.8(@vue/compiler-sfc@3.5.13)(encoding@0.1.13)(lodash@4.17.21)(vue@3.5.13)(webpack-sources@3.2.3))(cypress@14.3.0)(encoding@0.1.13)(eslint@8.57.1)':
+  '@vue/cli-plugin-e2e-cypress@5.0.8(@vue/cli-service@5.0.8(@vue/compiler-sfc@3.5.13)(encoding@0.1.13)(lodash@4.17.21)(vue@3.5.13)(webpack-sources@3.2.3))(cypress@14.3.1)(encoding@0.1.13)(eslint@8.57.1)':
     dependencies:
       '@vue/cli-service': 5.0.8(@vue/compiler-sfc@3.5.13)(encoding@0.1.13)(lodash@4.17.21)(vue@3.5.13)(webpack-sources@3.2.3)
       '@vue/cli-shared-utils': 5.0.8(encoding@0.1.13)
-      cypress: 14.3.0
+      cypress: 14.3.1
       eslint-plugin-cypress: 2.15.2(eslint@8.57.1)
     transitivePeerDependencies:
       - encoding
@@ -8352,7 +8352,7 @@ snapshots:
 
   csstype@3.1.3: {}
 
-  cypress@14.3.0:
+  cypress@14.3.1:
     dependencies:
       '@cypress/request': 3.0.8
       '@cypress/xvfb': 1.2.4(supports-color@8.1.1)
