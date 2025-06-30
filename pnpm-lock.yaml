@@ -25,8 +25,8 @@ importers:
         specifier: ^6.0.4
         version: 6.0.4(@babel/core@7.26.7)(rollup@4.44.0)
       '@rollup/plugin-commonjs':
-        specifier: ^28.0.5
-        version: 28.0.5(rollup@4.44.0)
+        specifier: ^28.0.6
+        version: 28.0.6(rollup@4.44.0)
       '@rollup/plugin-node-resolve':
         specifier: ^16.0.1
         version: 16.0.1(rollup@4.44.0)
@@ -841,8 +841,8 @@ packages:
   '@jridgewell/source-map@0.3.6':
     resolution: {integrity: sha512-1ZJTZebgqllO79ue2bm3rIGud/bOe0pP5BjSRCRxxYkEZS8STV7zN84UBbiYu7jy+eCKSnVIUgoWWE/tt+shMQ==}
 
-  '@jridgewell/sourcemap-codec@1.5.0':
-    resolution: {integrity: sha512-gv3ZRaISU3fjPAgNsriBRqGWQL6quFx04YMPW/zD8XMLsU32mhCCbfbO6KZFLjvYpCZ8zyDEgqsgf+PwPaM7GQ==}
+  '@jridgewell/sourcemap-codec@1.5.2':
+    resolution: {integrity: sha512-gKYheCylLIedI+CSZoDtGkFV9YEBxRRVcfCH7OfAqh4TyUyRjEE6WVE/aXDXX0p8BIe/QgLcaAoI0220KRRFgg==}
 
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
@@ -1011,8 +1011,8 @@ packages:
       rollup:
         optional: true
 
-  '@rollup/plugin-commonjs@28.0.5':
-    resolution: {integrity: sha512-lytLp2JgAMwqJY6ve3OSROXr2XuEYHjnsQN3hmnxC+w11dI91LuUw4Yc1kk2FqKXeMG8psoFejFgK+znoij0cg==}
+  '@rollup/plugin-commonjs@28.0.6':
+    resolution: {integrity: sha512-XSQB1K7FUU5QP+3lOQmVCE3I0FcbbNvmNT4VJSj93iUjayaARrTQeoRdiYQoftAJBLrR9t2agwAd3ekaTgHNlw==}
     engines: {node: '>=16.0.0 || 14 >= 14.17'}
     peerDependencies:
       rollup: ^2.68.0||^3.0.0||^4.0.0
@@ -1049,6 +1049,15 @@ packages:
 
   '@rollup/pluginutils@5.1.4':
     resolution: {integrity: sha512-USm05zrsFxYLPdWWq+K3STlWiT/3ELn3RcV5hJMghpeAIhxfsUIg6mt12CBJBInWMV4VneoV7SfGv8xIwo2qNQ==}
+    engines: {node: '>=14.0.0'}
+    peerDependencies:
+      rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
+    peerDependenciesMeta:
+      rollup:
+        optional: true
+
+  '@rollup/pluginutils@5.2.0':
+    resolution: {integrity: sha512-qWJ2ZTbmumwiLFomfzTyt5Kng4hwPi9rwCYN4SHb6eaRU1KNO4ccxINHr/VhH4GgPlt1XfSTLX2LBTme8ne4Zw==}
     engines: {node: '>=14.0.0'}
     peerDependencies:
       rollup: ^1.20.0||^2.0.0||^3.0.0||^4.0.0
@@ -6716,7 +6725,7 @@ snapshots:
   '@jridgewell/gen-mapping@0.3.8':
     dependencies:
       '@jridgewell/set-array': 1.2.1
-      '@jridgewell/sourcemap-codec': 1.5.0
+      '@jridgewell/sourcemap-codec': 1.5.2
       '@jridgewell/trace-mapping': 0.3.25
 
   '@jridgewell/resolve-uri@3.1.2': {}
@@ -6728,12 +6737,12 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.8
       '@jridgewell/trace-mapping': 0.3.25
 
-  '@jridgewell/sourcemap-codec@1.5.0': {}
+  '@jridgewell/sourcemap-codec@1.5.2': {}
 
   '@jridgewell/trace-mapping@0.3.25':
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
-      '@jridgewell/sourcemap-codec': 1.5.0
+      '@jridgewell/sourcemap-codec': 1.5.2
 
   '@leichtgewicht/ip-codec@2.0.5': {}
 
@@ -6923,9 +6932,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@rollup/plugin-commonjs@28.0.5(rollup@4.44.0)':
+  '@rollup/plugin-commonjs@28.0.6(rollup@4.44.0)':
     dependencies:
-      '@rollup/pluginutils': 5.1.4(rollup@4.44.0)
+      '@rollup/pluginutils': 5.2.0(rollup@4.44.0)
       commondir: 1.0.1
       estree-walker: 2.0.2
       fdir: 6.4.6(picomatch@4.0.2)
@@ -6961,6 +6970,14 @@ snapshots:
       rollup: 4.44.0
 
   '@rollup/pluginutils@5.1.4(rollup@4.44.0)':
+    dependencies:
+      '@types/estree': 1.0.8
+      estree-walker: 2.0.2
+      picomatch: 4.0.2
+    optionalDependencies:
+      rollup: 4.44.0
+
+  '@rollup/pluginutils@5.2.0(rollup@4.44.0)':
     dependencies:
       '@types/estree': 1.0.8
       estree-walker: 2.0.2
@@ -10004,7 +10021,7 @@ snapshots:
 
   magic-string@0.30.17:
     dependencies:
-      '@jridgewell/sourcemap-codec': 1.5.0
+      '@jridgewell/sourcemap-codec': 1.5.2
 
   make-dir@3.1.0:
     dependencies:
