@@ -53,7 +53,7 @@
     "@vue/cli-plugin-babel": "^5.0.8",
     "@vue/cli-plugin-e2e-cypress": "^5.0.8",
     "@vue/cli-plugin-eslint": "^5.0.8",
-    "@vue/cli-service": "^5.0.8",
+    "@vue/cli-service": "^5.0.9",
     "@vue/compat": "^3.5.18",
     "@vue/compiler-sfc": "^3.5.18",
     "cross-env": "^10.0.0",
