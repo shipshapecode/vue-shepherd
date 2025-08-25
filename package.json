@@ -55,7 +55,7 @@
     "@vue/cli-plugin-eslint": "^5.0.8",
     "@vue/cli-service": "^5.0.8",
     "@vue/compat": "^3.5.18",
-    "@vue/compiler-sfc": "^3.5.18",
+    "@vue/compiler-sfc": "^3.5.20",
     "cross-env": "^10.0.0",
     "cypress": "^14.5.4",
     "eslint": "^8.57.1",
