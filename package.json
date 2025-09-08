@@ -62,7 +62,7 @@
     "eslint-plugin-vue": "^9.32.0",
     "minimist": "^1.2.8",
     "release-it": "^19.0.4",
-    "rollup": "^4.48.1",
+    "rollup": "^4.50.1",
     "rollup-plugin-filesize": "^10.0.0",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-vue": "^6.0.0",
