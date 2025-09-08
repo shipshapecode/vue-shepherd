@@ -40,8 +40,8 @@ importers:
         specifier: ^5.0.8
         version: 5.0.8(@vue/cli-service@5.0.9(@vue/compiler-sfc@3.5.18)(encoding@0.1.13)(lodash@4.17.21)(vue@3.5.18)(webpack-sources@3.3.3))(encoding@0.1.13)(vue@3.5.18)
       '@vue/cli-plugin-e2e-cypress':
-        specifier: ^5.0.8
-        version: 5.0.8(@vue/cli-service@5.0.9(@vue/compiler-sfc@3.5.18)(encoding@0.1.13)(lodash@4.17.21)(vue@3.5.18)(webpack-sources@3.3.3))(cypress@15.1.0)(encoding@0.1.13)(eslint@8.57.1)
+        specifier: ^5.0.9
+        version: 5.0.9(@vue/cli-service@5.0.9(@vue/compiler-sfc@3.5.18)(encoding@0.1.13)(lodash@4.17.21)(vue@3.5.18)(webpack-sources@3.3.3))(cypress@15.1.0)(encoding@0.1.13)(eslint@8.57.1)
       '@vue/cli-plugin-eslint':
         specifier: ^5.0.8
         version: 5.0.8(@vue/cli-service@5.0.9(@vue/compiler-sfc@3.5.18)(encoding@0.1.13)(lodash@4.17.21)(vue@3.5.18)(webpack-sources@3.3.3))(encoding@0.1.13)(eslint@8.57.1)
@@ -1493,8 +1493,8 @@ packages:
     peerDependencies:
       '@vue/cli-service': ^3.0.0 || ^4.0.0 || ^5.0.0-0
 
-  '@vue/cli-plugin-e2e-cypress@5.0.8':
-    resolution: {integrity: sha512-BasFHQSqDAmFvueaqk/d+s1hJnW0OtWEIgmHZRXg8hYkZJF4pu7kz66DmEAZl6DypfyoSxqwN7WHILYDuKAaEw==}
+  '@vue/cli-plugin-e2e-cypress@5.0.9':
+    resolution: {integrity: sha512-G6GnQi+7M/ZrDr1HuPLvlqjMDFuYj+iMytjEFeeVOp0ms8O+nJUADpZ2WFPp/9zx68gNOEtmqWGH/Nzh+4xAgg==}
     peerDependencies:
       '@vue/cli-service': ^3.0.0 || ^4.0.0 || ^5.0.0-0
       cypress: '*'
@@ -7538,10 +7538,10 @@ snapshots:
       - vue
       - webpack-cli
 
-  '@vue/cli-plugin-e2e-cypress@5.0.8(@vue/cli-service@5.0.9(@vue/compiler-sfc@3.5.18)(encoding@0.1.13)(lodash@4.17.21)(vue@3.5.18)(webpack-sources@3.3.3))(cypress@15.1.0)(encoding@0.1.13)(eslint@8.57.1)':
+  '@vue/cli-plugin-e2e-cypress@5.0.9(@vue/cli-service@5.0.9(@vue/compiler-sfc@3.5.18)(encoding@0.1.13)(lodash@4.17.21)(vue@3.5.18)(webpack-sources@3.3.3))(cypress@15.1.0)(encoding@0.1.13)(eslint@8.57.1)':
     dependencies:
       '@vue/cli-service': 5.0.9(@vue/compiler-sfc@3.5.18)(encoding@0.1.13)(lodash@4.17.21)(vue@3.5.18)(webpack-sources@3.3.3)
-      '@vue/cli-shared-utils': 5.0.8(encoding@0.1.13)
+      '@vue/cli-shared-utils': 5.0.9(encoding@0.1.13)
       cypress: 15.1.0
       eslint-plugin-cypress: 2.15.2(eslint@8.57.1)
     transitivePeerDependencies:
