@@ -42,7 +42,7 @@
     "shepherd.js": "^14.5.1"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "^7.28.0",
+    "@babel/eslint-parser": "^7.28.4",
     "@release-it-plugins/lerna-changelog": "^8.0.1",
     "@rollup/plugin-alias": "^5.1.1",
     "@rollup/plugin-babel": "^6.0.4",
