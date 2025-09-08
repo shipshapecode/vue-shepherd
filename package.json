@@ -50,7 +50,7 @@
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-replace": "^6.0.2",
     "@rollup/plugin-terser": "^0.4.4",
-    "@vue/cli-plugin-babel": "^5.0.8",
+    "@vue/cli-plugin-babel": "^5.0.9",
     "@vue/cli-plugin-e2e-cypress": "^5.0.9",
     "@vue/cli-plugin-eslint": "^5.0.8",
     "@vue/cli-service": "^5.0.9",
