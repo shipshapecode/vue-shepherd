@@ -17,7 +17,7 @@ importers:
         version: 7.28.5(@babel/core@7.28.4)(eslint@8.57.1)
       '@release-it-plugins/lerna-changelog':
         specifier: ^8.0.1
-        version: 8.0.1(release-it@19.2.2(@types/node@25.0.6))
+        version: 8.0.1(release-it@19.2.3(@types/node@25.0.6))
       '@rollup/plugin-alias':
         specifier: ^6.0.0
         version: 6.0.0(rollup@4.55.1)
@@ -70,8 +70,8 @@ importers:
         specifier: ^1.2.8
         version: 1.2.8
       release-it:
-        specifier: ^19.2.2
-        version: 19.2.2(@types/node@25.0.6)
+        specifier: ^19.2.3
+        version: 19.2.3(@types/node@25.0.6)
       rollup:
         specifier: ^4.55.1
         version: 4.55.1
@@ -3372,8 +3372,8 @@ packages:
     resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
     engines: {node: '>=0.10.0'}
 
-  iconv-lite@0.7.1:
-    resolution: {integrity: sha512-2Tth85cXwGFHfvRgZWszZSvdo+0Xsqmw8k8ZwxScfcBneNUraK+dxRxRm24nszx80Y0TVio8kKLt5sLE7ZCLlw==}
+  iconv-lite@0.7.2:
+    resolution: {integrity: sha512-im9DjEDQ55s9fL4EYzOAv0yMqmMBSZp6G0VvFyTMPKWxiSBHUj9NW/qqLmXUwXrrM7AvqSlTCfvqRb0cM8yYqw==}
     engines: {node: '>=0.10.0'}
 
   icss-utils@5.1.0:
@@ -4844,8 +4844,8 @@ packages:
     resolution: {integrity: sha512-G08Dxvm4iDN3MLM0EsP62EDV9IuhXPR6blNz6Utcp7zyV3tr4HVNINt6MpaRWbxoOHT3Q7YN2P+jaHX8vUbgog==}
     engines: {node: '>= 0.10'}
 
-  release-it@19.2.2:
-    resolution: {integrity: sha512-57TBUTBbBXLJsPufYS+Hsb1dSZKZ0ktiYgPkNc3Pmlq/QQtH9X0oD0SG2ib5CsXHTI11m19pyK60NXmvtE6cLg==}
+  release-it@19.2.3:
+    resolution: {integrity: sha512-GTSfrKb0cPmssEFliX0+WQBHC6NiDsMR/M8Y2tkvct/TO36BjB5XV6LO5BUTYV12C3+f78Y8aroku7jCyNiDeA==}
     engines: {node: ^20.12.0 || >=22.0.0}
     hasBin: true
 
@@ -6682,7 +6682,7 @@ snapshots:
   '@inquirer/external-editor@1.0.3(@types/node@25.0.6)':
     dependencies:
       chardet: 2.1.1
-      iconv-lite: 0.7.1
+      iconv-lite: 0.7.2
     optionalDependencies:
       '@types/node': 25.0.6
 
@@ -6956,13 +6956,13 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@release-it-plugins/lerna-changelog@8.0.1(release-it@19.2.2(@types/node@25.0.6))':
+  '@release-it-plugins/lerna-changelog@8.0.1(release-it@19.2.3(@types/node@25.0.6))':
     dependencies:
       execa: 5.1.1
       lerna-changelog: 2.2.0
       lodash: 4.17.21
       mdast-util-from-markdown: 2.0.2
-      release-it: 19.2.2(@types/node@25.0.6)
+      release-it: 19.2.3(@types/node@25.0.6)
       tmp: 0.2.3
       validate-peer-dependencies: 2.2.0
       which: 5.0.0
@@ -9633,7 +9633,7 @@ snapshots:
       safer-buffer: 2.1.2
     optional: true
 
-  iconv-lite@0.7.1:
+  iconv-lite@0.7.2:
     dependencies:
       safer-buffer: 2.1.2
 
@@ -11206,7 +11206,7 @@ snapshots:
 
   relateurl@0.2.7: {}
 
-  release-it@19.2.2(@types/node@25.0.6):
+  release-it@19.2.3(@types/node@25.0.6):
     dependencies:
       '@nodeutils/defaults-deep': 1.1.0
       '@octokit/rest': 22.0.1
@@ -11628,7 +11628,7 @@ snapshots:
 
   spdy@4.0.2:
     dependencies:
-      debug: 4.4.3(supports-color@8.1.1)
+      debug: 4.4.1
       handle-thing: 2.0.1
       http-deceiver: 1.2.7
       select-hose: 2.0.0
