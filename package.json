@@ -54,7 +54,7 @@
     "@vue/cli-plugin-e2e-cypress": "^5.0.9",
     "@vue/cli-plugin-eslint": "^5.0.9",
     "@vue/cli-service": "^5.0.9",
-    "@vue/compat": "^3.5.26",
+    "@vue/compat": "^3.5.27",
     "@vue/compiler-sfc": "^3.5.26",
     "cross-env": "^10.1.0",
     "cypress": "^15.8.2",
@@ -66,7 +66,7 @@
     "rollup-plugin-filesize": "^10.0.0",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-vue": "^6.0.0",
-    "vue": "^3.5.26",
+    "vue": "^3.5.27",
     "vue-eslint-parser": "^10.2.0"
   },
   "peerDependencies": {
