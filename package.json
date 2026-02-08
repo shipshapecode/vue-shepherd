@@ -3,7 +3,7 @@
   "version": "5.0.1",
   "description": "A Vue wrapper for the site tour library Shepherd.",
   "repository": "https://github.com/shipshapecode/vue-shepherd",
-  "license": "MIT",
+  "license": "AGPL-3.0",
   "author": {
     "name": "Robert Wagner",
     "email": "rwwagner90@gmail.com",
@@ -34,6 +34,7 @@
     "dist/index.d.ts",
     "package.json",
     "README.md",
+    "LICENSE.md",
     "src",
     "tsconfig.json"
   ],

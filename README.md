@@ -114,3 +114,13 @@ import VueShepherd from 'vue-shepherd/dist/vue-shepherd.ssr.js';
 ## Directives
 
 WIP
+
+## License
+
+`vue-shepherd` is licensed under **AGPL-3.0** (for open source and non-commercial use) with a **Commercial License** available for commercial use.
+
+- **Free** for open source and non-commercial projects under AGPL-3.0
+- **Commercial license required** for commercial products and revenue-generating companies
+
+📄 [Read License Details](LICENSE.md)  
+💳 [Purchase Commercial License](https://shepherdjs.dev/pricing)
