@@ -1,6 +1,6 @@
 {
   "name": "vue-shepherd",
-  "version": "5.0.1",
+  "version": "6.0.0",
   "description": "A Vue wrapper for the site tour library Shepherd.",
   "repository": "https://github.com/shipshapecode/vue-shepherd",
   "license": "AGPL-3.0",

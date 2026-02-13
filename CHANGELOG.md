@@ -1,3 +1,12 @@
+
+## v6.0.0 (2026-02-13)
+
+#### :boom: Breaking Change
+* [#638](https://github.com/shipshapecode/vue-shepherd/pull/638) Update license to AGPL ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
+
+#### Committers: 1
+- Robbie Wagner ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
+
 ## v5.0.0 (2025-01-30)
 
 *Note*: This was marked as a breaking change because Shepherd has switched from an [MIT to AGPL-3.0 license](https://github.com/shipshapecode/shepherd/blob/main/LICENSE.md).
