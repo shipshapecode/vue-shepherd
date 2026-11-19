@@ -33,10 +33,10 @@ import 'shepherd.js/dist/css/shepherd.css';
 
 ```vue
 <script setup>
-import { onBeforeUnmount, onMounted, useTemplateRef } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { useShepherd } from 'vue-shepherd';
 
-const el = useTemplateRef('el');
+const el = ref(null);
 
 const tour = useShepherd({
   useModalOverlay: true
