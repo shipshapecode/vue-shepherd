@@ -1,0 +1,22 @@
+{
+  "solution": {
+    "vue-shepherd": {
+      "impact": "major",
+      "oldVersion": "6.0.0",
+      "newVersion": "7.0.0",
+      "tagName": "latest",
+      "constraints": [
+        {
+          "impact": "major",
+          "reason": "Appears in changelog section :boom: Breaking Change"
+        },
+        {
+          "impact": "patch",
+          "reason": "Appears in changelog section :house: Internal"
+        }
+      ],
+      "pkgJSONPath": "./package.json"
+    }
+  },
+  "description": "## Release (2026-11-19)\n\n* vue-shepherd 7.0.0 (major)\n\n#### :boom: Breaking Change\n* `vue-shepherd`\n  * [#705](https://github.com/shipshapecode/vue-shepherd/pull/705) Modernize for Shepherd 16, latest Vue and Nuxt ([@RobbieTheWagner](https://github.com/RobbieTheWagner))\n\n#### :house: Internal\n* `vue-shepherd`\n  * [#703](https://github.com/shipshapecode/vue-shepherd/pull/703) Switch from release-it to release-plan ([@RobbieTheWagner](https://github.com/RobbieTheWagner))\n\n#### Committers: 1\n- Robbie Wagner ([@RobbieTheWagner](https://github.com/RobbieTheWagner))\n"
+}

@@ -1,5 +1,20 @@
 # Changelog
 
+## Release (2026-11-19)
+
+* vue-shepherd 7.0.0 (major)
+
+#### :boom: Breaking Change
+* `vue-shepherd`
+  * [#705](https://github.com/shipshapecode/vue-shepherd/pull/705) Modernize for Shepherd 16, latest Vue and Nuxt ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
+
+#### :house: Internal
+* `vue-shepherd`
+  * [#703](https://github.com/shipshapecode/vue-shepherd/pull/703) Switch from release-it to release-plan ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
+
+#### Committers: 1
+- Robbie Wagner ([@RobbieTheWagner](https://github.com/RobbieTheWagner))
+
 
 ## v6.0.0 (2026-02-13)
 
