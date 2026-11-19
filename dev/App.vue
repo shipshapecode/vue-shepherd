@@ -1,10 +1,11 @@
-<script setup>
+<script setup lang="ts">
 import ShepherdExample from './components/ShepherdExample.vue';
-import 'shepherd.js/dist/css/shepherd.css';
+import OptionsApiExample from './components/OptionsApiExample.vue';
 </script>
 
 <template>
-  <shepherd-example />
+  <ShepherdExample />
+  <OptionsApiExample />
 </template>
 
 <style>
