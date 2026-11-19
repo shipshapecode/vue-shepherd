@@ -35,24 +35,41 @@ jobs:
       - name: Unit, server rendering and type tests
         run: pnpm test
 
-      - name: Cypress - Chrome
-        uses: cypress-io/github-action@v7
-        with:
-          install: false
-          start: pnpm vite --port 5174 --strictPort
-          wait-on: http://localhost:5174
-          browser: chrome
+  e2e:
+    name: E2E (${{ matrix.browser }})
+    runs-on: ubuntu-latest
 
-      - name: Cypress - Firefox
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chrome, firefox]
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .tool-versions
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cypress
         uses: cypress-io/github-action@v7
         with:
           install: false
           start: pnpm vite --port 5174 --strictPort
           wait-on: http://localhost:5174
-          browser: firefox
+          browser: ${{ matrix.browser }}
 
   automerge:
-    needs: [test]
+    needs: [test, e2e]
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
