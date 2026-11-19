@@ -18,20 +18,12 @@
   "main": "dist/vue-shepherd.esm.js",
   "unpkg": "dist/vue-shepherd.min.js",
   "module": "src/entry.js",
-  "types": "./dist/index.d.ts",
+  "types": "./types/index.d.ts",
   "files": [
-    "dist/vue-shepherd.common.js",
-    "dist/vue-shepherd.common.js.map",
-    "dist/vue-shepherd.esm.js",
-    "dist/vue-shepherd.esm.js.map",
-    "dist/vue-shepherd.min.js",
-    "dist/vue-shepherd.ssr.js",
-    "dist/index.d.ts",
-    "package.json",
-    "README.md",
-    "LICENSE.md",
+    "dist",
     "src",
-    "tsconfig.json"
+    "types",
+    "LICENSE.md"
   ],
   "scripts": {
     "build": "cross-env NODE_ENV=production rollup --config rollup.config.js",
