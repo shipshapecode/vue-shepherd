@@ -15,36 +15,66 @@ jobs:
 
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup pnpm
-        uses: wyvox/action-setup-pnpm@v3
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .tool-versions
+          cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
-      - name: Install Cypress Binary
-        run: pnpm cypress install
+      - name: Lint, typecheck and check the package
+        run: pnpm lint
 
-      - name: Cypress - Chrome
-        uses: cypress-io/github-action@v6
+      - name: Unit, server rendering and type tests
+        run: pnpm test
+
+  e2e:
+    name: E2E (${{ matrix.browser }})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chrome, firefox]
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
         with:
-          command: pnpm test:e2e --browser chrome --headless
-          install: false
+          node-version-file: .tool-versions
+          cache: pnpm
 
-      - name: Cypress - Firefox
-        uses: cypress-io/github-action@v6
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Cypress
+        uses: cypress-io/github-action@v7
         with:
-          command: pnpm test:e2e --browser firefox --headless
           install: false
+          start: pnpm vite --port 5174 --strictPort
+          wait-on: http://localhost:5174
+          browser: ${{ matrix.browser }}
 
   automerge:
-    needs: [test]
+    needs: [test, e2e]
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
       contents: write
     steps:
-      - uses: fastify/github-action-merge-dependabot@v3.11.0
+      - uses: fastify/github-action-merge-dependabot@v3.15.0
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}

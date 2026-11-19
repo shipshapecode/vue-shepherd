@@ -1,18 +1,17 @@
 .DS_Store
 node_modules
-public
 dist
 coverage
-docs/.vuepress/dist
+*.tgz
 
 # local env files
 .env.local
 .env.*.local
 
-# related test files
-/tests/e2e/reports
-/tests/e2e/videos
-/tests/e2e/screenshots
+# cypress run artifacts
+/cypress/downloads
+/cypress/screenshots
+/cypress/videos
 
 # editor directories and files
 .idea
@@ -22,4 +21,3 @@ docs/.vuepress/dist
 *.njsproj
 *.sln
 *.sw*
-  

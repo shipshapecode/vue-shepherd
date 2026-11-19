@@ -2,80 +2,98 @@
   "name": "vue-shepherd",
   "version": "6.0.0",
   "description": "A Vue wrapper for the site tour library Shepherd.",
-  "keywords": [
-    "vue",
-    "site tour",
-    "tour",
-    "shepherd"
-  ],
-  "repository": "https://github.com/shipshapecode/vue-shepherd",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shipshapecode/vue-shepherd.git"
+  },
   "license": "AGPL-3.0",
   "author": {
     "name": "Robert Wagner",
     "email": "rwwagner90@gmail.com",
     "url": "https://github.com/RobbieTheWagner"
   },
-  "main": "dist/vue-shepherd.esm.js",
-  "unpkg": "dist/vue-shepherd.min.js",
-  "module": "src/entry.js",
-  "types": "./types/index.d.ts",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "unpkg": "./dist/vue-shepherd.min.js",
+  "jsdelivr": "./dist/vue-shepherd.min.js",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist",
     "src",
-    "types",
     "LICENSE.md"
   ],
+  "sideEffects": false,
   "scripts": {
-    "build": "cross-env NODE_ENV=production rollup --config rollup.config.js",
-    "build:es": "cross-env NODE_ENV=production rollup --config rollup.config.js --format es",
-    "build:ssr": "cross-env NODE_ENV=production rollup --config rollup.config.js --format cjs",
-    "build:unpkg": "cross-env NODE_ENV=production rollup --config rollup.config.js --format iife",
-    "dev": "pnpm serve",
-    "lint": "vue-cli-service lint",
+    "build": "tsdown",
+    "dev": "vite",
+    "lint": "pnpm lint:js && pnpm lint:types && pnpm lint:package",
+    "lint:js": "eslint . --max-warnings 0",
+    "lint:package": "pnpm build && publint --strict && attw --pack --profile node16",
+    "lint:types": "tsc --noEmit",
     "prepack": "pnpm build",
-    "serve": "vue-cli-service serve dev/serve.js",
-    "start": "pnpm serve",
-    "test:e2e": "vue-cli-service test:e2e"
+    "start": "vite",
+    "test": "vitest run",
+    "test:e2e": "start-server-and-test 'vite --port 5174 --strictPort' http://localhost:5174 'cypress run'",
+    "test:e2e:open": "start-server-and-test 'vite --port 5174 --strictPort' http://localhost:5174 'cypress open'",
+    "test:watch": "vitest"
   },
   "dependencies": {
-    "shepherd.js": "^15.2.2"
+    "shepherd.js": "^16.0.0"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "^7.29.7",
-    "@rollup/plugin-alias": "^6.0.0",
-    "@rollup/plugin-babel": "^7.1.0",
-    "@rollup/plugin-commonjs": "^29.0.3",
-    "@rollup/plugin-node-resolve": "^16.0.3",
-    "@rollup/plugin-replace": "^6.0.3",
-    "@rollup/plugin-terser": "^1.0.0",
-    "@vue/cli-plugin-babel": "^5.0.9",
-    "@vue/cli-plugin-e2e-cypress": "^5.0.9",
-    "@vue/cli-plugin-eslint": "^5.0.9",
-    "@vue/cli-service": "^5.0.9",
-    "@vue/compat": "^3.5.39",
-    "@vue/compiler-sfc": "^3.5.39",
-    "cross-env": "^10.1.0",
-    "cypress": "^15.18.0",
-    "eslint": "^8.57.1",
-    "eslint-plugin-vue": "^9.32.0",
-    "minimist": "^1.2.8",
-    "release-plan": "^0.20.1",
-    "rollup": "^4.62.2",
-    "rollup-plugin-filesize": "^10.0.0",
-    "rollup-plugin-peer-deps-external": "^2.2.4",
-    "rollup-plugin-vue": "^6.0.0",
-    "vue": "^3.5.39",
-    "vue-eslint-parser": "^10.4.1"
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@eslint/js": "^10.0.1",
+    "@vitejs/plugin-vue": "^6.0.11",
+    "@types/node": "^26.6.6",
+    "@vue/test-utils": "^2.6.0",
+    "cypress": "^16.3.0",
+    "eslint": "^10.15.0",
+    "eslint-plugin-cypress": "~7.0.5",
+    "eslint-plugin-vue": "^10.12.1",
+    "globals": "^17.14.0",
+    "happy-dom": "^21.0.4",
+    "publint": "^0.3.25",
+    "start-server-and-test": "^3.0.13",
+    "tsdown": "^0.23.7",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.73.0",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.1",
+    "vue": "^3.5.45",
+    "vue-eslint-parser": "^10.4.2",
+    "release-plan": "^0.20.1"
   },
   "peerDependencies": {
-    "vue": ">=3.0.0"
+    "vue": "^3.0.0"
   },
-  "packageManager": "pnpm@10.29.3",
-  "engines": {
-    "node": ">= 20"
-  },
+  "keywords": [
+    "vue",
+    "nuxt",
+    "site tour",
+    "tour",
+    "guided tour",
+    "onboarding",
+    "shepherd"
+  ],
   "publishConfig": {
     "registry": "https://registry.npmjs.org"
   },
-  "sideeffects": false
+  "packageManager": "pnpm@12.21.0",
+  "engines": {
+    "node": ">= 20"
+  }
 }
